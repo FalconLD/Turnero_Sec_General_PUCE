@@ -10,4 +10,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
     //hola de nuevo
+
+    //Holis Dar XD
 }

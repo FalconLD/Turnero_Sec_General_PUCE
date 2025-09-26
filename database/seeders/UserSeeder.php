@@ -10,6 +10,7 @@ use App\Models\User;
  
 class UserSeeder extends Seeder
 {
+<<<<<<< HEAD
     public function run(): void
     {
         $users = [
@@ -25,6 +26,28 @@ class UserSeeder extends Seeder
                 'password' => bcrypt($user['password']),
             ]);
         }
+=======
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run(): void
+{
+    $users = [
+        ['name' => 'Darling Arroyo', 'email' => 'darroyo606@puce.edu.ec', 'password' => '12345678'],
+        ['name' => 'Cristian Freire', 'email' => 'cafreirel@puce.edu.ec', 'password' => '4321'],
+        ['name' => 'Cristhofer Lopez', 'email' => 'clopez559@puce.edu.ec', 'password' => '7410'],
+    ];
+
+    foreach ($users as $user) {
+        User::create([
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'password' => bcrypt($user['password']),
+        ]);
+>>>>>>> origin/develop
     }
+}
 }
  

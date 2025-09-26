@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'AdminLTE 3',
+    'title' => 'Turnero Psicología Aplicada',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -64,7 +64,7 @@ return [
     */
 
     'logo' => '<b>Turnero Centro de Psicología Aplicada</b>',
-    'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+    'logo_img' => 'vendor/adminlte/dist/img/logopuce2.png',
     'logo_img_class' => 'brand-imaSge img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -83,16 +83,29 @@ return [
     |
     */
 
-    'auth_logo' => [
+    /*'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'vendor/adminlte/dist/img/logopuce2.png',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,
             'height' => 50,
         ],
+    ],*/
+
+
+    'auth_logo' => [
+    'enabled' => true,
+    'img' => [
+        'path' => 'vendor/adminlte/dist/img/logopuce2.png',
+        'alt' => 'Logo Turnero',
+        'class' => 'd-inline-block align-middle mr-2', // <--- alineación
+        'width' => 60,
+        'height' => 60,
     ],
+],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -113,7 +126,7 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'vendor/adminlte/dist/img/logopuce2.png',
             'alt' => 'AdminLTE Preloader Image',
             'effect' => 'animation__shake',
             'width' => 60,

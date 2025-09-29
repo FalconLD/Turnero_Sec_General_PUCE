@@ -19,6 +19,10 @@ Route::get('/', function () {
 
 })->middleware('auth')->name('admin.home');
 
+Route::get('/cubiculos', function () {
+    return view('cubiculos.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('cubiculos.index');
+
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

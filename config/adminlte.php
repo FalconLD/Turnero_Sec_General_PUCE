@@ -382,7 +382,7 @@ return [
             'submenu' => [
                 [
                     'text' => 'Formularios',
-                    'route' => 'formulario.index',
+                    'route' => 'forms.index',
                     'icon' => 'fa fa-indent',
                 ],
                 [

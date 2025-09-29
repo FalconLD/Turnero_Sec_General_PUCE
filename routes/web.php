@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CubiculoController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FormController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,9 +26,9 @@ Route::get('/', function () {
 //})->middleware('auth')->name('cubiculos.index');
 
 
-Route::get('/formulario', function () {
-    return view('formulario.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('formulario.index');
+//Route::get('/forms', function () {
+  //  return view('forms.index'); // 👈 usa la carpeta y archivo que creaste
+//})->middleware('auth')->name('forms.index');
 Auth::routes();
 
 Route::get('/users', function () {
@@ -58,6 +59,7 @@ Auth::routes();
 Route::resource('cubiculos', CubiculoController::class);
 Route::resource('users', UserController::class);
 
+Route::resource('forms', FormController::class);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 

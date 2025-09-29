@@ -377,36 +377,43 @@ return [
                 ],
         [
             'text' => 'Administración',
-            'icon' => 'fas fa-fw fa-share',
+            'icon' => 'fa fa-list',
             'submenu' => [
                 [
                     'text' => 'Formularios',
-                    'url' => '#',
+                    'route' => 'formulario.index',
+                    'icon' => 'fa fa-indent',
                 ],
                 [
                     'text' => 'Cubículos',
                     'route' => 'cubiculos.index',
+                    'icon' => 'fa fa-braille',
                         
                 ],
                 [
                     'text' => 'Usuarios',
-                    'url' => '#',
+                    'route' => 'usuarios.index',
+                    'icon' => 'fa fa-user-circle',
                 ],
                 [
                     'text' => 'Asignación',
-                    'url' => '#',
+                    'route' => 'asignacion.index',
+                    'icon' => 'fa fa-check',
                 ],
                 [
                     'text' => 'Horarios',
-                    'url' => '#',
+                    'route' => 'horarios.index',
+                    'icon' => 'fa fa-clock',
                 ],
                 [
                     'text' => 'Encuestas',
-                    'url' => '#',
+                    'route' => 'encuesta.index',
+                    'icon' => 'fa fa-pencil-alt',
                 ],
                 [
                     'text' => 'Auditorías',
-                    'url' => '#',
+                    'route' => 'auditoria.index',
+                    'icon' => 'fa fa-thumbs-up',
                 ],
             ],
         ],

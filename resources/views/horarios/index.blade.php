@@ -1,18 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'pagina_horarios')
 
 @section('content_header')
-    <h1>Dashboardx</h1>
+    <h1>Sección horarios</h1>
 @stop
 
 @section('content')
-    <p>Welcome to this beautiful admin panel.</p>
-     <p>Welcome to this beautiful admin panel.</p>
-      <p>Welcome to this beautiful admin panel.</p>
-       <p>Welcome to this beautiful admin panel.</p>
+    <p>Esta es la pagina de los horarios.</p>
 @stop
-
 
 @section('css')
     {{-- Add here extra stylesheets --}}

@@ -1,18 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'pagina_formulario')
 
 @section('content_header')
-    <h1>Dashboardx</h1>
+    <h1>Sección formulario</h1>
 @stop
 
 @section('content')
-    <p>Welcome to this beautiful admin panel.</p>
-     <p>Welcome to this beautiful admin panel.</p>
-      <p>Welcome to this beautiful admin panel.</p>
-       <p>Welcome to this beautiful admin panel.</p>
+    <p>Esta es la pagina de los formularios</p>
 @stop
-
 
 @section('css')
     {{-- Add here extra stylesheets --}}

@@ -1,5 +1,7 @@
 <?php
 
+use function Laravel\Prompts\search;
+
 return [
 
     /*
@@ -101,8 +103,8 @@ return [
         'path' => 'vendor/adminlte/dist/img/logopuce2.png',
         'alt' => 'Logo Turnero',
         'class' => 'd-inline-block align-middle mr-2', // <--- alineación
-        'width' => 60,
-        'height' => 60,
+        'width' => 30,
+        'height' => 30,
     ],
 ],
 
@@ -167,8 +169,8 @@ return [
 
     'layout_topnav' => null,
     'layout_boxed' => null,
-    'layout_fixed_sidebar' => null,
-    'layout_fixed_navbar' => null,
+    'layout_fixed_sidebar' => true,
+    'layout_fixed_navbar' => true,
     'layout_fixed_footer' => null,
     'layout_dark_mode' => null,
 
@@ -184,11 +186,11 @@ return [
     |
     */
 
-    'classes_auth_card'   => 'card-outline card-success', // borde verde
-    'classes_auth_header' => 'bg-danger',                 // encabezado rojo
-    'classes_auth_body'   => 'bg-light',                  // cuerpo gris claro
-    'classes_auth_footer' => 'bg-dark',                   // pie oscuro
-    'classes_auth_icon'   => 'text-warning',              // ícono amarillo
+    'classes_auth_card'   => 'bg-white',                  // tarjeta blanca
+    'classes_auth_header' => 'bg-primary',               // encabezado azul
+    'classes_auth_body'   => 'bg-light',                 // cuerpo claro
+    'classes_auth_footer' => '',                        // pie de página predeterminado
+    'classes_auth_icon'   => '',                        // icono predeterminado
     'classes_auth_btn'    => 'btn-flat btn-info',  
 
     /*
@@ -204,12 +206,12 @@ return [
     */
 
     'classes_body' => '',
-    'classes_brand' => '',
+    'classes_brand' => '', // cambia el color de fondo del logo
     'classes_brand_text' => '',
     'classes_content_wrapper' => '',
     'classes_content_header' => '',
     'classes_content' => '',
-    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
+    'classes_sidebar' => 'sidebar-dark-primary elevation-4', // link activo color 
     'classes_sidebar_nav' => '',
     'classes_topnav' => 'navbar-white navbar-light',
     'classes_topnav_nav' => 'navbar-expand',
@@ -278,6 +280,7 @@ return [
     'password_email_url' => 'password/email',
     'profile_url' => false,
     'disable_darkmode_routes' => false,
+   
 
     /*
     |--------------------------------------------------------------------------
@@ -346,65 +349,75 @@ return [
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-user',
         ],
+        ['header' => 'CONFIGURACIONES'],
         [
-            'text' => 'change_password',
+            'text' => 'Cambiar contraseña',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-lock',
         ],
         [
-            'text' => 'multilevel',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'level_one',
+            'text' => 'Desbloquear usuario',
+            'url' => '#',
+            'icon' => 'fa fa-unlock',
+        ],
+        [
+                    'text' => 'Reportes',
                     'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
+                    'icon' => 'fa fa-file',
                     'submenu' => [
                         [
-                            'text' => 'level_two',
+                            'text' => 'Reportes actuales',
                             'url' => '#',
                         ],
                         [
-                            'text' => 'level_two',
+                            'text' => 'Reportes históricos',
                             'url' => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                            ],
                         ],
                     ],
                 ],
+        [
+            'text' => 'Administración',
+            'icon' => 'fa fa-list',
+            'submenu' => [
                 [
-                    'text' => 'level_one',
-                    'url' => '#',
+                    'text' => 'Formularios',
+                    'route' => 'formulario.index',
+                    'icon' => 'fa fa-indent',
+                ],
+                [
+                    'text' => 'Cubículos',
+                    'route' => 'cubiculos.index',
+                    'icon' => 'fa fa-braille',
+                        
+                ],
+                [
+                    'text' => 'Usuarios',
+                    'route' => 'usuarios.index',
+                    'icon' => 'fa fa-user-circle',
+                ],
+                [
+                    'text' => 'Asignación',
+                    'route' => 'asignacion.index',
+                    'icon' => 'fa fa-check',
+                ],
+                [
+                    'text' => 'Horarios',
+                    'route' => 'horarios.index',
+                    'icon' => 'fa fa-clock',
+                ],
+                [
+                    'text' => 'Encuestas',
+                    'route' => 'encuesta.index',
+                    'icon' => 'fa fa-pencil-alt',
+                ],
+                [
+                    'text' => 'Auditorías',
+                    'route' => 'auditoria.index',
+                    'icon' => 'fa fa-thumbs-up',
                 ],
             ],
         ],
-        ['header' => 'labels'],
-        [
-            'text' => 'important',
-            'icon_color' => 'red',
-            'url' => '#',
-        ],
-        [
-            'text' => 'warning',
-            'icon_color' => 'yellow',
-            'url' => '#',
-        ],
-        [
-            'text' => 'information',
-            'icon_color' => 'cyan',
-            'url' => '#',
-        ],
+        
     ],
 
     /*

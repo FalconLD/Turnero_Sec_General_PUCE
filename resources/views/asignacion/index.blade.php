@@ -1,18 +1,15 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'pagina_asignación')
 
 @section('content_header')
-    <h1>Dashboardx</h1>
+    <h1>Sección asignación</h1>
 @stop
 
 @section('content')
-    <p>Welcome to this beautiful admin panel.</p>
-     <p>Welcome to this beautiful admin panel.</p>
-      <p>Welcome to this beautiful admin panel.</p>
-       <p>Welcome to this beautiful admin panel.</p>
+    <p>Esta es la pagina de las asiganciones.</p>
+    <button type="button" class="btn btn-primary">Primary</button>
 @stop
-
 
 @section('css')
     {{-- Add here extra stylesheets --}}

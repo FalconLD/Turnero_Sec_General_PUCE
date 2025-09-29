@@ -9,27 +9,62 @@
 @section('content')
 <div class="card w-75 mb-3">
   <div class="card-body">
+    {{-- <h5 class="card-title">Formulario con Checkbox</h5>
 
- {{-- Select --}}
+    {{-- Checkbox --}}
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="activarCampos">
+      <label class="form-check-label" for="activarCampos">
+        Activar campos adicionales
+      </label>
+    </div>
+
+    {{-- Select (deshabilitado al inicio) --}}
     <div class="mb-3">
       <label for="opcion" class="form-label">Seleccione una opción</label>
-      <select class="form-select" id="opcion">
+      <select class="form-select" id="opcion" disabled>
         <option selected disabled>-- Seleccione --</option>
+        <option value="nuevo">Nuevo</option>
         <option value="1">Opción 1</option>
         <option value="2">Opción 2</option>
-        <option value="3">Opción 3</option>
+        
       </select>
     </div>
 
-     {{-- Campo de texto --}}
+    {{-- Input de texto (deshabilitado al inicio) --}}
     <div class="mb-3">
-      <label for="nombre" class="form-label">Nombre</label>
-      <input type="text" class="form-control" id="nombre" placeholder="Ingrese su nombre">
+      <label for="textoExtra" class="form-label">Texto adicional</label>
+      <input type="text" class="form-control" id="textoExtra" placeholder="Ingrese algo..." disabled>
     </div>
-    <h5 class="card-title">Card title</h5>
-    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-    <a href="#" class="btn btn-primary">Button</a>
+
+    {{-- Botón --}}
+    <button type="button" class="btn btn-primary">Guardar</button>
   </div>
 </div>
 
+{{-- Script para controlar el checkbox y select --}}
+@section('js')
+<script>
+  const checkbox = document.getElementById('activarCampos');
+  const select = document.getElementById('opcion');
+  const input = document.getElementById('textoExtra');
+
+  // Controlar activación del select con el checkbox
+  checkbox.addEventListener('change', function() {
+    select.disabled = !this.checked;
+    input.disabled = true; // siempre lo bloqueamos al inicio
+    input.value = ""; // limpiar input al desactivar
+  });
+
+  // Controlar input según la opción del select
+  select.addEventListener('change', function() {
+    if (this.value === "nuevo") {
+      input.disabled = false;
+    } else {
+      input.disabled = true;
+      input.value = ""; // limpiar si no es "nuevo"
+    }
+  });
+</script>
+@endsection
 @stop

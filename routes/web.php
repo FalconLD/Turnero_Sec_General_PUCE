@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\CubiculoController;
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,9 +20,9 @@ Route::get('/', function () {
 
 })->middleware('auth')->name('admin.home');
 
-Route::get('/cubiculos', function () {
-    return view('cubiculos.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('cubiculos.index');
+//Route::get('/cubiculos', function () {
+   // return view('cubiculos.index'); // 👈 usa la carpeta y archivo que creaste
+//})->middleware('auth')->name('cubiculos.index');
 
 
 Route::get('/formulario', function () {
@@ -29,9 +30,9 @@ Route::get('/formulario', function () {
 })->middleware('auth')->name('formulario.index');
 Auth::routes();
 
-Route::get('/usuarios', function () {
-    return view('usuarios.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('usuarios.index');
+Route::get('/users', function () {
+    return view('users.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('users.index');
 Auth::routes();
 
 Route::get('/asignacion', function () {
@@ -54,8 +55,8 @@ Route::get('/audtorias', function () {
 })->middleware('auth')->name('auditoria.index');
 Auth::routes();
 
-
-
+Route::resource('cubiculos', CubiculoController::class);
+Route::resource('users', UserController::class);
 
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

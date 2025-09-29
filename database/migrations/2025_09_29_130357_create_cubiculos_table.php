@@ -9,13 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('cubiculos', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+    public function up()
+{
+    Schema::create('cubiculos', function (Blueprint $table) {
+        $table->id();
+        $table->string('nombre'); 
+        $table->enum('tipo_atencion', ['virtual', 'presencial']); 
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // relación con usuarios
+        $table->timestamps();
+    });
+}
+
 
     /**
      * Reverse the migrations.

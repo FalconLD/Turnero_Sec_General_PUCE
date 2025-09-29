@@ -16,6 +16,7 @@ return [
     |
     */
 
+
     'title' => 'Turnero Psicología Aplicada',
     'title_prefix' => '',
     'title_postfix' => '',
@@ -391,8 +392,8 @@ return [
                         
                 ],
                 [
-                    'text' => 'Usuarios',
-                    'route' => 'usuarios.index',
+                    'text' => 'User',
+                    'route' => 'users.index',
                     'icon' => 'fa fa-user-circle',
                 ],
                 [

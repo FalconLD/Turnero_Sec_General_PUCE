@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cubiculo;
 use Illuminate\Http\Request;
-
+use App\Models\User;
 class CubiculoController extends Controller
 {
     /**
@@ -13,6 +13,8 @@ class CubiculoController extends Controller
     public function index()
     {
         //
+        $cubiculos = Cubiculo::with('users')->get();
+        return view('cubiculos.index', compact('cubiculos'));
     }
 
     /**
@@ -21,6 +23,8 @@ class CubiculoController extends Controller
     public function create()
     {
         //
+        $users = User::all();
+        return view('cubiculos.create', compact('users'));
     }
 
     /**
@@ -29,6 +33,15 @@ class CubiculoController extends Controller
     public function store(Request $request)
     {
         //
+         $request->validate([
+            'nombre' => 'required|string|max:255',
+            'tipo_atencion' => 'required|in:virtual,presencial',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        Cubiculo::create($request->all());
+
+        return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado correctamente.');
     }
 
     /**
@@ -45,6 +58,8 @@ class CubiculoController extends Controller
     public function edit(Cubiculo $cubiculo)
     {
         //
+        $users = User::all();
+        return view('cubiculos.edit', compact('cubiculo', 'users'));
     }
 
     /**
@@ -53,6 +68,15 @@ class CubiculoController extends Controller
     public function update(Request $request, Cubiculo $cubiculo)
     {
         //
+         $request->validate([
+            'nombre' => 'required|string|max:255',
+            'tipo_atencion' => 'required|in:virtual,presencial',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $cubiculo->update($request->all());
+
+        return redirect()->route('cubiculos.index')->with('success', 'Cubículo actualizado correctamente.');
     }
 
     /**
@@ -61,5 +85,7 @@ class CubiculoController extends Controller
     public function destroy(Cubiculo $cubiculo)
     {
         //
+         $cubiculo->delete();
+        return redirect()->route('cubiculos.index')->with('success', 'Cubículo eliminado correctamente.');
     }
 }

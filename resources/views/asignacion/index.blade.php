@@ -1,13 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'pagina_cubiculos')
+@section('title', 'pagina_asignación')
 
 @section('content_header')
-    <h1>Sección usuarios</h1>
+    <h1>Sección asignación</h1>
 @stop
 
 @section('content')
-    <p>Esta es la pagina de los cubiculos.</p>
+    <p>Esta es la pagina de las asiganciones.</p>
+    <button type="button" class="btn btn-primary">Primary</button>
 @stop
 
 @section('css')

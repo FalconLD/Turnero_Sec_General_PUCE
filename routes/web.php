@@ -23,7 +23,40 @@ Route::get('/cubiculos', function () {
     return view('cubiculos.index'); // 👈 usa la carpeta y archivo que creaste
 })->middleware('auth')->name('cubiculos.index');
 
+
+Route::get('/formulario', function () {
+    return view('formulario.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('formulario.index');
 Auth::routes();
+
+Route::get('/usuarios', function () {
+    return view('usuarios.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('usuarios.index');
+Auth::routes();
+
+Route::get('/asignacion', function () {
+    return view('asignacion.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('asignacion.index');
+Auth::routes();
+
+Route::get('/horarios', function () {
+    return view('horarios.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('horarios.index');
+Auth::routes();
+
+Route::get('/encuesta', function () {
+    return view('encuesta.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('encuesta.index');
+Auth::routes();
+
+Route::get('/audtorias', function () {
+    return view('auditoria.index'); // 👈 usa la carpeta y archivo que creaste
+})->middleware('auth')->name('auditoria.index');
+Auth::routes();
+
+
+
+
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 

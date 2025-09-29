@@ -1,13 +1,13 @@
 @extends('adminlte::page')
 
-@section('title', 'pagina_cubiculos')
+@section('title', 'pagina_formulario')
 
 @section('content_header')
-    <h1>Sección usuarios</h1>
+    <h1>Sección formulario</h1>
 @stop
 
 @section('content')
-    <p>Esta es la pagina de los cubiculos.</p>
+    <p>Esta es la pagina de los formularios</p>
 @stop
 
 @section('css')

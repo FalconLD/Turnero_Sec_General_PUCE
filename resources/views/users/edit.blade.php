@@ -9,23 +9,23 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('users.update', $usuario) }}" method="POST">
+            <form action="{{ route('users.update', $user) }}" method="POST">
                 @csrf
                 @method('PUT')
 
                 <div class="form-group">
                     <label for="name">Nombre</label>
-                    <input type="text" name="name" class="form-control" value="{{ $usuario->name }}" required>
+                    <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Correo Electrónico</label>
-                    <input type="email" name="email" class="form-control" value="{{ $usuario->email }}" required>
+                    <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="DNI">DNI</label>
-                    <input type="text" name="DNI" class="form-control" value="{{ $usuario->DNI }}">
+                    <input type="text" name="DNI" class="form-control" value="{{ $user->DNI }}">
                 </div>
 
                 <div class="form-group">

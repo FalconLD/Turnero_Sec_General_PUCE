@@ -20,4 +20,11 @@ class Cubiculo extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function asignaciones()
+    {
+        return $this->hasMany(Asignacion::class);
+    }
+
+
 }

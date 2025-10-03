@@ -7,91 +7,59 @@
 @stop
 
 @section('content')
+    <div class="card">
+        <div class="card-header">
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
 
-<div class="container mt-5">
-    <div class="card card-custom p-4">
-        <div class="card-body">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="input-group" style="max-width: 400px;">
-                    <span class="input-group-text bg-light border-0"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control border-0" placeholder="Buscar">
-                </div>
-                <div>
-                    <button class="btn btn-primary">Nuevo</button>
-                    <button class="btn btn-refresh">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                <a href="{{ route('asignacion.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Asignación                
+                </a>
+            <div class="card-body">
+                <table id="asignacion" class="table table-bordered table-striped">
+                    <thead class="table-dark">
                         <tr>
-                            <th scope="col">CUBÍCULO</th>
-                            <th scope="col">FORMULARIO</th>
-                            <th scope="col">ACTUALIZADO</th>
-                            <th scope="col" colspan="2">ACCIONES</th>
+                            <th>ID</th>
+                            <th>Cubículo</th>
+                            <th>Formulario</th>
+                            <th>Fecha de Actualización</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
-                    
                     <tbody>
-                        {{-- Aquí comenzaría tu bucle en Laravel: @foreach($asignaciones as $asignacion) --}}
-                        
-                        <tr>
-                            <td><span class="badge-custom">Cubículo 2 Demo Tania</span></td>
-                            <td><span class="badge-custom">Matrículas carrera1</span></td>
-                            <td>hace 6 meses</td>
-                            <td>
-                                <a href="#" class="text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="badge-custom">Cubículo 1 Demo SAdmin</span></td>
-                            <td><span class="badge-custom">Matrículas carrera1</span></td>
-                            <td>hace 6 meses</td>
-                            <td>
-                                <a href="#" class="text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="badge-custom">Cubículos6</span></td>
-                            <td><span class="badge-custom">Matrículas carrera6</span></td>
-                            <td>hace un mes</td>
-                            <td>
-                                <a href="#" class="text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="badge-custom">Cubículos7</span></td>
-                            <td><span class="badge-custom">Matrículas carrera7</span></td>
-                            <td>hace un mes</td>
-                            <td>
-                                <a href="#" class="text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        {{-- Aquí terminaría tu bucle: @endforeach --}}
+                        @forelse($asignaciones as $asignacion)
+                            <tr>
+                                <td>{{ $asignacion->id }}</td>
+                                <td>{{ $asignacion->cubiculo->nombre ?? 'N/A' }}</td>
+                                <td>{{ $asignacion->form->title ?? 'N/A' }}</td>
+                                <td>
+                                    @if($asignacion->fecha_actualizacion)
+                                        {{ $asignacion->fecha_actualizacion->format('d/m/Y') }}
+                                     @else
+                                         <span class="text-muted">No asignada</span>
+                                     @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('asignacion.edit', $asignacion->id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Editar</a>
+                                    <form action="{{ route('asignacion.destroy', $asignacion->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta asignación?')">🗑️ Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No hay assignments registrados.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
-</div>
-
 
 @stop
 
@@ -101,5 +69,15 @@
 @stop
 
 @section('js')
-    <script> console.log("Hi, I'm using the Laravel-AdminLTE package!"); </script>
+    <script>
+        $(function () {
+            $('#asignacion').DataTable({
+                responsive: true,
+                autoWidth: false,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                }
+            });
+        });
+    </script>
 @stop

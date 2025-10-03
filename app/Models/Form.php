@@ -9,4 +9,12 @@ class Form extends Model
 {
     use HasFactory;
     protected $fillable = ['title', 'description', 'term', 'question'];
+
+    public function asignaciones()
+    {
+        return $this->hasMany(Asignacion::class);
+    }
+
+
 }
+

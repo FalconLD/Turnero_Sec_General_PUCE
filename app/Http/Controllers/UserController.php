@@ -38,33 +38,33 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
     }
 
-    public function edit(User $usuario)
+    public function edit(User $user)
     {
-        return view('users.edit', compact('usuario'));
+        return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $usuario)
+    public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $usuario->id,
-            'DNI' => 'nullable|string|max:20|unique:users,DNI,' . $usuario->id,
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'DNI' => 'nullable|string|max:20|unique:users,DNI,' . $user->id,
             'password' => 'nullable|min:6',
         ]);
 
-        $usuario->update([
+        $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'DNI' => $request->DNI,
-            'password' => $request->password ? Hash::make($request->password) : $usuario->password,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-    public function destroy(User $usuario)
+    public function destroy(User $user)
     {
-        $usuario->delete();
+        $user->delete();
         return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
     }
 }

@@ -31,14 +31,14 @@
             <textarea name="description" class="form-control">{{ old('description', $form->description) }}</textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="term" class="form-label">Término</label>
-            <input type="text" name="term" class="form-control" value="{{ old('term', $form->term) }}" required>
+       <div class="custom-control custom-switch mb-3">
+            <input type="checkbox" class="custom-control-input" id="term" name="term" value="1" {{ old('term') ? 'checked' : '' }}>
+            <label class="custom-control-label" for="term">Término</label>
         </div>
 
-        <div class="mb-3">
-            <label for="question" class="form-label">Pregunta</label>
-            <textarea name="question" class="form-control" required>{{ old('question', $form->question) }}</textarea>
+        <div class="custom-control custom-switch mb-3">
+            <input type="checkbox" class="custom-control-input" id="question" name="question" value="1" {{ old('question') ? 'checked' : '' }}>
+            <label class="custom-control-label" for="question">Pregunta</label>
         </div>
 
         <div class="d-flex justify-content-between">

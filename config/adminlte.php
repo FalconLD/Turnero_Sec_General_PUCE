@@ -416,6 +416,11 @@ return [
                     'route' => 'auditoria.index',
                     'icon' => 'fa fa-thumbs-up',
                 ],
+                [
+                    'text' => 'Parameters',
+                    'route' => 'parameters.index',
+                    'icon' => 'fa fa-thumbs-up',
+                ],
             ],
         ],
         

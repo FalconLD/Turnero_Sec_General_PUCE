@@ -6,6 +6,7 @@ use App\Http\Controllers\CubiculoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ParameterController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -68,7 +69,7 @@ Route::resource('schedules', ScheduleController::class);
 Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
 Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
  
-
+Route::resource('parameters', ParameterController::class);
 
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

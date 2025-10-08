@@ -403,7 +403,7 @@ return [
                 ],
                 [
                     'text' => 'Horarios',
-                    'route' => 'horarios.index',
+                    'route' => 'schedules.index',
                     'icon' => 'fa fa-clock',
                 ],
                 [

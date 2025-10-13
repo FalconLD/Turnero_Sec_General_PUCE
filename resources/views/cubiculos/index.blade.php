@@ -20,6 +20,7 @@
                         <th scope="col" class="table-primary" >ID</th>
                         <th scope="col" class="table-primary">Nombre</th>
                         <th scope="col" class="table-primary">Tipo de Atención</th>
+                        <th scope="col" class="table-primary">Enlace / Ubicación</th>
                         <th scope="col" class="table-primary">Usuario Asignado</th>
                         <th scope="col" class="table-primary">Acciones</th>
                     </tr>
@@ -34,7 +35,22 @@
                                     {{ ucfirst($cubiculo->tipo_atencion) }}
                                 </span>
                             </td>
+
+                            {{-- Mostrar enlace o ubicación según tipo --}}
+                            <td>
+                                @if ($cubiculo->tipo_atencion === 'virtual' && $cubiculo->enlace_o_ubicacion)
+                                    <a href="{{ $cubiculo->enlace_o_ubicacion }}" target="_blank" class="text-primary">
+                                        {{ Str::limit($cubiculo->enlace_o_ubicacion, 30) }}
+                                    </a>
+                                @elseif ($cubiculo->tipo_atencion === 'presencial')
+                                    {{ $cubiculo->enlace_o_ubicacion ?? '—' }}
+                                @else
+                                    —
+                                @endif
+                            </td>
+
                             <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td>
+
                             <td>
                                 <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i>

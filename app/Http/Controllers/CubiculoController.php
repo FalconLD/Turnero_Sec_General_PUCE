@@ -37,6 +37,7 @@ class CubiculoController extends Controller
             'nombre' => 'required|string|max:255',
             'tipo_atencion' => 'required|in:virtual,presencial',
             'user_id' => 'required|exists:users,id',
+            'enlace_o_ubicacion' => 'nullable|string|max:255',
         ]);
 
         Cubiculo::create($request->all());
@@ -72,6 +73,7 @@ class CubiculoController extends Controller
             'nombre' => 'required|string|max:255',
             'tipo_atencion' => 'required|in:virtual,presencial',
             'user_id' => 'required|exists:users,id',
+            'enlace_o_ubicacion' => 'nullable|string|max:255',
         ]);
 
         $cubiculo->update($request->all());

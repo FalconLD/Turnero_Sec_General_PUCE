@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ class Cubiculo extends Model
         'nombre',
         'tipo_atencion',
         'user_id',
+        'enlace_o_ubicacion', // <-- nuevo campo
     ];
 
     // Relación con usuario
@@ -25,6 +27,4 @@ class Cubiculo extends Model
     {
         return $this->hasMany(Asignacion::class);
     }
-
-
 }

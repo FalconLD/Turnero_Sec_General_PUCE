@@ -32,11 +32,23 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Cristhofer Lopez',
+            'name' => 'Cristofer Lopez',
             'email' => 'clopez559@puce.edu.ec',
             'password' => Hash::make('7410'),
         ]);
 
+        User::create([
+            'name' => 'Israel Chavez',
+            'email' => 'hichavez@puce.edu.ec',
+            'password' => Hash::make('4321'),
+        ]);
+        
+        //ejemplos de usuarios para creacion de cubiculos
+        User::create([
+            'name' => 'Francisco Romero',
+            'email' => 'fjromero@puce.edu.ec',
+            'password' => Hash::make('4321'),
+        ]);
         // OPCIONAL: Crear usuarios de prueba con datos falsos usando un Factory
         // Esto es muy útil para llenar la base de datos con muchos usuarios de prueba.
         // User::factory(10)->create();

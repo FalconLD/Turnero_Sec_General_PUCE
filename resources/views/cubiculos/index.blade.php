@@ -3,25 +3,25 @@
 @section('title', 'Cubículos')
 
 @section('content_header')
-    <h1>Listado de Cubículos</h1>
+    <h1 class="text-center">Listado de Cubículos</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
             <a href="{{ route('cubiculos.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nuevo Cubículo
+                <i class="fas fa-plus"></i> Nuevo
             </a>
         </div>
         <div class="card-body">
-            <table id="cubiculos" class="table table-bordered table-striped">
+            <table id="cubiculos" class="table caption-top">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Tipo de Atención</th>
-                        <th>Usuario Asignado</th>
-                        <th>Acciones</th>
+                        <th scope="col" class="table-primary" >ID</th>
+                        <th scope="col" class="table-primary">Nombre</th>
+                        <th scope="col" class="table-primary">Tipo de Atención</th>
+                        <th scope="col" class="table-primary">Usuario Asignado</th>
+                        <th scope="col" class="table-primary">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>

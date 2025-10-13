@@ -35,6 +35,10 @@ return [
 
     'use_ico_only' => false,
     'use_full_favicon' => false,
+    'favicon' => true,
+    'favicon_png' => 'vendor/adminlte/dist/img/logo.png',
+    //'favicon_png_sizes' => [16, 32, 48, 64, 96, 128],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -66,9 +70,9 @@ return [
     |
     */
 
-    'logo' => '<b>Turnero Centro de Psicología Aplicada</b>',
+    'logo' => 'Turnero Psi. Aplicada',
     'logo_img' => 'vendor/adminlte/dist/img/logopuce2.png',
-    'logo_img_class' => 'brand-imaSge img-circle elevation-3',
+    'logo_img_class' => null,
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
     'logo_img_alt' => 'Admin Logo',
@@ -318,35 +322,29 @@ return [
     'menu' => [
         // Navbar items:
         [
-            'type' => 'navbar-search',
-            'text' => 'search',
-            'topnav_right' => true,
+            //'type' => 'navbar-search',
+            //'text' => 'search',
+            //'topnav_right' => true,
         ],
         [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
+            //'type' => 'fullscreen-widget',
+            //'topnav_right' => true,
         ],
 
         // Sidebar items:
         [
-            'type' => 'sidebar-menu-search',
-            'text' => 'search',
+            //'type' => 'sidebar-menu-search',
+            //'text' => 'search',
         ],
         [
             'text' => 'blog',
             'url' => 'admin/blog',
             'can' => 'manage-blog',
         ],
+        
+        ['header' => 'Configuracion de Perfil'],
         [
-            'text' => 'pages',
-            'url' => 'admin/pages',
-            'icon' => 'far fa-fw fa-file',
-            'label' => 4,
-            'label_color' => 'success',
-        ],
-        ['header' => 'account_settings'],
-        [
-            'text' => 'profile',
+            'text' => 'Perfil',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-user',
         ],
@@ -361,29 +359,15 @@ return [
             'url' => '#',
             'icon' => 'fa fa-unlock',
         ],
-        [
-                    'text' => 'Reportes',
-                    'url' => '#',
-                    'icon' => 'fa fa-file',
-                    'submenu' => [
-                        [
-                            'text' => 'Reportes actuales',
-                            'url' => '#',
-                        ],
-                        [
-                            'text' => 'Reportes históricos',
-                            'url' => '#',
-                        ],
-                    ],
-                ],
+
         [
             'text' => 'Administración',
             'icon' => 'fa fa-list',
             'submenu' => [
                 [
-                    'text' => 'Formularios',
-                    'route' => 'forms.index',
-                    'icon' => 'fa fa-indent',
+                    'text' => 'Usuarios',
+                    'route' => 'users.index',
+                    'icon' => 'fa fa-user-circle',
                 ],
                 [
                     'text' => 'Cubículos',
@@ -392,20 +376,25 @@ return [
                         
                 ],
                 [
-                    'text' => 'User',
-                    'route' => 'users.index',
-                    'icon' => 'fa fa-user-circle',
+                    'text' => 'Horarios',
+                    'route' => 'schedules.index',
+                    'icon' => 'fa fa-clock',
                 ],
                 [
                     'text' => 'Asignación',
                     'route' => 'asignacion.index',
                     'icon' => 'fa fa-check',
+                ],                
+                [
+                    'text' => 'Formularios',
+                    'route' => 'forms.index',
+                    'icon' => 'fa fa-indent',
                 ],
                 [
-                    'text' => 'Horarios',
-                    'route' => 'schedules.index',
-                    'icon' => 'fa fa-clock',
-                ],
+                    'text' => 'Parametros',
+                    'route' => 'parameters.index',
+                    'icon' => 'fa fa-cogs',
+                ],                
                 [
                     'text' => 'Encuestas',
                     'route' => 'encuesta.index',
@@ -416,10 +405,25 @@ return [
                     'route' => 'auditoria.index',
                     'icon' => 'fa fa-thumbs-up',
                 ],
+                
+            ],
+        ],
+        [
+            'text' => 'Reportes',
+            'url' => '#',
+            'icon' => 'fa fa-file',
+            'submenu' => [
                 [
-                    'text' => 'Parameters',
-                    'route' => 'parameters.index',
-                    'icon' => 'fa fa-cogs',
+                    'text' => 'Reportes actuales',
+                    'url' => '#', 
+                ],
+                [
+                    'text' => 'Reportes históricos',
+                    'url' => '#',
+                ],
+                [
+                    'text' => 'Reportes Formularios',
+                    'url' => '#',
                 ],
             ],
         ],

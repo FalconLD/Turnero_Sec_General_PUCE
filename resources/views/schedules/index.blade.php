@@ -3,15 +3,18 @@
 @section('title', 'Horarios')
 
 @section('content_header')
-    <h1>Sección horarios</h1>
+    <h1 class="text-center">Sección Horarios</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
             {{-- Botón para crear nuevos horarios --}}
-            <a href="{{ route('schedules.create') }}" class="btn btn-primary">Crear Nuevo Horario</a>
+            <a href="{{ route('schedules.create') }}" class="btn btn-primary"> 
+                <i class="fas fa-plus"></i> Nuevo
+            </a>
         </div>
+
         <div class="card-body">
             @if(session('success'))
                 <div class="alert alert-success">
@@ -24,17 +27,17 @@
                 $diasSemana = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
             @endphp
 
-            <table class="table table-bordered table-striped">
+            <table class="table caption-top">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Cubículo</th>
-                        <th>Horario Laboral</th>
-                        <th>Duración total de tiempo atender(en min)</th>
-                        <th>Vigencia</th>
-                        <th>Tiempo de atención</th>
-                        <th>Días de la Semana</th>
-                        <th>Acciones</th>
+                        <th scope="col" class="table-primary">ID</th>
+                        <th scope="col" class="table-primary">Cubículo</th>
+                        <th scope="col" class="table-primary">Horario Laboral</th>
+                        <th scope="col" class="table-primary">Duración total de tiempo atender(en min)</th>
+                        <th scope="col" class="table-primary">Vigencia</th>
+                        <th scope="col" class="table-primary">Tiempo de atención</th>
+                        <th scope="col" class="table-primary">Días de la Semana</th>
+                        <th scope="col" class="table-primary">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,11 +68,16 @@
                                 @endforeach
                             </td>
                             <td>
-                                <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-sm btn-info">Editar</a>
+                                <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
                                 <form action="{{ route('schedules.destroy', $schedule) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar este horario?');">Eliminar</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este horario?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

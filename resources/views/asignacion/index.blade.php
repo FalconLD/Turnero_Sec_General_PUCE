@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'pagina_asignación')
+@section('title', 'Asignación')
 
 @section('content_header')
-    <h1>Sección asignación</h1>
+    <h1 class="text-center">Sección Asignación</h1>
 @stop
 
 @section('content')
@@ -14,17 +14,18 @@
             @endif
 
                 <a href="{{ route('asignacion.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nueva Asignación                
+                <i class="fas fa-plus"></i> Agregar               
                 </a>
-            <div class="card-body">
-                <table id="asignacion" class="table table-bordered table-striped">
-                    <thead class="table-dark">
+        </div>
+        <div class="card-body">
+                <table id="asignacion" class="table caption-top">
+                    <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Cubículo</th>
-                            <th>Formulario</th>
-                            <th>Fecha de Actualización</th>
-                            <th>Acciones</th>
+                            <th scope="col" class="table-primary">ID</th>
+                            <th scope="col" class="table-primary">Cubículo</th>
+                            <th scope="col" class="table-primary">Formulario</th>
+                            <th scope="col" class="table-primary">Fecha de Actualización</th>
+                            <th scope="col" class="table-primary">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,11 +43,13 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('asignacion.edit', $asignacion->id) }}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Editar</a>
+                                        <i class="fas fa-edit"></i></a>
                                     <form action="{{ route('asignacion.destroy', $asignacion->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta asignación?')">🗑️ Eliminar</button>
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta asignación?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
@@ -58,7 +61,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
     </div>
 
 @stop

@@ -3,26 +3,26 @@
 @section('title', 'Usuarios')
 
 @section('content_header')
-    <h1>Listado de Usuarios</h1>
+    <h1 class="text-center">Listado de Usuarios</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
             <a href="{{ route('users.create') }}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Nuevo Usuario
+                <i class="fas fa-user-plus"></i> Nuevo
             </a>
         </div>
         <div class="card-body">
-            <table id="usuarios" class="table table-bordered table-striped">
+            <table id="usuarios" class="table caption-top">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>DNI</th>
-                        <th>Cubículos Asignados</th>
-                        <th>Acciones</th>
+                        <th scope="col" class="table-primary">ID</th>
+                        <th scope="col" class="table-primary">Nombre</th>
+                        <th scope="col" class="table-primary">Email</th>
+                        <th scope="col" class="table-primary">DNI</th>
+                        <th scope="col" class="table-primary">Cubículos Asignados</th>
+                        <th scope="col" class="table-primary">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>

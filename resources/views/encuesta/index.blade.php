@@ -1,47 +1,48 @@
 @extends('adminlte::page')
 
-@section('title', 'Encuesta')
+@section('title', 'Formularios')
 
 @section('content_header')
-    <h1>Configuración de encuesta</h1>
+    <h1 class="text-center">Sección Encuestas</h1>
 @stop
 
 @section('content')
-<div class="card w-75 mb-3">
-  <div class="card-body">
-    {{-- <h5 class="card-title">Formulario con Checkbox</h5>
+  <div class="card">
+    <div class="card-body">
+      {{-- <h5 class="card-title">Formulario con Checkbox</h5>
 
-    {{-- Checkbox --}}
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" id="activarCampos">
-      <label class="form-check-label" for="activarCampos">
-        Activar campos adicionales
-      </label>
+      {{-- Checkbox --}}
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="activarCampos">
+        <label class="form-check-label" for="activarCampos">
+          Activar campos adicionales
+        </label>
+      </div>
+
+      {{-- Select (deshabilitado al inicio) --}}
+      <div class="mb-3">
+        <label for="opcion" class="form-label">Seleccione una opción</label>
+        <select class="form-select" id="opcion" disabled>
+          <option selected disabled>-- Seleccione --</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="1">Opción 1</option>
+          <option value="2">Opción 2</option>
+          
+        </select>
+      </div>
+
+      {{-- Input de texto (deshabilitado al inicio) --}}
+      <div class="mb-3">
+        <label for="textoExtra" class="form-label">Texto adicional</label>
+        <input type="text" class="form-control" id="textoExtra" placeholder="Ingrese algo..." disabled>
+      </div>
+
+      {{-- Botón --}}
+      <button type="button" class="btn btn-primary">Guardar</button>
     </div>
-
-    {{-- Select (deshabilitado al inicio) --}}
-    <div class="mb-3">
-      <label for="opcion" class="form-label">Seleccione una opción</label>
-      <select class="form-select" id="opcion" disabled>
-        <option selected disabled>-- Seleccione --</option>
-        <option value="nuevo">Nuevo</option>
-        <option value="1">Opción 1</option>
-        <option value="2">Opción 2</option>
-        
-      </select>
-    </div>
-
-    {{-- Input de texto (deshabilitado al inicio) --}}
-    <div class="mb-3">
-      <label for="textoExtra" class="form-label">Texto adicional</label>
-      <input type="text" class="form-control" id="textoExtra" placeholder="Ingrese algo..." disabled>
-    </div>
-
-    {{-- Botón --}}
-    <button type="button" class="btn btn-primary">Guardar</button>
   </div>
-</div>
 
+@endsection
 {{-- Script para controlar el checkbox y select --}}
 @section('js')
 <script>
@@ -67,4 +68,3 @@
   });
 </script>
 @endsection
-@stop

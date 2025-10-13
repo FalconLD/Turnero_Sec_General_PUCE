@@ -1,4 +1,11 @@
-@extends('layouts.app')
+@extends('adminlte::page')
+
+@section('title', 'Horarios')
+
+@section('content_header')
+    <h1>Sección horarios</h1>
+@stop
+
 
 @section('content')
 <div class="container">

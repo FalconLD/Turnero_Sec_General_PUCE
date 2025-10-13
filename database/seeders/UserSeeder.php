@@ -1,53 +1,45 @@
 <?php
- 
+
 namespace Database\Seeders;
- 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
- 
- 
 use App\Models\User;
- 
+// IMPORTANTE: Importar la clase Hash para encriptar contraseñas
+use Illuminate\Support\Facades\Hash;
+
 class UserSeeder extends Seeder
 {
-<<<<<<< HEAD
-    public function run(): void
-    {
-        $users = [
-            ['name' => 'Darling Arroyo', 'email' => 'darroyo606@puce.edu.ec', 'password' => '12345678'],
-            ['name' => 'Cristian Freire', 'email' => 'cafreirel@puce.edu.ec', 'password' => '4321'],
-            ['name' => 'Cristhofer Lopez', 'email' => 'clopez559@puce.edu.ec', 'password' => '7410'],
-        ];
-    
-        foreach ($users as $user) {
-            User::create([
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'password' => bcrypt($user['password']),
-            ]);
-        }
-=======
     /**
      * Run the database seeds.
      *
      * @return void
      */
     public function run(): void
-{
-    $users = [
-        ['name' => 'Darling Arroyo', 'email' => 'darroyo606@puce.edu.ec', 'password' => '12345678'],
-        ['name' => 'Cristian Freire', 'email' => 'cafreirel@puce.edu.ec', 'password' => '4321'],
-        ['name' => 'Cristhofer Lopez', 'email' => 'clopez559@puce.edu.ec', 'password' => '7410'],
-    ];
-
-    foreach ($users as $user) {
+    {
+        // Usamos create() directamente, es más limpio.
+        // Laravel se encargará de encriptar la contraseña si el modelo User está bien configurado.
+        
         User::create([
-            'name' => $user['name'],
-            'email' => $user['email'],
-            'password' => bcrypt($user['password']),
+            'name' => 'Darling Arroyo',
+            'email' => 'darroyo686@puce.edu.ec',
+            'password' => Hash::make('12345678'), // Usar Hash::make()
         ]);
->>>>>>> origin/develop
+
+        User::create([
+            'name' => 'Cristian Freire',
+            'email' => 'cafreire1@puce.edu.ec',
+            'password' => Hash::make('4321'),
+        ]);
+
+        User::create([
+            'name' => 'Cristhofer Lopez',
+            'email' => 'clopez559@puce.edu.ec',
+            'password' => Hash::make('7410'),
+        ]);
+
+        // OPCIONAL: Crear usuarios de prueba con datos falsos usando un Factory
+        // Esto es muy útil para llenar la base de datos con muchos usuarios de prueba.
+        // User::factory(10)->create();
     }
-}
 }
  

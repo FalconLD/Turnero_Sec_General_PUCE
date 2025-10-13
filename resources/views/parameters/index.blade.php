@@ -1,5 +1,4 @@
 @extends('adminlte::page')
-<<<<<<< HEAD
 
 @section('title', 'Horarios')
 
@@ -7,8 +6,6 @@
     <h1>Sección horarios</h1>
 @stop
 
-=======
->>>>>>> origin/CristianF
 
 @section('content')
 <div class="container">

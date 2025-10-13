@@ -1,76 +1,55 @@
 <?php
 
+// Importación de todos los controladores utilizados en este archivo.
 use App\Http\Controllers\AsignacionController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CubiculoController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\FormController;
-use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ParameterController;
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
- 
-Route::get('/', function () {
-    //return view('auth.login');
-    return view('dashboard');
- 
-})->middleware('auth')->name('admin.home');
- 
-//Route::get('/cubiculos', function () {
-   // return view('cubiculos.index'); // 👈 usa la carpeta y archivo que creaste
-//})->middleware('auth')->name('cubiculos.index');
- 
- 
-//Route::get('/forms', function () {
-  //  return view('forms.index'); // 👈 usa la carpeta y archivo que creaste
-//})->middleware('auth')->name('forms.index');
-Auth::routes();
- 
-Route::get('/users', function () {
-    return view('users.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('users.index');
-Auth::routes();
- 
- /*
-Route::get('/horarios', function () {
-    return view('horarios.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('horarios.index');
-Auth::routes();*/
- 
-Route::get('/encuesta', function () {
-    return view('encuesta.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('encuesta.index');
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// --- Rutas de Autenticación ---
+// Esta única línea registra todas las rutas necesarias para la autenticación:
+// login, logout, registro, olvido de contraseña, etc.
 Auth::routes();
 
-Route::get('/audtorias', function () {
-    return view('auditoria.index'); // 👈 usa la carpeta y archivo que creaste
-})->middleware('auth')->name('auditoria.index');
-Auth::routes();
+// --- Grupo de Rutas Protegidas por Autenticación ---
+// Todas las rutas dentro de este grupo requerirán que el usuario haya iniciado sesión.
+Route::middleware(['auth'])->group(function () {
 
-Route::resource('asignacion', AsignacionController::class);
-    
-Route::resource('cubiculos', CubiculoController::class);
+    // --- Rutas Principales del Dashboard ---
+    // Ruta para la página de inicio principal después de iniciar sesión.
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
 
-Route::resource('users', UserController::class);
- 
-Route::resource('forms', FormController::class);
+    // --- Rutas de Recursos (CRUD) ---
+    // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
+    // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.
+    Route::resource('asignacion', AsignacionController::class);
+    Route::resource('cubiculos', CubiculoController::class);
+    Route::resource('users', UserController::class);
+    Route::resource('forms', FormController::class);
+    Route::resource('schedules', ScheduleController::class);
+    Route::resource('parameters', ParameterController::class);
 
-Route::resource('schedules', ScheduleController::class);
+    // --- Rutas Específicas para Horarios (Schedules) ---
+    // Estas son rutas adicionales para el controlador de horarios que no forman parte del CRUD estándar.
+    // Se utilizan para el flujo de creación de horarios en varios pasos.
+    Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
+    Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
 
-// Rutas para el segundo paso: seleccionar días
-Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
-Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
- 
-Route::resource('parameters', ParameterController::class);
+    // --- Rutas Estáticas (solo muestran una vista) ---
+    // Aunque es mejor usar controladores, si solo necesitas mostrar una vista, esta es una forma limpia.
+    // Se recomienda crear controladores para estas secciones si su lógica crece en el futuro.
+    Route::get('/encuesta', function () {
+        return view('encuesta.index');
+    })->name('encuesta.index');
 
+    Route::get('/auditorias', function () {
+        return view('auditoria.index');
+    })->name('auditoria.index');
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+});

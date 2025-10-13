@@ -419,7 +419,7 @@ return [
                 [
                     'text' => 'Parameters',
                     'route' => 'parameters.index',
-                    'icon' => 'fa fa-thumbs-up',
+                    'icon' => 'fa fa-cogs',
                 ],
             ],
         ],

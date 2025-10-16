@@ -4,12 +4,12 @@
 @section('title', 'Formularios')
 
 @section('content_header')
-    <h1 class="text-center">Sección Parametros</h1>
+    <h1 class="text-center">Gestión de Parámetros</h1>
 @stop
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-end align-items-center">
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -20,15 +20,15 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table caption-top">
-                <thead>
+            <table id="tabla-formularios" class="table">
+                <thead class="table-primary">
                     <tr>
-                        <th scope="col" class="table-primary">Clave</th>
-                        <th scope="col" class="table-primary">Descripción</th>
-                        <th scope="col" class="table-primary">Parámetro</th>
-                        <th scope="col" class="table-primary">Creado</th>
-                        <th scope="col" class="table-primary">Actualizado</th>
-                        <th scope="col" class="table-primary">Acciones</th>
+                        <th >Clave</th>
+                        <th >Descripción</th>
+                        <th >Parámetro</th>
+                        <th >Creado</th>
+                        <th >Actualizado</th>
+                        <th >Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,4 +60,69 @@
     </div>
     
 </div>
-@endsection
+@stop   
+
+@section('css')
+    {{-- DataTables estilos --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+    </style>
+
+@stop
+
+@section('js')
+    {{-- DataTables scripts --}}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    {{-- Exportación: PDF, Excel, Imprimir --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#tabla-formularios').DataTable({
+                responsive: true,
+                autoWidth: false,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Exportar Excel',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> Exportar PDF',
+                        className: 'btn btn-danger btn-sm',
+                        orientation: 'landscape',
+                        pageSize: 'A4',
+                        title: 'Lista de Formularios'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        className: 'btn btn-secondary btn-sm'
+                    }
+                ],
+                order: [[0, 'asc']]
+            });
+        });
+    </script>
+@stop
+
+
+

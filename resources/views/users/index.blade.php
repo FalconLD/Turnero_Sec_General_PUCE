@@ -7,16 +7,14 @@
 @stop
 
 @section('content')
-    <div class="card">
-        
+    <div class="card">        
         <div class="card-header d-flex justify-content-end align-items-center">
             <a href="{{ route('users.create') }}" class="btn btn-primary">
                 <i class="fas fa-user-plus"></i> Nuevo
             </a>
         </div>
 
-        <div class="card-body">
-            
+        <div class="card-body">            
             <div class="table-responsive">
                 <table id="usuarios" class="table">
                     <thead class="table-primary">

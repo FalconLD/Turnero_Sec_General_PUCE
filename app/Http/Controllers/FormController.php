@@ -66,8 +66,8 @@ class FormController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'term' => 'required|string|max:255',
-            'question' => 'required|string',
+            'term' => 'nullable|string|max:255',
+            'question' => 'nullable|string',
         ]);
 
         $form->update($request->all());

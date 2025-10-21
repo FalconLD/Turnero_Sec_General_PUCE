@@ -13,22 +13,22 @@
                 @csrf
 
                 <div class="form-group">
-                    <label for="name">Nombre</label>
+                    <label for="name">Nombre <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Correo Electrónico</label>
+                    <label for="email">Correo Electrónico <span class="text-danger">*</span></label>
                     <input type="email" name="email" class="form-control" required value="{{ old('email') }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="DNI">DNI</label>
+                    <label for="DNI">DNI </label>
                     <input type="text" name="DNI" class="form-control" value="{{ old('DNI') }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Contraseña</label>
+                    <label for="password">Contraseña <span class="text-danger">*</span></label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
 

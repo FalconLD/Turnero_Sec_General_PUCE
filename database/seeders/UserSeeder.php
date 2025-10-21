@@ -42,6 +42,12 @@ class UserSeeder extends Seeder
             'email' => 'hichavez@puce.edu.ec',
             'password' => Hash::make('4321'),
         ]);
+
+        User::create([
+            'name' => 'Ker Viera',
+            'email' => 'kviera@puce.edu.ec',
+            'password' => Hash::make('4321'),
+        ]);
         
         //ejemplos de usuarios para creacion de cubiculos
         User::create([

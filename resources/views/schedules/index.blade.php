@@ -3,7 +3,11 @@
 @section('title', 'Horarios')
 
 @section('content_header')
+<<<<<<< HEAD
     <h1 class="text-center">Sección Horarios</h1>
+=======
+    <h1>Sección Horarios</h1>
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
 @stop
 
 @section('content')

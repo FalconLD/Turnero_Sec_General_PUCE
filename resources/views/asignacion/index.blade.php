@@ -3,7 +3,11 @@
 @section('title', 'Asignación')
 
 @section('content_header')
+<<<<<<< HEAD
     <h1 class="text-center">Sección Asignación</h1>
+=======
+    <h1>Gestión de Asignaciones</h1>
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
 @stop
 
 @section('content')
@@ -50,12 +54,22 @@
                                     @endif
                                 </td>
                                 <td>
+<<<<<<< HEAD
                                     <a href="{{ route('asignacion.edit', $asignacion->id) }}" class="btn btn-warning btn-sm">
                                         <i class="fas fa-edit"></i></a>
                                     <form action="{{ route('asignacion.destroy', $asignacion->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta asignación?')">
+=======
+                                    <a href="{{ route('asignacion.edit', $asignacion->id) }}" class="btn btn-warning btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('asignacion.destroy', $asignacion->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar esta asignación?')">
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

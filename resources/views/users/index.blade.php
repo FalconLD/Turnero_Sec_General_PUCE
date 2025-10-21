@@ -16,7 +16,19 @@
         </div>
 
         <div class="card-body">
+<<<<<<< HEAD
             
+=======
+
+            {{-- Filtro por nombre de usuario --}}
+           <!-- <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="filtro_nombre">Filtrar por Nombre de Usuario:</label>
+                    <input type="text" id="filtro_nombre" class="form-control" placeholder="Escriba un nombre...">
+                </div>
+            </div>-->
+
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
             <div class="table-responsive">
                 <table id="usuarios" class="table table-bordered table-striped">
                     <thead class="table-primary">

@@ -16,6 +16,7 @@
         </div>
 
         <div class="card-body">
+<<<<<<< HEAD
             <table id="cubiculos" class="table caption-top">
                 <thead>
                     <tr>
@@ -25,6 +26,30 @@
                         <th scope="col" class="table-primary">Enlace / Ubicación</th>
                         <th scope="col" class="table-primary">Usuario Asignado</th>
                         <th scope="col" class="table-primary">Acciones</th>
+=======
+
+            {{-- Filtro por tipo de atención --}}
+          <!--  <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="filtro_tipo">Filtrar por Tipo de Atención:</label>
+                    <select id="filtro_tipo" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="Virtual">Virtual</option>
+                        <option value="Presencial">Presencial</option>
+                    </select>
+                </div>
+            </div>-->
+
+            <table id="cubiculos" class="table table-bordered table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Tipo de Atención</th>
+                        <th>Enlace / Ubicación</th>
+                        <th>Usuario Asignado</th>
+                        <th>Acciones</th>
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
                     </tr>
                 </thead>
                 <tbody>

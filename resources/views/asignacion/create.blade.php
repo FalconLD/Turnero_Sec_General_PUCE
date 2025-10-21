@@ -43,13 +43,13 @@
                         @endforeach
                     </select>
                 </div>
-
+                {{-- 
                 <!-- Fecha de actualización -->
                 <div class="mb-3">
                     <label for="fecha_actualizacion" class="form-label">Fecha de actualización</label>
                     <input type="date" name="fecha_actualizacion" id="fecha_actualizacion" class="form-control" value="{{ old('fecha_actualizacion') }}">
                 </div>
-
+                --}}
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <a href="{{ route('asignacion.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>

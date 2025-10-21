@@ -54,12 +54,14 @@
         </div>
 
         <!-- Fecha de actualización -->
-        <div class="mb-3">
-            <label for="fecha_actualizacion" class="form-label">Fecha de actualización</label>
-            <input type="date" name="fecha_actualizacion" id="fecha_actualizacion" 
-                   class="form-control" 
-                   value="{{ old('fecha_actualizacion', $asignacion->fecha_actualizacion ? $asignacion->fecha_actualizacion->format('Y-m-d') : '') }}">
-        </div>
+{{-- 
+<div class="mb-3">
+    <label for="fecha_actualizacion" class="form-label">Fecha de actualización</label>
+    <input type="date" name="fecha_actualizacion" id="fecha_actualizacion" 
+           class="form-control" 
+           value="{{ old('fecha_actualizacion', $asignacion->fecha_actualizacion ? $asignacion->fecha_actualizacion->format('Y-m-d') : '') }}">
+</div>
+--}}
 
         <button type="submit" class="btn btn-success">Actualizar</button>
         <a href="{{ route('asignacion.index') }}" class="btn btn-secondary">Cancelar</a>

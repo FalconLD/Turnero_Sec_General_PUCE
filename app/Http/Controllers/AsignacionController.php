@@ -6,6 +6,7 @@ use App\Models\Asignacion;
 use Illuminate\Http\Request;
 use App\Models\Cubiculo;
 use App\Models\Form;
+use Illuminate\Support\Carbon; 
 
 class AsignacionController extends Controller
 {
@@ -67,12 +68,18 @@ class AsignacionController extends Controller
      */
     public function update(Request $request, Asignacion $asignacion)
     {
-         $request->validate([
+        $request->validate([
             'cubiculo_id' => 'required|exists:cubiculos,id',
             'form_id' => 'required|exists:forms,id',
+            // ya no validas fecha_actualizacion aquí porque no viene del formulario
         ]);
 
-        $asignacion->update($request->all());
+        $data = $request->all();
+
+        // Asignar fecha_actualizacion con la fecha y hora actual
+        $data['fecha_actualizacion'] = Carbon::now();
+
+        $asignacion->update($data);
 
         return redirect()->route('asignacion.index')->with('success', 'Asignación actualizada correctamente.');
     }

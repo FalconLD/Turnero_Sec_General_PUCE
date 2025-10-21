@@ -11,16 +11,17 @@ class Asignacion extends Model
 
     protected $table ='asignaciones';
 
-    protected $fillable = ['cubiculo_id', 
-                            'form_id', 
-                            'fecha_actualizacion'];
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     * @var array
-     */
+    protected $fillable = [
+        'cubiculo_id', 
+        'form_id', 
+        'fecha_actualizacion',
+    ];
+
     protected $casts = [
-        'fecha_actualizacion' => 'datetime', // <-- SINTAXIS CORREGIDA
-    ];                        
+        'fecha_actualizacion' => 'datetime',
+    ];  
+
+    public $timestamps = false; // DESACTIVAR timestamps automáticos
 
     public function cubiculo()
     {

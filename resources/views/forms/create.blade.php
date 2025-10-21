@@ -24,7 +24,7 @@
         @csrf
 
         <div class="mb-3">
-            <label for="title" class="form-label">Título</label>
+            <label for="title" class="form-label">Título <span class="text-danger">*</span></label>
             <input type="text" name="title" class="form-control" placeholder="Escribe el título" value="{{ old('title') }}" required>
         </div>
 
@@ -33,12 +33,28 @@
             <textarea name="description" class="form-control" placeholder="Escribe una descripción">{{ old('description') }}</textarea>
         </div>
 
+        <!--
         <div class="custom-control custom-switch mb-3">
             <input type="checkbox" class="custom-control-input" id="term" name="term" value="1" {{ old('term') ? 'checked' : '' }}>
             <label class="custom-control-label" for="term">Término</label>
+        </div>*/
+       -->
+         <div class="custom-control custom-switch mb-3">
+            <!-- Campo oculto para enviar 0 si no está chequeado -->
+            <input type="hidden" name="term" value="0">
+            <input type="checkbox" class="custom-control-input" id="term" name="term" value="1" {{ old('term') ? 'checked' : '' }}>
+            <label class="custom-control-label" for="term">Término</label>
         </div>
-
+        <!--
+    
         <div class="custom-control custom-switch mb-3">
+            <input type="checkbox" class="custom-control-input" id="question" name="question" value="1" {{ old('question') ? 'checked' : '' }}>
+            <label class="custom-control-label" for="question">Pregunta</label>
+        </div>
+    -->
+        <div class="custom-control custom-switch mb-3">
+            <!-- Campo oculto para enviar 0 si no está chequeado -->
+            <input type="hidden" name="question" value="0">
             <input type="checkbox" class="custom-control-input" id="question" name="question" value="1" {{ old('question') ? 'checked' : '' }}>
             <label class="custom-control-label" for="question">Pregunta</label>
         </div>

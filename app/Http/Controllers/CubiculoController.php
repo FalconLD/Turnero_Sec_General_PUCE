@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Cubiculo;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Http\Requests\UpdateCubiculoRequest;
+use App\Http\Requests\StoreCubiculoRequest;
+
 class CubiculoController extends Controller
 {
     /**
@@ -30,6 +33,8 @@ class CubiculoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+    /*
     public function store(Request $request)
     {
         //
@@ -43,7 +48,20 @@ class CubiculoController extends Controller
         Cubiculo::create($request->all());
 
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado correctamente.');
+    }*/
+
+    public function store(StoreCubiculoRequest $request)
+    {
+    // Si la validación falla, Laravel redirigirá automáticamente
+    // al usuario de vuelta al formulario con los errores.
+    
+    // Si la validación pasa, puedes crear el cubículo.
+    // $request->validated() solo devuelve los datos validados.
+    Cubiculo::create($request->validated());
+    
+    return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');
     }
+
 
     /**
      * Display the specified resource.
@@ -66,20 +84,18 @@ class CubiculoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Cubiculo $cubiculo)
+    public function update(UpdateCubiculoRequest $request, Cubiculo $cubiculo)
     {
-        //
-         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'tipo_atencion' => 'required|in:virtual,presencial',
-            'user_id' => 'required|exists:users,id',
-            'enlace_o_ubicacion' => 'nullable|string|max:255',
-        ]);
-
-        $cubiculo->update($request->all());
-
-        return redirect()->route('cubiculos.index')->with('success', 'Cubículo actualizado correctamente.');
+    // Si la validación falla, Laravel automáticamente
+    // redirigirá al usuario de vuelta al formulario con los errores.
+    
+    // Si la validación pasa, el código continúa
+    $cubiculo->update($request->validated());
+    
+    return redirect()->route('cubiculos.index');
     }
+
+    
 
     /**
      * Remove the specified resource from storage.

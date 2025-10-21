@@ -3,17 +3,12 @@
 @section('title', 'Asignación')
 
 @section('content_header')
-<<<<<<< HEAD
-    <h1 class="text-center">Sección Asignación</h1>
-=======
-    <h1>Gestión de Asignaciones</h1>
->>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
+    <h1 class="text-center">Gestion de Asignaciónes</h1>
 @stop
 
 @section('content')
     <div class="card shadow-lg">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Listado de Asignaciones</h3>
+        <div class="card-header d-flex justify-content-end align-items-center">
             <a href="{{ route('asignacion.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nueva Asignación
             </a>
@@ -30,7 +25,7 @@
 
             {{-- Tabla de asignaciones --}}
             <div class="table-responsive">
-                <table id="tabla-asignacion" class="table table-bordered table-striped align-middle">
+                <table id="tabla-asignacion" class="table">
                     <thead class="table-primary">
                         <tr>
                             <th scope="col" class="table-primary">ID</th>
@@ -90,6 +85,11 @@
     {{-- Estilos DataTables y Botones --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+    </style>
 @stop
 
 @section('js')
@@ -119,12 +119,12 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        text: '<i class="fas fa-file-excel"></i>Exportar Excel',
                         className: 'btn btn-success btn-sm'
                     },
                     {
                         extend: 'pdfHtml5',
-                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        text: '<i class="fas fa-file-pdf"></i> Exportar PDF',
                         className: 'btn btn-danger btn-sm',
                         orientation: 'landscape',
                         pageSize: 'A4',

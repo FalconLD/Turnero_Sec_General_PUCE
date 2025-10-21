@@ -3,34 +3,20 @@
 @section('title', 'Usuarios')
 
 @section('content_header')
-    <h1 class="text-center">Listado de Usuarios</h1>
+    <h1 class="text-center">Gestión de Usuarios</h1>
 @stop
 
 @section('content')
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Gestión de Usuarios</h3>
+    <div class="card">        
+        <div class="card-header d-flex justify-content-end align-items-center">
             <a href="{{ route('users.create') }}" class="btn btn-primary">
                 <i class="fas fa-user-plus"></i> Nuevo
             </a>
         </div>
 
-        <div class="card-body">
-<<<<<<< HEAD
-            
-=======
-
-            {{-- Filtro por nombre de usuario --}}
-           <!-- <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="filtro_nombre">Filtrar por Nombre de Usuario:</label>
-                    <input type="text" id="filtro_nombre" class="form-control" placeholder="Escriba un nombre...">
-                </div>
-            </div>-->
-
->>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
+        <div class="card-body">            
             <div class="table-responsive">
-                <table id="usuarios" class="table table-bordered table-striped">
+                <table id="usuarios" class="table">
                     <thead class="table-primary">
                         <tr>
                             <th>ID</th>
@@ -84,6 +70,13 @@
     {{-- Estilos DataTables y botones --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+    {{-- CÓDIGO CORREGIDO PARA FORZAR LA SEPARACIÓN --}}
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+    </style>
 @stop
 
 @section('js')
@@ -113,12 +106,12 @@
                     {
                         extend: 'excelHtml5',
                         text: '<i class="fas fa-file-excel"></i> Exportar Excel',
-                        className: 'btn btn-success btn-sm'
+                        className: 'btn btn-success btn-sm' // Primer botón, sin margen
                     },
                     {
                         extend: 'pdfHtml5',
                         text: '<i class="fas fa-file-pdf"></i> Exportar PDF',
-                        className: 'btn btn-danger btn-sm',
+                        className: 'btn btn-danger btn-sm ms-2', // << AÑADIDO ms-2
                         orientation: 'landscape',
                         pageSize: 'A4',
                         title: 'Listado de Usuarios'
@@ -126,7 +119,7 @@
                     {
                         extend: 'print',
                         text: '<i class="fas fa-print"></i> Imprimir',
-                        className: 'btn btn-secondary btn-sm'
+                        className: 'btn btn-secondary btn-sm ms-2' // << AÑADIDO ms-2
                     }
                 ]
             });

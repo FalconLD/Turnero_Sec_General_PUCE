@@ -3,17 +3,12 @@
 @section('title', 'Horarios')
 
 @section('content_header')
-<<<<<<< HEAD
-    <h1 class="text-center">Sección Horarios</h1>
-=======
-    <h1>Sección Horarios</h1>
->>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
+    <h1 class="text-center">Gestión de Horarios</h1>
 @stop
 
 @section('content')
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Gestión de Horarios</h3>
+        <div class="card-header d-flex justify-content-end align-items-center">
             <a href="{{ route('schedules.create') }}" class="btn btn-primary">
                 <i class="fas fa-calendar-plus"></i> Crear Nuevo Horario
             </a>
@@ -48,7 +43,7 @@
             @endphp
 
             <div class="table-responsive">
-                <table id="tabla-horarios" class="table table-bordered table-striped align-middle">
+                <table id="tabla-horarios" class="table">
                     <thead class="table-primary">
                         <tr>
                             <th>ID</th>
@@ -114,6 +109,13 @@
     {{-- DataTables estilos --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+    </style>
+
 @stop
 
 @section('js')

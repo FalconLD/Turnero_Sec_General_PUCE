@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container">
+    
     <h2>Crear Parámetro</h2>
 
     <form action="{{ route('parameters.store') }}" method="POST">
@@ -21,6 +22,7 @@
             <label for="parametro" class="form-label">Parámetro</label>
             <input type="text" class="form-control" name="parametro" required>
         </div>
+        
 
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>

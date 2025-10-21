@@ -8,48 +8,22 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Gestión de Cubículos</h3>
+        <div class="card-header d-flex justify-content-end align-items-center">            
             <a href="{{ route('cubiculos.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nuevo
             </a>
         </div>
 
         <div class="card-body">
-<<<<<<< HEAD
-            <table id="cubiculos" class="table caption-top">
-                <thead>
-                    <tr>
-                        <th scope="col" class="table-primary" >ID</th>
-                        <th scope="col" class="table-primary">Nombre</th>
-                        <th scope="col" class="table-primary">Tipo de Atención</th>
-                        <th scope="col" class="table-primary">Enlace / Ubicación</th>
-                        <th scope="col" class="table-primary">Usuario Asignado</th>
-                        <th scope="col" class="table-primary">Acciones</th>
-=======
-
-            {{-- Filtro por tipo de atención --}}
-          <!--  <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="filtro_tipo">Filtrar por Tipo de Atención:</label>
-                    <select id="filtro_tipo" class="form-control">
-                        <option value="">Todos</option>
-                        <option value="Virtual">Virtual</option>
-                        <option value="Presencial">Presencial</option>
-                    </select>
-                </div>
-            </div>-->
-
-            <table id="cubiculos" class="table table-bordered table-striped">
+            <table id="cubiculos" class="table">
                 <thead class="table-primary">
                     <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Tipo de Atención</th>
-                        <th>Enlace / Ubicación</th>
-                        <th>Usuario Asignado</th>
-                        <th>Acciones</th>
->>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
+                        <th  >ID</th>
+                        <th >Nombre</th>
+                        <th >Tipo de Atención</th>
+                        <th >Enlace / Ubicación</th>
+                        <th >Usuario Asignado</th>
+                        <th >Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,6 +74,12 @@
     {{-- Estilos DataTables y botones --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+    </style>
+
 @stop
 
 @section('js')
@@ -139,7 +119,13 @@
                         orientation: 'landscape',
                         pageSize: 'A4',
                         title: 'Listado de Cubículos'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        className: 'btn btn-secondary btn-sm ms-2' // << AÑADIDO ms-2
                     }
+
                 ]
             });
 

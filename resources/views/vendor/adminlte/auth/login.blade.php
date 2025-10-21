@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <link rel="icon" type="image/png" href="{{ asset('login_template/images/icons/favicon.ico') }}"/>
+    <link rel="icon" type="image/png" href="{{ asset('login_template/images/icons/favicon1.ico') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/vendor/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/fonts/Linearicons-Free-v1.0.0/icon-font.min.css') }}">
@@ -25,6 +25,9 @@
                 <form class="login100-form validate-form" method="POST" action="{{ route('login') }}">
                     
                     @csrf
+                    <div style="text-align: center; padding-bottom: 25px;">
+                        <img src="{{ asset('login_template/images/logo-puce.png') }}" alt="Logo PUCE" style="max-width: 320px;">
+                    </div>
 
                     <span class="login100-form-title p-b-43">
                         Bienvenido al Turnero de Psicología Aplicada
@@ -64,12 +67,7 @@
                             <label class="label-checkbox100" for="ckb1">
                                 Recuerdame
                             </label>
-                        </div>
-                        <div>
-                            <a href="{{ route('password.request') }}" class="txt1">
-                                ¿Olvidaste tu contraseña?
-                            </a>
-                        </div>
+                        </div>                        
                     </div>
             
                     <div class="container-login100-form-btn">
@@ -82,6 +80,10 @@
                 </form>
 
                 <div class="login100-more" style="background-image: url('{{ asset('login_template/images/bg-01.svg') }}');">
+                    <div class="wrap-login100-more">
+                        <div class="img100-wrap" style="background-size: contain; background-position: center; background-repeat: no-repeat;">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,4 +98,3 @@
 
 </body>
 </html>
-

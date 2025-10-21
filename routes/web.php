@@ -10,6 +10,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\StudentRegistrationController;
 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -51,5 +52,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/auditorias', function () {
         return view('auditoria.index');
     })->name('auditoria.index');
+
+ 
+
+       
+        Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
+        Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
+        Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+        Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+
 
 });

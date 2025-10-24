@@ -9,16 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('student_registrations', function (Blueprint $table) {
-            $table->id();
+            $table->id(); // id autoincremental
 
             // Datos personales
             $table->string('names');
-            $table->string('cedula', 20);
+            $table->string('cedula', 36)->unique(); // índice único
             $table->integer('edad');
             $table->date('fecha_nacimiento');
             $table->string('telefono', 20);
             $table->string('direccion');
-            $table->string('correo_puce')->unique();
+            $table->string('correo_puce')->unique(); // correo también único
             $table->string('facultad');
             $table->string('carrera');
             $table->string('nivel');

@@ -11,7 +11,7 @@ class StudentRegistrationController extends Controller
     // Paso 1: Términos
     public function showTerms()
     {
-        $terminos = Parameter::where('clave', 'TERM')->first();
+       $terminos = Parameter::where('clave', 'TERM')->first();
 
         return view('student.terms', compact('terminos'));
     }

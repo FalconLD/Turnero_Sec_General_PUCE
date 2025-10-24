@@ -6,6 +6,7 @@ use App\Http\Controllers\CubiculoController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ParameterController;
+use App\Http\Controllers\DayController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('forms', FormController::class);
     Route::resource('schedules', ScheduleController::class);
     Route::resource('parameters', ParameterController::class);
+   
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
+    Route::post('/days', [DayController::class, 'store'])->name('days.store');
+});
+
 
     // --- Rutas Específicas para Horarios (Schedules) ---
     // Estas son rutas adicionales para el controlador de horarios que no forman parte del CRUD estándar.
@@ -55,7 +64,7 @@ Route::middleware(['auth'])->group(function () {
 
  
 
-       
+        Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
         Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
         Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
         Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');

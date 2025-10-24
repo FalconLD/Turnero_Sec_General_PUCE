@@ -23,6 +23,16 @@ class DayController extends Controller
         return view('days.create', compact('schedule'));
     }
 
+    public function edit($scheduleId)
+    {
+        $schedule = Schedule::findOrFail($scheduleId);
+        $existingDays = Day::where('schedule_day', $scheduleId)->pluck('date_day')->map(function ($date) {
+            return Carbon::parse($date)->format('Y-m-d');
+        })->toArray();
+
+        return view('days.edit', compact('schedule', 'existingDays'));
+    }
+
     public function store(Request $request)
 {
     $request->validate([

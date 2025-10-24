@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
+    Route::get('/days/{schedule}/edit', [DayController::class, 'edit'])->name('days.edit');
     Route::post('/days', [DayController::class, 'store'])->name('days.store');
 });
 

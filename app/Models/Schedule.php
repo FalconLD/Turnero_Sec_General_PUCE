@@ -4,11 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use OwenIt\Auditing\Contracts\Auditable;
+// 1. Importamos tanto la Interfaz como el Trait CORRECTAMENTE
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract; 
+use OwenIt\Auditing\Auditable; // ← CORREGIDO: 'OwenIt' no 'Owenlt'
 
-class Schedule extends Model implements Auditable
+class Schedule extends Model implements AuditableContract
 {
-    use HasUuids, \OwenIt\Auditing\Auditable;
+    // 2. Usamos el trait Auditable. Como implementamos la interfaz con un alias,
+    //    ya no hay conflicto de nombres aquí.
+    use HasUuids, Auditable;
 
     protected $table = 'schedules';
     protected $primaryKey = 'id_hor';
@@ -22,14 +26,18 @@ class Schedule extends Model implements Auditable
         'break_minutes',     // previously descanso_hor
         'attention_minutes', // previously atencion_hor
     ];
+
     protected static function booted()
-        {
-            static::creating(function ($schedule) {
-                if (empty($schedule->{$schedule->getKeyName()})) {
-                    $schedule->{$schedule->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
-                }
-            });
-        }
+    {
+        static::creating(function ($schedule) {
+            if (empty($schedule->{$schedule->getKeyName()})) {
+                $schedule->{$schedule->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+    
+    // El resto de tu modelo...
+    
     protected $appends = ['until'];
 
     /**
@@ -37,7 +45,7 @@ class Schedule extends Model implements Auditable
      */
     public function getUntilAttribute()
     {
-        return $this->maxDate()->first();
+        return optional($this->maxDate()->first())->date_day;
     }
 
     /**
@@ -45,7 +53,7 @@ class Schedule extends Model implements Auditable
      */
     public function days()
     {
-        return $this->hasMany(Day::class, 'schedule_day');
+        return $this->hasMany(Day::class, 'schedule_day', 'id_hor');
     }
 
     /**
@@ -53,7 +61,7 @@ class Schedule extends Model implements Auditable
      */
     public function maxDate()
     {
-        return $this->hasOne(Day::class, 'schedule_day')
+        return $this->hasOne(Day::class, 'schedule_day', 'id_hor')
                     ->latest('date_day')
                     ->select('date_day');
     }
@@ -63,7 +71,7 @@ class Schedule extends Model implements Auditable
      */
     public function shifts()
     {
-        return $this->hasMany(Shift::class, 'schedule_shift');
+        return $this->hasMany(Shift::class, 'schedule_shift', 'id_hor');
     }
 
     /**
@@ -71,7 +79,7 @@ class Schedule extends Model implements Auditable
      */
     public function breaks()
     {
-        return $this->hasMany(ScheduleBreak::class, 'id');
+        return $this->hasMany(ScheduleBreak::class, 'schedule_id', 'id_hor');
     }
 
     /**
@@ -79,19 +87,20 @@ class Schedule extends Model implements Auditable
      */
     public function occupiedShifts()
     {
-        return $this->hasMany(Shift::class, 'schedule_shift')->whereNotNull('person_shift');
+        return $this->hasMany(Shift::class, 'schedule_shift', 'id_hor')
+                    ->whereNotNull('person_shift');
     }
 
     /**
      * Relationship: Schedule belongs to many cubicles
      */
     public function cubicles()
-        {
-            return $this->belongsToMany(
-                Cubiculo::class,
-                'cubiculos_schedules',  
-                'schedule_id',          
-                'cubiculo_id'            
-            );
-        }
+    {
+        return $this->belongsToMany(
+            Cubiculo::class,
+            'cubiculos_schedules',  
+            'schedule_id',
+            'cubiculo_id'
+        );
+    }
 }

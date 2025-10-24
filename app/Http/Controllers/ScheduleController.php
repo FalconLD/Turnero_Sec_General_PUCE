@@ -131,8 +131,9 @@ class ScheduleController extends Controller
      */
     public function edit($id)
     {
-        $schedule = Schedule::with(['cubiculos', 'breaks'])->findOrFail($id);
-        return view('schedules.edit', compact('schedule'));
+        $schedule = Schedule::with(['cubicles', 'breaks'])->findOrFail($id);
+        $cubicles = Cubiculo::all();
+        return view('schedules.edit', compact('schedule', 'cubicles'));
     }
 
     /**
@@ -147,7 +148,10 @@ class ScheduleController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'break_minutes' => 'required|integer|min:0',
             'attention_minutes' => 'required|integer|min:1',
-            'cubiculos' => 'required|array|min:1',
+            'cubicles' => 'required|array|min:1',
+            'breaks' => 'nullable|array',
+            'breaks.*.start' => 'required_with:breaks|date_format:H:i',
+            'breaks.*.end' => 'required_with:breaks|date_format:H:i|after:breaks.*.start',
         ]);
 
         DB::beginTransaction();
@@ -165,7 +169,7 @@ class ScheduleController extends Controller
             // Actualizar cubiculos
             CubicleSchedule::where('schedule_id', $schedule->id_hor)->delete();
             $cubiculosData = collect($request->cubicles)->map(fn($cub) => [
-                'cubicles_id' => $cub,
+                'cubiculo_id' => $cub,
                 'schedule_id' => $schedule->id_hor,
                 'created_at' => $now,
                 'updated_at' => $now
@@ -173,12 +177,12 @@ class ScheduleController extends Controller
             CubicleSchedule::insert($cubiculosData);
 
             // Actualizar breaks
-            ScheduleBreak::where('id_hor', $schedule->id_hor)->delete();
+            ScheduleBreak::where('schedule_id', $schedule->id_hor)->delete();
             if ($request->filled('breaks')) {
                 $breakData = collect($request->breaks)->map(fn($b) => [
-                    'id_hor' => $schedule->id_hor,
-                    'start_time' => $b['start'],
-                    'end_time' => $b['end'],
+                    'schedule_id' => $schedule->id_hor,
+                    'start_break' => $b['start'],
+                    'end_break' => $b['end'],
                     'created_at' => $now,
                     'updated_at' => $now
                 ])->toArray();
@@ -198,22 +202,25 @@ class ScheduleController extends Controller
      */
     public function destroy($id)
     {
-        $schedule = Schedule::findOrFail($id);
+        $schedule = Schedule::with('days')->findOrFail($id);
 
         DB::beginTransaction();
         try {
-            // Eliminar cubiculoss y breaks
-            CubicleSchedule::where('schedule_id', $schedule->id_hor)->delete();
-            ScheduleBreak::where('id_hor', $schedule->id_hor)->delete();
-
-            // Eliminar el horario
+            // Eliminar manualmente los días relacionados, ya que no hay eliminación en cascada.
+            $schedule->days()->delete();
+    
+            // Los cubiculos_schedules, schedule_breaks y shifts relacionados
+            // se eliminarán automáticamente debido a la restricción onDelete('cascade')
+            // en sus respectivas migraciones.
+    
+            // Ahora, elimina el horario en sí.
             $schedule->delete();
-
+    
             DB::commit();
-            return redirect()->route('schedules.index')->with('success', 'Schedule deleted successfully.');
+            return redirect()->route('schedules.index')->with('success', 'Horario eliminado con éxito.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Error deleting schedule: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al eliminar el horario: ' . $e->getMessage()]);
         }
     }
 }

@@ -6,10 +6,12 @@ use App\Http\Controllers\CubiculoController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ParameterController;
+use App\Http\Controllers\DayController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\StudentRegistrationController;
 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -34,6 +36,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('forms', FormController::class);
     Route::resource('schedules', ScheduleController::class);
     Route::resource('parameters', ParameterController::class);
+   
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
+    Route::post('/days', [DayController::class, 'store'])->name('days.store');
+});
+
 
     // --- Rutas Específicas para Horarios (Schedules) ---
     // Estas son rutas adicionales para el controlador de horarios que no forman parte del CRUD estándar.
@@ -51,5 +61,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/auditorias', function () {
         return view('auditoria.index');
     })->name('auditoria.index');
+
+ 
+
+        Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
+        Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
+        Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
+        Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+        Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+
 
 });

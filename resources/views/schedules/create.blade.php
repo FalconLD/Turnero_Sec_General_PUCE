@@ -1,147 +1,124 @@
 @extends('adminlte::page')
 
-@section('title', 'Horarios')
+@section('title', 'Nuevo Horario')
 
 @section('content_header')
-    <h1>Asignacion de Horarios</h1>
+    <h1 class="text-center">Crear Nuevo Horario</h1>
 @stop
 
-
 @section('content')
-    <div class="card">
+<div class="container">
+    <div class="card shadow w-75 mx-auto">
         <div class="card-body">
-            {{-- El formulario enviará los datos al método 'store' del controlador --}}
-            <form action="{{ route('schedules.store') }}" method="POST">
+            {{-- Mostrar errores de validación --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('schedules.store') }}" method="POST" id="scheduleForm">
                 @csrf
 
+                {{-- Horario --}}
                 <div class="row">
-                    {{-- Cubículo --}}
-                    <div class="form-group col-md-6">
-                        <label for="cubiculo_id">Cubículo</label>
-                        <select name="cubiculo_id" id="cubiculo_id" class="form-control @error('cubiculo_id') is-invalid @enderror">
-                            <option value="">Seleccione un cubículo</option>
-                            @foreach($cubiculos as $cubiculo)
-                                <option value="{{ $cubiculo->id }}" {{ old('cubiculo_id') == $cubiculo->id ? 'selected' : '' }}>
-                                    {{ $cubiculo->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('cubiculo_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-6 mb-3">
+                        <label for="start_time">Hora de Inicio</label>
+                        <input type="time" name="start_time" class="form-control" required value="{{ old('start_time') }}">
                     </div>
-
-                    {{-- Duración de la Atención --}}
-                    <div class="form-group col-md-6">
-                        <label for="atencion">Duración de la Atención (minutos)</label>
-                        <input type="number" name="atencion" id="atencion" class="form-control @error('atencion') is-invalid @enderror" value="{{ old('atencion', 30) }}" min="1">
-                        @error('atencion')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-6 mb-3">
+                        <label for="end_time">Hora de Fin</label>
+                        <input type="time" name="end_time" class="form-control" required value="{{ old('end_time') }}">
                     </div>
                 </div>
 
                 <div class="row">
-                    {{-- Hora de Inicio --}}
-                    <div class="form-group col-md-6">
-                        <label for="hora_inicio">Hora de Inicio</label>
-                        <input type="time" name="hora_inicio" id="hora_inicio" class="form-control @error('hora_inicio') is-invalid @enderror" value="{{ old('hora_inicio') }}">
-                        @error('hora_inicio')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-6 mb-3">
+                        <label for="break_minutes">Duración del Descanso (min)</label>
+                        <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', 0) }}">
                     </div>
-
-                    {{-- Hora de Fin --}}
-                    <div class="form-group col-md-6">
-                        <label for="hora_fin">Hora de Fin</label>
-                        <input type="time" name="hora_fin" id="hora_fin" class="form-control @error('hora_fin') is-invalid @enderror" value="{{ old('hora_fin') }}">
-                        @error('hora_fin')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="col-md-6 mb-3">
+                        <label for="attention_minutes">Duración Atención (min)</label>
+                        <input type="number" name="attention_minutes" class="form-control" min="1" required value="{{ old('attention_minutes', 1) }}">
                     </div>
                 </div>
 
-                <div class="row">
-                    {{-- Vigencia Desde --}}
-                    <div class="form-group col-md-6">
-                        <label for="vigencia_desde">Vigencia Desde</label>
-                        <input type="date" name="vigencia_desde" id="vigencia_desde" class="form-control @error('vigencia_desde') is-invalid @enderror" value="{{ old('vigencia_desde') }}">
-                        @error('vigencia_desde')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    {{-- Vigencia Hasta --}}
-                    <div class="form-group col-md-6">
-                        <label for="vigencia_hasta">Vigencia Hasta</label>
-                        <input type="date" name="vigencia_hasta" id="vigencia_hasta" class="form-control @error('vigencia_hasta') is-invalid @enderror" value="{{ old('vigencia_hasta') }}">
-                        @error('vigencia_hasta')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
+                {{-- Cubículos --}}
+                <div class="mb-3">
+                    <label for="cubicles">Cubículos</label>
+                    <select name="cubicles[]" class="form-control" multiple required>
+                        @foreach($cubicles as $cubicle)
+                            <option value="{{ $cubicle->id }}" {{ (collect(old('cubicles'))->contains($cubicle->id)) ? 'selected' : '' }}>
+                                {{ $cubicle->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Mantenga presionada la tecla Ctrl (Cmd en Mac) para seleccionar múltiples cubículos.</small>
                 </div>
 
-                {{-- Campo oculto para 'descanso', puedes cambiarlo si lo necesitas visible --}}
-                <input type="hidden" name="descanso" value="0">
-
-                <hr>
-                
-                {{-- Sección para Pausas Dinámicas --}}
-                <h4>Pausas Programadas</h4>
-                <div id="pausas-container">
-                    {{-- Las pausas se agregarán aquí con JavaScript --}}
+                {{-- Breaks dinámicos --}}
+                <div class="mb-3">
+                    <label>Breaks</label>
+                    <div id="breaksContainer">
+                        <div class="row break-row mb-2">
+                            <div class="col-md-5">
+                                <input type="time" name="breaks[0][start]" class="form-control" placeholder="Inicio break">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="time" name="breaks[0][end]" class="form-control" placeholder="Fin break">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger btn-remove-break">Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addBreak" class="btn btn-secondary btn-sm mt-2">Agregar Break</button>
                 </div>
-                <button type="button" id="add-pausa" class="btn btn-secondary mt-2">Agregar Pausa</button>
 
-                <hr>
-
-                <button type="submit" class="btn btn-primary">Siguiente: Seleccionar Días</button>
-                <a href="{{ route('schedules.index') }}" class="btn btn-danger">Cancelar</a>
+                {{-- Botones --}}
+                <div class="d-flex justify-content-between">
+                    <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Horario</button>
+                </div>
             </form>
         </div>
     </div>
-@stop
+</div>
 
+{{-- Scripts para breaks dinámicos --}}
 @section('js')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const container = document.getElementById('pausas-container');
-        const addButton = document.getElementById('add-pausa');
-        let pausaIndex = 0;
+    let breakIndex = 1;
 
-        addButton.addEventListener('click', function () {
-            const pausaDiv = document.createElement('div');
-            pausaDiv.classList.add('row', 'align-items-center', 'mb-2');
-            
-            pausaDiv.innerHTML = `
-                <div class="col-md-5">
-                    <div class="form-group">
-                        <label>Inicio Pausa</label>
-                        <input type="time" name="pausas[${pausaIndex}][hora_inicio]" class="form-control" required>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="form-group">
-                        <label>Fin Pausa</label>
-                        <input type="time" name="pausas[${pausaIndex}][hora_fin]" class="form-control" required>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-pausa" style="margin-top: 15px;">Eliminar</button>
-                </div>
-            `;
-            
-            container.appendChild(pausaDiv);
-            pausaIndex++;
-        });
+    document.getElementById('addBreak').addEventListener('click', function () {
+        const container = document.getElementById('breaksContainer');
+        const row = document.createElement('div');
+        row.classList.add('row', 'break-row', 'mb-2');
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="time" name="breaks[${breakIndex}][start]" class="form-control" placeholder="Inicio break">
+            </div>
+            <div class="col-md-5">
+                <input type="time" name="breaks[${breakIndex}][end]" class="form-control" placeholder="Fin break">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-remove-break">Eliminar</button>
+            </div>
+        `;
+        container.appendChild(row);
+        breakIndex++;
+    });
 
-        container.addEventListener('click', function (e) {
-            if (e.target.classList.contains('remove-pausa')) {
-                e.target.closest('.row').remove();
-            }
-        });
+    document.addEventListener('click', function(e) {
+        if(e.target && e.target.classList.contains('btn-remove-break')) {
+            e.target.closest('.break-row').remove();
+        }
     });
 </script>
 @stop
 
-
+@endsection

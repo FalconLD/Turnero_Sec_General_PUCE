@@ -65,6 +65,7 @@
     </div>
 @stop
 
+<<<<<<< HEAD
 
 @section('css')
     {{-- DataTables estilos --}}
@@ -78,6 +79,14 @@
 
 @stop
 
+=======
+@section('css')
+    {{-- DataTables estilos --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+@stop
+
+>>>>>>> 770481b4c5da99829f5c325c95116d71cc39b8aa
 @section('js')
     {{-- DataTables scripts --}}
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>

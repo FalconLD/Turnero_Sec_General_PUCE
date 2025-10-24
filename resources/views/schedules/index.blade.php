@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1>Horarios</h1>
         <a href="{{ route('schedules.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nuevo
+            <i class="fas fa-plus"></i>  Nuevo
         </a>
     </div>
 @stop

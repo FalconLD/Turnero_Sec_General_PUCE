@@ -3,6 +3,8 @@
 @section('title', 'Registro de Estudiante')
 
 @section('content_header')
+
+    <h1>Matrículas</h1>
 <h1 class="text-center mb-4">Registro de Estudiante</h1>
 @stop
 
@@ -177,7 +179,8 @@
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
                     <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
-                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Enviar</button>
+                    {{-- cambio submit por button --}}
+                    <button type="button" id="submitBtn" class="btn btn-success" style="display:none;">Enviar</button>
                 </div>
 
                 {{-- Línea de tiempo --}}
@@ -293,6 +296,84 @@ document.addEventListener('DOMContentLoaded', function() {
             pagoEfectivoNote.style.display = 'none';
         }
     });
+
+    // === CALENDARIO Y TURNOS DISPONIBLES ===
+document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    const calendarSection = document.getElementById('calendarSection');
+    const fechaInput = document.getElementById('fechaSeleccionada');
+    const turnosContainer = document.getElementById('turnosContainer');
+    const form = document.querySelector('form');
+
+    // 1️⃣ Al hacer clic en "Enviar" → mostrar calendario
+    submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        form.style.display = 'none';
+        calendarSection.style.display = 'block';
+    });
+
+    // 2️⃣ Cuando selecciona una fecha → consultar turnos
+    fechaInput.addEventListener('change', function() {
+        const fecha = this.value;
+        if (!fecha) return;
+
+        turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+
+        fetch(`/shifts/${fecha}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
+                    return;
+                }
+
+                let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
+                data.forEach(t => {
+                    const horaInicio = t.start_shift.substring(0,5);
+                    const horaFin = t.end_shift.substring(0,5);
+                    html += `
+                        <button type="button" 
+                                class="btn btn-outline-primary turno-btn" 
+                                data-id="${t.id_shift}" 
+                                data-hora="${horaInicio}-${horaFin}">
+                            ${horaInicio} - ${horaFin} <br>
+                            <small>${t.cubicle_shift}</small>
+                        </button>`;
+                });
+                html += '</div>';
+
+                turnosContainer.innerHTML = html;
+
+                // Asignar evento a cada botón de turno
+                document.querySelectorAll('.turno-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const turnoId = this.getAttribute('data-id');
+                        const hora = this.getAttribute('data-hora');
+                        seleccionarTurno(turnoId, hora);
+                    });
+                });
+            })
+            .catch(() => {
+                turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
+            });
+    });
+
+    // 3️⃣ Al seleccionar un turno → mostrar confirmación
+    function seleccionarTurno(turnoId, hora) {
+        turnosContainer.innerHTML = `
+            <div class="alert alert-success text-center">
+                <strong>Turno seleccionado:</strong> ${hora} <br>
+                <small>¡Gracias por completar su inscripción!</small>
+            </div>
+            <form action="{{ route('student.store') }}" method="POST" class="mt-3">
+                @csrf
+                <input type="hidden" name="turno_id" value="${turnoId}">
+                <button type="submit" class="btn btn-success">Confirmar inscripción</button>
+            </form>
+        `;
+    }
+});
+
 
     showStep(currentStep);
 });

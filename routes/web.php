@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StudentRegistrationController;
+use App\Http\Controllers\ShiftController;
 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -63,13 +64,31 @@ Route::middleware(['auth'])->group(function () {
         return view('auditoria.index');
     })->name('auditoria.index');
 
- 
-
-        Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
+  /* Antiguo */
+       /* Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
         Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
         Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
         Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+        Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');*/
+
+       /* Nuevo */
+
+            // Ruta principal: muestra el formulario de inscripción (personal_data.blade)
+        Route::get('/student', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.start');
+        Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
+
+        // Guardar los datos del formulario
+        Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+
+        // Mensaje de éxito
         Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+
+        // (Opcional) Redirecciones desde las rutas antiguas
+        Route::get('/student/terms', fn() => redirect()->route('student.personal'));
+        Route::post('/student/accept-terms', fn() => redirect()->route('student.personal'));
+       
+        //calendario
+        Route::get('/shifts/{fecha}', [ShiftController::class, 'getAvailableShifts'])->name('shifts.available');
 
 
 });

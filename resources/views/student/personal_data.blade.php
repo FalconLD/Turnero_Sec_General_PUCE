@@ -328,59 +328,46 @@ const fechaInput = document.getElementById('fechaSeleccionada');
 const turnosContainer = document.getElementById('turnosContainer');
 const turnoHidden = document.getElementById('turno_id');
 
-// Validar si se puede avanzar
+// Función para habilitar siguiente paso solo si hay turno seleccionado
 function checkTurnoSelected() {
-    nextBtn.disabled = !turnoHidden.value; // habilita siguiente solo si hay turno seleccionado
+    nextBtn.disabled = !turnoHidden.value;
 }
 
-/*
-// Al cambiar la fecha, se consultan los turnos disponibles
+// Cuando se cambia la fecha
 fechaInput.addEventListener('change', function() {
     const fecha = this.value;
     if (!fecha) return;
 
     turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
-    turnoHidden.value = ''; // Reinicia turno seleccionado
+    turnoHidden.value = ''; // Reiniciar selección
     checkTurnoSelected();
 
-    fetch(`/shifts/${fecha}`) // Ajusta la ruta según tu backend
+    fetch(`/shifts/${fecha}`)
         .then(res => res.json())
         .then(data => {
-            if(data.length === 0){
+            if (!Array.isArray(data) || data.length === 0) {
                 turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
                 return;
             }
 
             let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
-           /* data.forEach(t => {
+            data.forEach(t => {
                 const horaInicio = t.start_shift.substring(0,5);
                 const horaFin = t.end_shift.substring(0,5);
-                html += `<button type="button" 
-                                class="btn btn-outline-primary turno-btn" 
-                                data-id="${t.id_shift}" 
-                                data-hora="${horaInicio}-${horaFin}">
-                            ${horaInicio} - ${horaFin} <br>
-                            <small>${t.cubicle_shift}</small>
-                        </button>`;
+                html += `
+                    <button type="button" 
+                            class="btn btn-outline-primary turno-btn" 
+                            data-id="${t.id_shift}" 
+                            data-hora="${horaInicio}-${horaFin}">
+                        ${horaInicio} - ${horaFin} <br>
+                        <small>${t.cubicle_shift}</small>
+                    </button>`;
             });
-
-data.forEach(t => {
-    const horaInicio = t.start_time.substring(0, 5);
-    const horaFin = t.end_time.substring(0, 5);
-    html += `
-        <button type="button" 
-                class="btn btn-outline-primary turno-btn" 
-                data-id="${t.id}" 
-                data-hora="${horaInicio}-${horaFin}">
-            ${horaInicio} - ${horaFin} <br>
-            <small>${t.cubicle_id}</small>
-        </button>`;
-});
-
             html += '</div>';
+
             turnosContainer.innerHTML = html;
 
-            // Eventos para seleccionar turno
+            // Asignar evento a cada botón de turno
             document.querySelectorAll('.turno-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const turnoId = this.getAttribute('data-id');
@@ -406,54 +393,6 @@ data.forEach(t => {
 
                     // Habilitar siguiente paso
                     checkTurnoSelected();
-                });
-            });
-        })
-       .catch(() => {
-            turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
-        });
-
-});
-*/
-
-
-fechaInput.addEventListener('change', function() {
-    const fecha = this.value;
-    if (!fecha) return;
-
-    turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
-
-    fetch(`/shifts/${fecha}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!Array.isArray(data) || data.length === 0) {
-                turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
-                return;
-            }
-
-            let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
-            data.forEach(t => {
-    const horaInicio = t.start_shift.substring(0,5);
-    const horaFin = t.end_shift.substring(0,5);
-    html += `
-        <button type="button" 
-                class="btn btn-outline-primary turno-btn" 
-                data-id="${t.id_shift}" 
-                data-hora="${horaInicio}-${horaFin}">
-            ${horaInicio} - ${horaFin} <br>
-            <small>${t.cubicle_shift}</small>
-        </button>`;
-            });
-            html += '</div>';
-
-            turnosContainer.innerHTML = html;
-
-            // Asignar evento a cada botón de turno
-            document.querySelectorAll('.turno-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const turnoId = this.getAttribute('data-id');
-                    const hora = this.getAttribute('data-hora');
-                    seleccionarTurno(turnoId, hora);
                 });
             });
         })

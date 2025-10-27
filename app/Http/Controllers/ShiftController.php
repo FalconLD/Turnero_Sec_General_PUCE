@@ -154,4 +154,22 @@ class ShiftController extends Controller
 
         return ['assigned' => $assignedShifts, 'modified' => $modifiedShifts];
     }
+public function getShifts($fecha)
+{
+    try {
+        // Obtener turnos activos de la fecha seleccionada
+        $turnos = Shift::where('date_shift', $fecha)
+            ->where('status_shift', true)
+            ->get(['id_shift', 'start_shift', 'end_shift', 'cubicle_shift']);
+
+        return response()->json($turnos->toArray());
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'No se pudieron cargar los turnos.',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
 }

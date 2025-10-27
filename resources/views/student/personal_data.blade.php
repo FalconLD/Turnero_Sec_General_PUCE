@@ -323,81 +323,144 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // === CALENDARIO Y TURNOS DISPONIBLES ===
-document.addEventListener('DOMContentLoaded', function() {
-    const submitBtn = document.getElementById('submitBtn');
-    const calendarSection = document.getElementById('calendarSection');
-    const fechaInput = document.getElementById('fechaSeleccionada');
-    const turnosContainer = document.getElementById('turnosContainer');
-    const form = document.querySelector('form');
+// === CALENDARIO Y TURNOS DISPONIBLES ===
+const fechaInput = document.getElementById('fechaSeleccionada');
+const turnosContainer = document.getElementById('turnosContainer');
+const turnoHidden = document.getElementById('turno_id');
 
-    // 1️⃣ Al hacer clic en "Enviar" → mostrar calendario
-    submitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        form.style.display = 'none';
-        calendarSection.style.display = 'block';
-    });
+// Validar si se puede avanzar
+function checkTurnoSelected() {
+    nextBtn.disabled = !turnoHidden.value; // habilita siguiente solo si hay turno seleccionado
+}
 
-    // 2️⃣ Cuando selecciona una fecha → consultar turnos
-    fechaInput.addEventListener('change', function() {
-        const fecha = this.value;
-        if (!fecha) return;
+/*
+// Al cambiar la fecha, se consultan los turnos disponibles
+fechaInput.addEventListener('change', function() {
+    const fecha = this.value;
+    if (!fecha) return;
 
-        turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+    turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+    turnoHidden.value = ''; // Reinicia turno seleccionado
+    checkTurnoSelected();
 
-        fetch(`/shifts/${fecha}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.length === 0) {
-                    turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
-                    return;
-                }
+    fetch(`/shifts/${fecha}`) // Ajusta la ruta según tu backend
+        .then(res => res.json())
+        .then(data => {
+            if(data.length === 0){
+                turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
+                return;
+            }
 
-                let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
-                data.forEach(t => {
-                    const horaInicio = t.start_shift.substring(0,5);
-                    const horaFin = t.end_shift.substring(0,5);
-                    html += `
-                        <button type="button" 
+            let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
+           /* data.forEach(t => {
+                const horaInicio = t.start_shift.substring(0,5);
+                const horaFin = t.end_shift.substring(0,5);
+                html += `<button type="button" 
                                 class="btn btn-outline-primary turno-btn" 
                                 data-id="${t.id_shift}" 
                                 data-hora="${horaInicio}-${horaFin}">
                             ${horaInicio} - ${horaFin} <br>
                             <small>${t.cubicle_shift}</small>
                         </button>`;
-                });
-                html += '</div>';
-
-                turnosContainer.innerHTML = html;
-
-                // Asignar evento a cada botón de turno
-                document.querySelectorAll('.turno-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const turnoId = this.getAttribute('data-id');
-                        const hora = this.getAttribute('data-hora');
-                        seleccionarTurno(turnoId, hora);
-                    });
-                });
-            })
-            .catch(() => {
-                turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
             });
-    });
 
-    // 3️⃣ Al seleccionar un turno → mostrar confirmación
-    function seleccionarTurno(turnoId, hora) {
-        turnosContainer.innerHTML = `
-            <div class="alert alert-success text-center">
-                <strong>Turno seleccionado:</strong> ${hora} <br>
-                <small>¡Gracias por completar su inscripción!</small>
-            </div>
-            <form action="{{ route('student.store') }}" method="POST" class="mt-3">
-                @csrf
-                <input type="hidden" name="turno_id" value="${turnoId}">
-                <button type="submit" class="btn btn-success">Confirmar inscripción</button>
-            </form>
-        `;
-    }
+data.forEach(t => {
+    const horaInicio = t.start_time.substring(0, 5);
+    const horaFin = t.end_time.substring(0, 5);
+    html += `
+        <button type="button" 
+                class="btn btn-outline-primary turno-btn" 
+                data-id="${t.id}" 
+                data-hora="${horaInicio}-${horaFin}">
+            ${horaInicio} - ${horaFin} <br>
+            <small>${t.cubicle_id}</small>
+        </button>`;
+});
+
+            html += '</div>';
+            turnosContainer.innerHTML = html;
+
+            // Eventos para seleccionar turno
+            document.querySelectorAll('.turno-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const turnoId = this.getAttribute('data-id');
+                    const hora = this.getAttribute('data-hora');
+
+                    // Guardar turno en input hidden
+                    turnoHidden.value = turnoId;
+
+                    // Resaltar botón seleccionado
+                    document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('btn-success'));
+                    this.classList.add('btn-success');
+
+                    // Mostrar confirmación
+                    let confirmMsg = turnosContainer.querySelector('.alert');
+                    if(!confirmMsg){
+                        const div = document.createElement('div');
+                        div.classList.add('mt-2','alert','alert-success');
+                        div.innerText = `Turno seleccionado: ${hora}`;
+                        turnosContainer.appendChild(div);
+                    } else {
+                        confirmMsg.innerText = `Turno seleccionado: ${hora}`;
+                    }
+
+                    // Habilitar siguiente paso
+                    checkTurnoSelected();
+                });
+            });
+        })
+       .catch(() => {
+            turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
+        });
+
+});
+*/
+
+
+fechaInput.addEventListener('change', function() {
+    const fecha = this.value;
+    if (!fecha) return;
+
+    turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+
+    fetch(`/shifts/${fecha}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!Array.isArray(data) || data.length === 0) {
+                turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
+                return;
+            }
+
+            let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
+            data.forEach(t => {
+    const horaInicio = t.start_shift.substring(0,5);
+    const horaFin = t.end_shift.substring(0,5);
+    html += `
+        <button type="button" 
+                class="btn btn-outline-primary turno-btn" 
+                data-id="${t.id_shift}" 
+                data-hora="${horaInicio}-${horaFin}">
+            ${horaInicio} - ${horaFin} <br>
+            <small>${t.cubicle_shift}</small>
+        </button>`;
+            });
+            html += '</div>';
+
+            turnosContainer.innerHTML = html;
+
+            // Asignar evento a cada botón de turno
+            document.querySelectorAll('.turno-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const turnoId = this.getAttribute('data-id');
+                    const hora = this.getAttribute('data-hora');
+                    seleccionarTurno(turnoId, hora);
+                });
+            });
+        })
+        .catch(err => {
+            console.error("Error al cargar los turnos:", err);
+            turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
+        });
 });
 
 

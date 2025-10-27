@@ -71,4 +71,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
         Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
 
+
+    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+
 });

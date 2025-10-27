@@ -65,30 +65,10 @@ Route::middleware(['auth'])->group(function () {
     })->name('auditoria.index');
 
   /* Antiguo */
-       /* Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
-        Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
+       //Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
+        //Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
         Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
         Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
-        Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');*/
-
-       /* Nuevo */
-
-            // Ruta principal: muestra el formulario de inscripción (personal_data.blade)
-        Route::get('/student', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.start');
-        Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
-
-        // Guardar los datos del formulario
-        Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
-
-        // Mensaje de éxito
         Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
-
-        // (Opcional) Redirecciones desde las rutas antiguas
-        Route::get('/student/terms', fn() => redirect()->route('student.personal'));
-        Route::post('/student/accept-terms', fn() => redirect()->route('student.personal'));
-       
-        //calendario
-        Route::get('/shifts/{fecha}', [ShiftController::class, 'getAvailableShifts'])->name('shifts.available');
-
 
 });

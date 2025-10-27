@@ -8,6 +8,7 @@ use App\Models\Parameter; // Donde está el parámetro TERM
 
 class StudentRegistrationController extends Controller
 {
+    
     // Paso 1: Términos
     public function showTerms()
     {
@@ -39,6 +40,7 @@ class StudentRegistrationController extends Controller
         $terminos = Parameter::where('clave', 'TERM')->first();
 
         return view('student.personal_data', compact('terminos'));
+        
     }
 
 
@@ -81,4 +83,9 @@ class StudentRegistrationController extends Controller
     {
         return view('student.success');
     }
+
+
+
+
+
 }

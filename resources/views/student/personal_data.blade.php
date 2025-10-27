@@ -43,7 +43,7 @@
                     <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label>Nombre completo</label>
+                            <label>Nombre completo </label>
                             <input type="text" class="form-control" name="names" placeholder="Ingrese su nombre" required>
                         </div>
                         <div class="col-md-3 mb-3">
@@ -166,7 +166,27 @@
                     </div>
                 </div>
 
-                {{-- Paso 5: Confirmación --}}
+
+                {{-- Paso 5: Selección de fecha y horario --}}
+                <div class="form-step" style="display:none;">
+                    <h5 class="text-secondary mb-3">Seleccione una fecha y horario disponible</h5>
+
+                    <div class="mb-3">
+                        <label><strong>Seleccione una fecha:</strong></label>
+                        <input type="date" id="fechaSeleccionada" class="form-control" min="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <div id="turnosContainer" class="mt-3 text-center">
+                        <p class="text-muted">Seleccione una fecha para ver turnos...</p>
+                    </div>
+
+                    <input type="hidden" name="turno_id" id="turno_id">
+                </div>
+
+
+
+
+                {{-- Paso 6: Confirmación --}}
                 <div class="form-step" style="display:none;">
                     <h5 class="text-secondary mb-3">Confirmación</h5>
                     <p>Verifique que todos los datos sean correctos antes de enviar su información.</p>
@@ -193,6 +213,10 @@
                         <div id="stepIcon3" class="step-circle bg-secondary text-white">3</div>
                         <div class="line"></div>
                         <div id="stepIcon4" class="step-circle bg-secondary text-white">4</div>
+                        <div class="line"></div>
+                        <div id="stepIcon5" class="step-circle bg-secondary text-white">5</div>
+                        <div class="line"></div>
+                        <div id="stepIcon6" class="step-circle bg-secondary text-white">6</div>
                     </div>
                     <small class="text-muted d-block mt-2">Progreso del registro</small>
                 </div>
@@ -216,7 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('stepIcon1'),
         document.getElementById('stepIcon2'),
         document.getElementById('stepIcon3'),
-        document.getElementById('stepIcon4')
+        document.getElementById('stepIcon4'),
+        document.getElementById('stepIcon5'),
+        document.getElementById('stepIcon6')
     ];
 
     let currentStep = 0;

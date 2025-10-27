@@ -1,11 +1,10 @@
 @extends('adminlte::page')
 
 @section('title', 'Registro de Estudiante')
+@section('layout_topnav', true)
 
 @section('content_header')
-
-    <h1>Matrículas</h1>
-<h1 class="text-center mb-4">Registro de Estudiante</h1>
+    <h1 class="text-center mb-4">Registro de Estudiante</h1>
 @stop
 
 @section('content')
@@ -14,7 +13,7 @@
         <div class="card-body">
             <h4 class="card-title text-center mb-4 text-primary">Formulario de Inscripción</h4>
 
-            <form action="{{ route('student.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('student.finish') }}" method="POST" enctype="multipart/form-data" id="multiStepForm">
                 @csrf
 
                 {{-- Barra de progreso --}}
@@ -33,8 +32,8 @@
                         @endif
                     </div>
                     <div class="form-check mb-3 text-center">
-                        <input type="checkbox" id="acepta_terminos" name="acepta_terminos">
-                        <label  for="acepta_terminos">Acepto los términos y condiciones</label>
+                        <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
+                        <label for="acepta_terminos">Acepto los términos y condiciones</label>
                     </div>
                 </div>
 
@@ -43,7 +42,7 @@
                     <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label>Nombre completo </label>
+                            <label>Nombre completo</label>
                             <input type="text" class="form-control" name="names" placeholder="Ingrese su nombre" required>
                         </div>
                         <div class="col-md-3 mb-3">
@@ -104,35 +103,40 @@
                             </select>
                         </div>
 
+                        {{-- Nivel de instrucción --}}
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Nivel de instrucción</label>
                             <div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="nivel_instruccion" value="grado">
+                                    <input type="radio" class="form-check-input" name="nivel_instruccion" value="grado" required>
                                     <label class="form-check-label">Grado</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="nivel_instruccion" value="posgrado">
+                                    <input type="radio" class="form-check-input" name="nivel_instruccion" value="posgrado" required>
                                     <label class="form-check-label">Posgrado</label>
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Beca --}}
                         <div class="col-md-12 mb-3" id="beca-group">
                             <label class="form-label">¿Pertenece al grupo de beca San Ignacio?</label>
                             <div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="beca_san_ignacio" value="si">
+                                    <input type="radio" class="form-check-input" name="beca_san_ignacio" value="si" required>
                                     <label class="form-check-label">Sí</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="beca_san_ignacio" value="no">
+                                    <input type="radio" class="form-check-input" name="beca_san_ignacio" value="no" required>
                                     <label class="form-check-label">No</label>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12 mb-3 text-center" id="valor-pagar-box" style="display:none; font-size: 1.2em; color: #0d6efd;"></div>
+                        {{-- Mensaje de pago dinámico --}}
+                        <div class="col-md-12 mb-3 text-center">
+                            <p id="mensaje_pago" class="text-primary"></p>
+                        </div>
                     </div>
                 </div>
 
@@ -144,19 +148,19 @@
                             <label>Tipo de pago a realizar</label>
                             <select class="form-select" id="tipo-pago" name="forma_pago" required>
                                 <option value="" selected disabled>Seleccione...</option>
-                                <option value="DeUna">DeUna</option>
-                                <option value="Transferencia">Transferencia</option>
-                                <option value="Pago en Efectivo">Pago en Efectivo</option>
+                                <option value="una_sola_vez">DE UNA</option>
+                                <option value="transferencia">TRANSFERENCIA</option>
+                                <option value="efectivo">Pago en Efectivo</option>
                             </select>
                         </div>
 
                         <div class="col-md-12 mb-3" id="comprobante-container" style="display:none;">
-                            <label>Subir comprobante</label>
+                            <label>Subir comprobante (si aplica)</label>
                             <input type="file" class="form-control" accept=".pdf,.jpg,.png" name="comprobante">
                         </div>
 
                         <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
-                            Pago en efectivo: Una vez finalizada la inscripción, por favor acercarse 10 minutos antes en el día programado para su atención, al Centro Médico de Fundación PuceSalud, en la Pontificia Universidad Católica del Ecuador, diagonal a la biblioteca.
+                            Una vez finalizada la inscripción, por favor acercarse 10 minutos antes en el día programado para su atención, al Centro Médico de Fundación PuceSalud, en la Pontificia Universidad Católica del Ecuador, diagonal a la biblioteca.
                         </div>
 
                         <div class="col-md-12 mb-3">
@@ -166,244 +170,196 @@
                     </div>
                 </div>
 
+                {{-- Paso 5 y 6 se mantienen igual --}}
+                <div class="form-step p-4 bg-light rounded shadow-sm" style="display:none;">
+                 <h5 class="text-primary mb-4 text-center">📅 Seleccione una fecha y horario disponible</h5>
+                
+                <div class="mb-4">
+                    <label for="fechaSeleccionada" class="form-label fw-bold">Fecha:</label>
+                    <input type="date" id="fechaSeleccionada" class="form-control" min="{{ date('Y-m-d') }}">
+                </div>
+                
+                        <div id="turnosContainer" class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+                            <div class="text-center p-3 border rounded text-muted" style="width:200px;">
+                                Seleccione una fecha para ver los turnos disponibles...
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="turno_id" id="turno_id">
+                        <input type="hidden" name="date_shift" id="date_shift">
+                        <input type="hidden" name="shift_time" id="shift_time">
+                    </div>
 
-                {{-- Paso 5: Selección de fecha y horario --}}
+                    <!-- Opcional: estilo para hover en turnos -->
+                    <style>
+                        .turno-card {
+                            cursor: pointer;
+                            transition: transform 0.2s, box-shadow 0.2s;
+                        }
+                        .turno-card:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+                        .turno-card.selected {
+                            border-color: #0d6efd;
+                            background-color: #e7f1ff;
+                        }
+                    </style>
+
+
                 <div class="form-step" style="display:none;">
-                    <h5 class="text-secondary mb-3">Seleccione una fecha y horario disponible</h5>
-
-                    <div class="mb-3">
-                        <label><strong>Seleccione una fecha:</strong></label>
-                        <input type="date" id="fechaSeleccionada" class="form-control" min="{{ date('Y-m-d') }}">
-                    </div>
-
-                    <div id="turnosContainer" class="mt-3 text-center">
-                        <p class="text-muted">Seleccione una fecha para ver turnos...</p>
-                    </div>
-
-                    <input type="hidden" name="turno_id" id="turno_id">
+                    <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
+                    <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
+                    <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
+                    <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
+                    <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
+                    <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
+                    <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>
+                    <div class="text-muted small">Al presionar *Confirmar y Guardar* se registrará su turno y se enviará un correo.</div>
                 </div>
 
-
-
-
-                {{-- Paso 6: Confirmación --}}
-                <div class="form-step" style="display:none;">
-                    <h5 class="text-secondary mb-3">Confirmación</h5>
-                    <p>Verifique que todos los datos sean correctos antes de enviar su información.</p>
-                    <div class="alert alert-info">
-                        <strong>Nota:</strong> Una vez enviado, no podrá modificar los datos ingresados.
-                    </div>
-                </div>
-
-                {{-- Botones --}}
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
                     <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
-                    {{-- cambio submit por button --}}
-                    <button type="button" id="submitBtn" class="btn btn-success" style="display:none;">Enviar</button>
-                </div>
-
-                {{-- Línea de tiempo --}}
-                <div class="mt-4 text-center">
-                    <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
-                        <div id="stepIcon1" class="step-circle bg-secondary text-white">1</div>
-                        <div class="line"></div>
-                        <div id="stepIcon2" class="step-circle bg-secondary text-white">2</div>
-                        <div class="line"></div>
-                        <div id="stepIcon3" class="step-circle bg-secondary text-white">3</div>
-                        <div class="line"></div>
-                        <div id="stepIcon4" class="step-circle bg-secondary text-white">4</div>
-                        <div class="line"></div>
-                        <div id="stepIcon5" class="step-circle bg-secondary text-white">5</div>
-                        <div class="line"></div>
-                        <div id="stepIcon6" class="step-circle bg-secondary text-white">6</div>
-                    </div>
-                    <small class="text-muted d-block mt-2">Progreso del registro</small>
+                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<style>
-.step-circle { width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.3s; }
-.line { height: 3px; width: 50px; background-color: #ccc; }
-.step-circle.active { background-color: #0d6efd !important; transform: scale(1.1); }
-.step-circle.completed { background-color: #198754 !important; }
-</style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
     const steps = document.querySelectorAll('.form-step');
-    const icons = [
-        document.getElementById('stepIcon1'),
-        document.getElementById('stepIcon2'),
-        document.getElementById('stepIcon3'),
-        document.getElementById('stepIcon4'),
-        document.getElementById('stepIcon5'),
-        document.getElementById('stepIcon6')
-    ];
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const aceptaTerminos = document.getElementById('acepta_terminos');
 
     let currentStep = 0;
 
-    const nextBtn = document.getElementById('nextBtn');
-    const prevBtn = document.getElementById('prevBtn');
-
-    function showStep(index) {
-        steps.forEach((step, i) => step.style.display = i === index ? 'block' : 'none');
-        prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
-        nextBtn.style.display = index === steps.length - 1 ? 'none' : 'inline-block';
-        document.getElementById('submitBtn').style.display = index === steps.length - 1 ? 'inline-block' : 'none';
-        document.getElementById('progressBar').style.width = ((index + 1) / steps.length) * 100 + '%';
-        icons.forEach((icon, i) => {
-            icon.classList.remove('active', 'completed');
-            if(i < index) icon.classList.add('completed');
-            if(i === index) icon.classList.add('active');
-        });
+    function showStep(step) {
+        steps.forEach((s, i) => s.style.display = (i === step) ? 'block' : 'none');
+        prevBtn.style.display = step === 0 ? 'none' : 'inline-block';
+        nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
+        submitBtn.style.display = step === steps.length - 1 ? 'inline-block' : 'none';
+        document.getElementById('progressBar').style.width = ((step + 1) / steps.length) * 100 + '%';
+        if(step === steps.length - 1) populateConfirmation();
     }
 
-    nextBtn.addEventListener('click', () => {
-        if(currentStep < steps.length - 1) currentStep++;
-        showStep(currentStep);
-    });
+    aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
 
-    prevBtn.addEventListener('click', () => {
-        if(currentStep > 0) currentStep--;
-        showStep(currentStep);
-    });
+    nextBtn.onclick = () => { if(!validateCurrentStep()) return; currentStep++; showStep(currentStep); };
+    prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
 
-    // Habilitar siguiente solo si se aceptan términos
-    const aceptaTerminos = document.getElementById('acepta_terminos');
-    aceptaTerminos.addEventListener('change', function() {
-        nextBtn.disabled = !this.checked;
-    });
-
-    // Mostrar/ocultar grupo beca y valor a pagar
-    document.addEventListener('change', function() {
-        const nivel = document.querySelector('input[name="nivel_instruccion"]:checked');
-        const becaGroup = document.getElementById('beca-group');
-        const beca = document.querySelector('input[name="beca_san_ignacio"]:checked');
-        const box = document.getElementById('valor-pagar-box');
-
-        if(nivel) {
-            if(nivel.value === 'posgrado') {
-                becaGroup.style.display = 'none';
-                becaGroup.querySelectorAll('input').forEach(r => r.checked = false);
-                box.style.display = 'block';
-                box.innerHTML = "<strong>VALOR A PAGAR</strong><br>$7.50";
-            } else {
-                becaGroup.style.display = 'block';
-                if(beca) {
-                    box.style.display = 'block';
-                    box.innerHTML = beca.value === 'si' ? "<strong>VALOR A PAGAR</strong><br>$0.50" : "<strong>VALOR A PAGAR</strong><br>$2.50";
-                } else {
-                    box.style.display = 'none';
-                }
-            }
+    function validateCurrentStep() {
+        const step = steps[currentStep];
+        const requireds = step.querySelectorAll('[required]');
+        for(let el of requireds){
+            if(el.type === 'radio'){
+                const name = el.name;
+                if(!step.querySelector(`input[name="${name}"]:checked`)) { el.focus(); return false; }
+            } else if(!el.value || el.value.trim() === ''){ el.focus(); return false; }
         }
-    });
+        return true;
+    }
 
-    // Mostrar campo de comprobante o nota según tipo de pago
+    // --- Mensajes dinámicos ---
+    const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
+    const becaRadios = document.querySelectorAll('input[name="beca_san_ignacio"]');
+    const mensajePago = document.getElementById('mensaje_pago');
     const tipoPagoSelect = document.getElementById('tipo-pago');
     const comprobanteContainer = document.getElementById('comprobante-container');
     const pagoEfectivoNote = document.getElementById('pago-efectivo-note');
 
-    tipoPagoSelect.addEventListener('change', function() {
-        const valor = this.value;
-        if(valor === 'DeUna' || valor === 'Transferencia') {
+    function actualizarMensajePago() {
+        const nivel = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
+        const beca = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
+
+        if(nivel === 'grado' && beca === 'si'){
+            mensajePago.textContent = "Dentro de los lineamientos de la Atención Psicológica Única (APSU) se establece el pago de $ 0.50 (cero cincuenta centavos)";
+        } else if(nivel === 'grado' && beca === 'no'){
+            mensajePago.textContent = "Dentro de los lineamientos de la Atención Psicológica Única (APSU) se establece el pago de $ 2.50 (dos con cincuenta)";
+        } else if(nivel === 'posgrado'){
+            mensajePago.textContent = "Dentro de los lineamientos de la Atención Psicológica Única (APSU) se establece el pago de $ 7.50 (siete con cincuenta)";
+        } else { mensajePago.textContent = ""; }
+    }
+
+    nivelRadios.forEach(r => r.addEventListener('change', actualizarMensajePago));
+    becaRadios.forEach(r => r.addEventListener('change', actualizarMensajePago));
+
+    tipoPagoSelect.addEventListener('change', () => {
+        const val = tipoPagoSelect.value;
+        if(val === 'una_sola_vez' || val === 'transferencia'){
             comprobanteContainer.style.display = 'block';
             pagoEfectivoNote.style.display = 'none';
-        } else if(valor === 'Pago en Efectivo') {
+        } else if(val === 'efectivo'){
             comprobanteContainer.style.display = 'none';
             pagoEfectivoNote.style.display = 'block';
-        } else {
+        } else{
             comprobanteContainer.style.display = 'none';
             pagoEfectivoNote.style.display = 'none';
         }
     });
 
-// === CALENDARIO Y TURNOS DISPONIBLES ===
-const fechaInput = document.getElementById('fechaSeleccionada');
-const turnosContainer = document.getElementById('turnosContainer');
-const turnoHidden = document.getElementById('turno_id');
+    // --- TURNOS ---
+    const fechaInput = document.getElementById('fechaSeleccionada');
+    const turnosContainer = document.getElementById('turnosContainer');
+    const turnoIdInput = document.getElementById('turno_id');
+    const dateShiftInput = document.getElementById('date_shift');
+    const shiftTimeInput = document.getElementById('shift_time');
 
-// Función para habilitar siguiente paso solo si hay turno seleccionado
-function checkTurnoSelected() {
-    nextBtn.disabled = !turnoHidden.value;
-}
+    fechaInput.addEventListener('change', () => {
+        const fecha = fechaInput.value;
+        if(!fecha) return;
+        turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+        turnoIdInput.value = ''; dateShiftInput.value = ''; shiftTimeInput.value = '';
+        nextBtn.disabled = true;
 
-// Cuando se cambia la fecha
-fechaInput.addEventListener('change', function() {
-    const fecha = this.value;
-    if (!fecha) return;
-
-    turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
-    turnoHidden.value = ''; // Reiniciar selección
-    checkTurnoSelected();
-
-    fetch(`/shifts/${fecha}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!Array.isArray(data) || data.length === 0) {
-                turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
-                return;
-            }
-
-            let html = '<div class="d-flex justify-content-center flex-wrap gap-3">';
-            data.forEach(t => {
-                const horaInicio = t.start_shift.substring(0,5);
-                const horaFin = t.end_shift.substring(0,5);
-                html += `
-                    <button type="button" 
-                            class="btn btn-outline-primary turno-btn" 
-                            data-id="${t.id_shift}" 
-                            data-hora="${horaInicio}-${horaFin}">
-                        ${horaInicio} - ${horaFin} <br>
-                        <small>${t.cubicle_shift}</small>
-                    </button>`;
-            });
-            html += '</div>';
-
-            turnosContainer.innerHTML = html;
-
-            // Asignar evento a cada botón de turno
-            document.querySelectorAll('.turno-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const turnoId = this.getAttribute('data-id');
-                    const hora = this.getAttribute('data-hora');
-
-                    // Guardar turno en input hidden
-                    turnoHidden.value = turnoId;
-
-                    // Resaltar botón seleccionado
-                    document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('btn-success'));
-                    this.classList.add('btn-success');
-
-                    // Mostrar confirmación
-                    let confirmMsg = turnosContainer.querySelector('.alert');
-                    if(!confirmMsg){
-                        const div = document.createElement('div');
-                        div.classList.add('mt-2','alert','alert-success');
-                        div.innerText = `Turno seleccionado: ${hora}`;
-                        turnosContainer.appendChild(div);
-                    } else {
-                        confirmMsg.innerText = `Turno seleccionado: ${hora}`;
-                    }
-
-                    // Habilitar siguiente paso
-                    checkTurnoSelected();
+        fetch(`/shifts/${fecha}`)
+            .then(res => res.json())
+            .then(data => {
+                if(!Array.isArray(data) || data.length === 0){
+                    turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha.</p>";
+                    return;
+                }
+                turnosContainer.innerHTML = '';
+                data.forEach(t => {
+                    const boton = document.createElement("button");
+                    boton.type = "button";
+                    boton.className = "btn btn-outline-primary m-2 turno-btn";
+                    const horaTxt = t.start_shift.substring(0,5) + " - " + t.end_shift.substring(0,5);
+                    boton.innerHTML = `<strong>${horaTxt}</strong><br><small>${t.cubicle_shift}</small>`;
+                    boton.dataset.id = t.id_shift;
+                    boton.dataset.hora = horaTxt;
+                    boton.addEventListener('click', function(){
+                        document.querySelectorAll('.turno-btn').forEach(b => b.classList.remove('btn-success'));
+                        this.classList.add('btn-success');
+                        turnoIdInput.value = this.dataset.id;
+                        dateShiftInput.value = fecha;
+                        shiftTimeInput.value = this.dataset.hora;
+                        nextBtn.disabled = false;
+                    });
+                    turnosContainer.appendChild(boton);
                 });
+            })
+            .catch(err => {
+                console.error(err);
+                turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
             });
-        })
-        .catch(err => {
-            console.error("Error al cargar los turnos:", err);
-            turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
-        });
-});
+    });
 
+    function populateConfirmation(){
+        document.getElementById('cedulaConfirm').textContent = document.querySelector('input[name="cedula"]').value || '-';
+        document.getElementById('namesConfirm').textContent = document.querySelector('input[name="names"]').value || '-';
+        document.getElementById('correoConfirm').textContent = document.querySelector('input[name="correo_puce"]').value || '-';
+        document.getElementById('telefonoConfirm').textContent = document.querySelector('input[name="telefono"]').value || '-';
+        document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
+        document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
+    }
 
     showStep(currentStep);
+    actualizarMensajePago();
 });
 </script>
 @stop

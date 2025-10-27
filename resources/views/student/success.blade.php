@@ -8,7 +8,7 @@
     <h4>Registro completado correctamente</h4>
     <a href="{{ route('student.personal') }}" class="btn btn-primary mt-3">Volver al inicio</a>
 
-    {{--<a href="{{ route('student.terms') }}" class="btn btn-primary mt-3">Volver al inicio</a>--}
+    {{--<a href="{{ route('student.terms') }}" class="btn btn-primary mt-3">Volver al inicio</a>--}}
    
   </div>
 </div>

@@ -65,13 +65,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('auditoria.index');
 
   /* Antiguo */
-       //Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
-       // Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
+       Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');
+        Route::post('/student/accept-terms', [StudentRegistrationController::class, 'acceptTerms'])->name('student.accept.terms');
         Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
         Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
         Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
 
 
     Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+
+    Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
+
 
 });

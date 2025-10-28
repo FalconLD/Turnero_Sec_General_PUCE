@@ -15,7 +15,7 @@ class StudentRegistrationController extends Controller
     public function showTerms()
     {
         $terminos = Parameter::where('clave', 'TERM')->first();
-        return view('student.terms', compact('terminos'));
+        //return view('student.terms', compact('terminos'));
     }
 
     // Validar aceptación de términos
@@ -33,11 +33,11 @@ class StudentRegistrationController extends Controller
     // Paso 2: Datos personales
     public function showPersonalForm()
     {
-        if (!session('accepted_terms')) {
-            return redirect()->route('student.terms');
-        }
+        // Ya no hace falta validar session('accepted_terms')
+        // porque el usuario acepta los términos dentro del mismo formulario.
 
         $terminos = Parameter::where('clave', 'TERM')->first();
+
         return view('student.personal_data', compact('terminos'));
     }
 
@@ -107,14 +107,14 @@ class StudentRegistrationController extends Controller
         'turno_id' => 'required|exists:shifts,id_shift',
     ]);
 
-    // --- Subida del archivo ---
+    
     $comprobantePath = null;
     if ($request->hasFile('comprobante')) {
         $comprobantePath = $request->file('comprobante')->store('public/comprobantes');
         $comprobantePath = str_replace('public/', '', $comprobantePath);
     }
 
-    // Calcular valor a pagar
+    
     $valor = ($request->nivel_instruccion === 'grado')
                 ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
                 : 7.50;
@@ -140,14 +140,14 @@ class StudentRegistrationController extends Controller
         'comprobante' => $comprobantePath
     ]);
 
-    // Asignar turno
+   
     $turno = Shift::find($request->turno_id);
     $turno->person_shift = $student->cedula;
     $turno->status_shift = 0;
     $turno->save();
 
 
-    // Después de asignar el turno
+    
     Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
 
     return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');

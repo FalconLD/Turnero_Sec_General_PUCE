@@ -154,21 +154,39 @@ class ShiftController extends Controller
 
         return ['assigned' => $assignedShifts, 'modified' => $modifiedShifts];
     }
-public function getShifts($fecha)
+public function getShifts(Request $request, $fecha)
 {
-    try {
-        // Obtener turnos activos de la fecha seleccionada
-        $turnos = Shift::where('date_shift', $fecha)
-            ->where('status_shift', true)
-            ->get(['id_shift', 'start_shift', 'end_shift', 'cubicle_shift']);
+    $modalidad = $request->query('modalidad'); // puede ser 'presencial' o 'virtual'
 
-        return response()->json($turnos->toArray());
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'No se pudieron cargar los turnos.',
-            'message' => $e->getMessage()
-        ], 500);
+    $query = \App\Models\Shift::whereDate('date_shift', $fecha)
+        ->where('status_shift', true)
+        ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
+        ->select('shifts.id_shift', 'shifts.start_shift', 'shifts.end_shift', 'cubiculos.nombre as cubiculo', 'cubiculos.tipo_atencion');
+
+    if ($modalidad) {
+        $query->where('cubiculos.tipo_atencion', $modalidad);
     }
+
+    $turnos = $query->orderBy('shifts.start_shift')->get();
+
+    return response()->json($turnos);
+}
+
+public function attention(Request $request)
+{
+    $date = $request->query('date', now()->toDateString());
+
+    // Solo los turnos tomados (person_shift no es null)
+    $shifts = Shift::with('person') // asegúrate que la relación se llama student()
+        ->whereDate('date_shift', $date)
+        ->whereNotNull('person_shift')   // <-- esto filtra solo los tomados
+        ->orderBy('start_shift')
+        ->get();
+
+    return view('shifts.attention', [
+        'shifts' => $shifts,
+        'selectedDate' => $date
+    ]);
 }
 
 

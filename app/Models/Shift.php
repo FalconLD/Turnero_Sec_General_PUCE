@@ -52,6 +52,7 @@ class Shift extends Model implements Auditable
     {
         return $this->hasOne(StudentRegistration::class, 'cedula', 'person_shift');
     }
+     
 
     // Eliminamos los eventos manuales de auditoría
     // OwenIt\Auditing se encarga automáticamente

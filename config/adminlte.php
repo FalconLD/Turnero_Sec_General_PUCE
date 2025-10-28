@@ -355,6 +355,11 @@ return [
             'icon' => 'fas fa-fw fa-lock',
         ],
         [
+            'text' => 'Atención',
+            'url'  => '/shifts/attention', // ✅ usar la ruta directamente
+            'icon' => 'fas fa-fw fa-user',
+        ],
+        [
             'text' => 'Desbloquear usuario',
             'url' => '#',
             'icon' => 'fa fa-unlock',

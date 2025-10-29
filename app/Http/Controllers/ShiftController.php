@@ -159,4 +159,40 @@ class ShiftController extends Controller
         ]);
 
     }
+public function getShifts(Request $request, $fecha)
+{
+    $modalidad = $request->query('modalidad'); // puede ser 'presencial' o 'virtual'
+
+    $query = \App\Models\Shift::whereDate('date_shift', $fecha)
+        ->where('status_shift', true)
+        ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
+        ->select('shifts.id_shift', 'shifts.start_shift', 'shifts.end_shift', 'cubiculos.nombre as cubiculo', 'cubiculos.tipo_atencion');
+
+    if ($modalidad) {
+        $query->where('cubiculos.tipo_atencion', $modalidad);
+    }
+
+    $turnos = $query->orderBy('shifts.start_shift')->get();
+
+    return response()->json($turnos);
+}
+
+public function attention(Request $request)
+{
+    $date = $request->query('date', now()->toDateString());
+
+    // Solo los turnos tomados (person_shift no es null)
+    $shifts = Shift::with('person') // asegúrate que la relación se llama student()
+        ->whereDate('date_shift', $date)
+        ->whereNotNull('person_shift')   // <-- esto filtra solo los tomados
+        ->orderBy('start_shift')
+        ->get();
+
+    return view('shifts.attention', [
+        'shifts' => $shifts,
+        'selectedDate' => $date
+    ]);
+}
+
+
 }

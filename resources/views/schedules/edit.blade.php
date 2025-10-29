@@ -37,13 +37,14 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="break_minutes">Duración del Descanso (min)</label>
-                        <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', $schedule->break_minutes) }}">
-                    </div>
-                    <div class="col-md-6 mb-3">
                         <label for="attention_minutes">Duración Atención (min)</label>
                         <input type="number" name="attention_minutes" class="form-control" min="1" required value="{{ old('attention_minutes', $schedule->attention_minutes) }}">
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="break_minutes">Duración del Descanso (min)</label>
+                        <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', $schedule->break_minutes) }}">
+                    </div>
+                    
                 </div>
 
                 <div class="mb-3">

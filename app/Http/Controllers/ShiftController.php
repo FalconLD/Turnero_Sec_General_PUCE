@@ -68,12 +68,12 @@ class ShiftController extends Controller
             // Eliminamos el turno de la base de datos
             $shift->delete();
 
-            // Redireccionamos de vuelta con un mensaje de éxito
-            return redirect()->route('shifts.index')->with('success', 'Turno eliminado correctamente.');
+            // Redirigimos "atrás" para mantener los filtros de la URL.
+            return redirect()->back()->with('success', 'Turno eliminado correctamente.');
 
         } catch (\Exception $e) {
-            // Manejo de error
-            return redirect()->route('shifts.index')->with('error', 'Error al eliminar el turno.');
+            // Redirigimos "atrás" también en caso de error.
+            return redirect()->back()->with('error', 'Error al eliminar el turno.');
         }
     }
 

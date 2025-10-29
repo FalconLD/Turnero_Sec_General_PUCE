@@ -63,7 +63,7 @@
                                             @if($shift->status == 1)
                                                 <span class="badge bg-success">Activo</span>
                                             @else
-                                                <span class="badge bg-secondary">Inactivo</span>
+                                                <span class="badge bg-secondary">Agendado</span>
                                             @endif
                                         </td>
                                         

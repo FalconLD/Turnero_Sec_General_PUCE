@@ -233,6 +233,8 @@ class ScheduleController extends Controller
      * Esta función toma un Horario y crea todas sus filas de Turno.
      * La llamaremos desde el controlador de Días.
      */
+
+    /*
     public function generateShifts(Schedule $schedule)
     {
         // 1. Cargar las relaciones que necesitamos (días, cubículos, descansos)
@@ -309,6 +311,6 @@ class ScheduleController extends Controller
         }
 
         
-    }
+    }*/
 
 }

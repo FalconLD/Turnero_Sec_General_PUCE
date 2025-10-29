@@ -8,6 +8,13 @@
 
 @section('content')
 <div class="container">
+    {{-- Botón para Volver --}}
+    <div class="mb-3 w-75 mx-auto">
+        <a href="{{ route('schedules.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Regresar a Horarios
+        </a>
+    </div>
+
     <div class="card shadow w-75 mx-auto">
         <div class="card-body">
             {{-- Mostrar errores de validación --}}
@@ -38,13 +45,13 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="break_minutes">Duración del Descanso (min)</label>
-                        <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', 0) }}">
-                    </div>
-                    <div class="col-md-6 mb-3">
                         <label for="attention_minutes">Duración Atención (min)</label>
                         <input type="number" name="attention_minutes" class="form-control" min="1" required value="{{ old('attention_minutes', 1) }}">
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="break_minutes">Duración del Descanso (min)</label>
+                        <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', 0) }}">
+                    </div>                    
                 </div>
 
                 {{-- Cubículos --}}

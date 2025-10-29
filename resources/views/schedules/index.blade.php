@@ -3,91 +3,235 @@
 @section('title', 'Horarios')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>Horarios</h1>
-        <a href="{{ route('schedules.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i>  Nuevo
-        </a>
-    </div>
+    {{-- 1. Título centrado (como en Usuarios) --}}
+    <h1 class="text-center">Gestión de Horarios</h1>
 @stop
 
 @section('content')
-<div class="card">
-    <div class="card-body">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+    {{-- 2. Estructura de contenedor centrada (como en Usuarios) --}}
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-11">
 
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                   <!-- <th>ID</th>--> 
-                    <th>Acciones</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Atención (Min)</th>
-                    <th>Descanso (Min)</th>
-                    <th>Días</th>
-                    <th>Fecha de Vigencia</th>  
-                    <th># de turnos</th>
-                    <th>Ocupados</th>
-                    <th># de Días</th>
-                    <th>Cubículos</th>
-                    <th>Descansos</th>
-                    
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($schedules as $schedule)
-                <tr>
-                    <td>
-                        <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-sm btn-warning" title="Editar">
-                            <i class="fas fa-edit"></i>
+                <div class="card">
+                    {{-- 3. Botón "Nuevo" movido al card-header (como en Usuarios) --}}
+                    <div class="card-header d-flex justify-content-end align-items-center">
+                        <a href="{{ route('schedules.create') }}" class="btn btn-primary rounded-pill px-5">
+                            <i class="fas fa-plus"></i>  Nuevo
                         </a>
-                        <form action="{{ route('schedules.destroy', $schedule->id_hor) }}" method="POST" style="display:inline-block">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger"
-                                onclick="return confirm('¿Está seguro de eliminar este horario?')" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                        <a href="{{ route('schedules.show', $schedule->id_hor) }}" class="btn btn-sm btn-info" title="Configurar Parametros">
-                            <i class="fas fa-key"></i>
-                        </a>
-                    </td>
-                    <td>{{ $schedule->start_time }}</td>
-                    <td>{{ $schedule->end_time }}</td>
-                    <td>{{ $schedule->attention_minutes }}</td>
-                    <td>{{ $schedule->break_minutes }}</td>
-                    <td>
-                        @foreach($schedule->days as $day)
-                            {{ $day->date_day->format('d/m/Y') }}<br>
-                        @endforeach
-                    </td>
-                    <td>{{ $schedule->valid_from ? \Carbon\Carbon::parse($schedule->valid_from)->format('d/m/Y') : 'N/A' }}</td>
-                    <td>{{ $schedule->shifts_count }}</td>
-                    <td>{{ $schedule->occupied_shifts_count }}</td>
-                    <td>{{ $schedule->days_count }}</td>
-                    <td>{{ $schedule->cubicles->pluck('nombre')->join(', ') }}</td>
-                    <td>
-                        @foreach($schedule->breaks as $b)
-                            {{ \Carbon\Carbon::parse($b->start_break)->format('H:i') }} - {{ \Carbon\Carbon::parse($b->end_break)->format('H:i') }}<br>
-                        @endforeach
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="12" class="text-center">No se encontraron horarios.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    </div>
 
-        <!-- Paginación -->
-        <div class="mt-3">
-            {{ $schedules->links() }}
+                    <div class="card-body">
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        
+                        {{-- 4. Wrapper 'table-responsive' y ID 'horarios' para DataTables --}}
+                        <div class="table-responsive">
+                            <table id="horarios" class="table"> {{-- ID 'horarios' y clase 'table' simple --}}
+                                <thead>
+                                    <tr>
+                                       <th>Acciones</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Atención (Min)</th>
+                                        <th>Descanso (Min)</th>
+                                        <th>Días</th>
+                                        <th>Fecha de Vigencia</th>  
+                                        <th># de turnos</th>
+                                        <th>Ocupados</th>
+                                        <th># de Días</th>
+                                        <th>Cubículos</th>
+                                        <th>Descansos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($schedules as $schedule)
+                                    <tr>
+                                        {{-- 5. Clases de botones adaptadas para mejor estilo --}}
+                                        <td class="text-nowrap">
+                                            <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('schedules.destroy', $schedule->id_hor) }}" method="POST" style="display:inline-block">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-link text-danger btn-sm"
+                                                    onclick="return confirm('¿Está seguro de eliminar este horario?')" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            @if($schedule->cubicles->count() > 1)
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-link text-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ver Turnos">
+                                                        <i class="fas fa-wrench"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        @foreach($schedule->cubicles as $cubiculo)
+                                                            <a class="dropdown-item" href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_id' => $cubiculo->id]) }}">{{ $cubiculo->nombre }}</a>
+                                                        @endforeach
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item" href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_ids' => $schedule->cubicles->pluck('id')->all()]) }}">Todos los cubículos</a>
+                                                    </div>
+                                                </div>
+                                            @elseif($schedule->cubicles->count() == 1)
+                                                <a href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_id' => $schedule->cubicles->first()->id]) }}" class="btn btn-link text-info btn-sm" title="Ver Turnos">
+                                                    <i class="fas fa-wrench"></i>
+                                                </a>
+                                            @endif
+                                        </td>
+                                        <td>{{ $schedule->start_time }}</td>
+                                        <td>{{ $schedule->end_time }}</td>
+                                        <td>{{ $schedule->attention_minutes }}</td>
+                                        <td>{{ $schedule->break_minutes }}</td>
+                                        <td>
+                                            @foreach($schedule->days as $day)
+                                                {{ $day->date_day->format('d/m/Y') }}<br>
+                                            @endforeach
+                                        </td>
+                                        <td>{{ $schedule->valid_from ? \Carbon\Carbon::parse($schedule->valid_from)->format('d/m/Y') : 'N/A' }}</td>
+                                        <td>{{ $schedule->shifts_count }}</td>
+                                        <td>{{ $schedule->occupied_shifts_count }}</td>
+                                        <td>{{ $schedule->days_count }}</td>
+                                        <td>{{ $schedule->cubicles->pluck('nombre')->join(', ') }}</td>
+                                        <td>
+                                            @foreach($schedule->breaks as $b)
+                                                {{ \Carbon\Carbon::parse($b->start_break)->format('H:i') }} - {{ \Carbon\Carbon::parse($b->end_break)->format('H:i') }}<br>
+                                            @endforeach
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="12" class="text-center">No se encontraron horarios.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                            
+                            {{-- 6. Paginador de Laravel ELIMINADO. DataTables lo manejará --}}
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
+@stop
+
+@section('css')
+    {{-- 7. Todos los CSS de DataTables copiados de Usuarios --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+    <style>
+        .dt-buttons .btn:not(:first-child) {
+            margin-left: 5px !important;
+        }
+        .card {
+            border-radius: 1rem !important;
+            border: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+        }
+        .card-header {
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+            background-color: #fff;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* 8. Estilos adaptados para #horarios (en lugar de #usuarios) */
+        #horarios thead {
+            background-color: #f8f9fa; 
+        }
+        #horarios thead th {
+            color: #495057; 
+            font-weight: 600; 
+            border: none;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        #horarios td, #horarios th {
+            border-left: none;
+            border-right: none;
+            text-align: center;     
+            vertical-align: middle; 
+        }
+        .dt-buttons .btn {
+            border-radius: 0.5rem; 
+        }
+        .dataTables_filter input[type="search"] {
+            width: 400px !important;
+        }
+        .dt-buttons .btn {
+            min-width: 105px;
+            text-align: center;
+        }
+        #horarios tbody .btn .fas {
+            font-size: 1.4rem;
+        }
+        /* Estilo para los botones de acción sin fondo */
+        #horarios tbody .btn-link {
+            border: none;
+            background-color: transparent;
+            box-shadow: none;
+            padding: 0.25rem; /* Ajuste de padding */
+        }
+        #horarios tbody .btn-link .fas {
+            font-size: 1.2rem; /* Tamaño de icono más sutil */
+        }
+        #horarios tbody .btn-link.text-primary:hover { color: #0056b3 !important; }
+        #horarios tbody .btn-link.text-danger:hover { color: #dc3545 !important; }
+        #horarios tbody .btn-link.text-info:hover { color: #0dcaf0 !important; }
+
+    </style>
+@stop
+
+@section('js')
+    {{-- 9. Todos los JS de DataTables copiados de Usuarios --}}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <script>
+        $(function () {
+            // 10. Script inicializado para #horarios y título de PDF actualizado
+            var table = $('#horarios').DataTable({
+                responsive: true,
+                autoWidth: false,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        className: 'btn btn-danger btn-sm ms-2',
+                        orientation: 'landscape',
+                        pageSize: 'A4',
+                        title: 'Listado de Horarios' // <-- Título actualizado
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        className: 'btn btn-secondary btn-sm ms-2'
+                    }
+                ]
+            });
+        });
+    </script>
 @stop

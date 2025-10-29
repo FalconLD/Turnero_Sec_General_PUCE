@@ -12,6 +12,8 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StudentRegistrationController;
+use App\Http\Controllers\ShiftController;
+
 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -36,7 +38,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('forms', FormController::class);
     Route::resource('schedules', ScheduleController::class);
     Route::resource('parameters', ParameterController::class);
-   
+    Route::resource('shifts', ShiftController::class);
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -63,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
         return view('auditoria.index');
     })->name('auditoria.index');
 
+    
  
 
         Route::get('/student/terms', [StudentRegistrationController::class, 'showTerms'])->name('student.terms');

@@ -115,6 +115,7 @@
         #usuarios td, #usuarios th {
             border-left: none;
             border-right: none;
+
         }
         
         /* Redondear los botones de exportar */

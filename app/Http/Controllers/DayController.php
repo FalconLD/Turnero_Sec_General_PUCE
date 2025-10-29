@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
+
 class DayController extends Controller
 {
     public function __construct()
@@ -77,6 +78,9 @@ class DayController extends Controller
         }
         \App\Models\Day::insert($insertDays);
 
+        // Borrar turnos anteriores para evitar duplicados
+        DB::table('shifts')->where('schedule_shift', $scheduleId)->delete();
+
         // Generar turnos
         $insertShifts = [];
         $now = now();
@@ -93,7 +97,8 @@ class DayController extends Controller
                 $isInBreak = $breaks->contains(function ($b) use ($shiftStart, $shiftEnd) {
                     $breakStart = \Carbon\Carbon::parse($shiftStart->toDateString() . ' ' . $b->start_break);
                     $breakEnd = \Carbon\Carbon::parse($shiftStart->toDateString() . ' ' . $b->end_break);
-                    return $shiftStart->between($breakStart, $breakEnd) || $shiftEnd->between($breakStart, $breakEnd);
+                    // Correct overlap check: (StartA < EndB) and (EndA > StartB)
+                    return $shiftStart->lt($breakEnd) && $shiftEnd->gt($breakStart);
                 });
 
                 if (!$isInBreak && $shiftEnd->lte($end)) {

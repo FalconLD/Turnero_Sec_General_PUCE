@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 // 1. Importamos tanto la Interfaz como el Trait CORRECTAMENTE
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract; 
 use OwenIt\Auditing\Auditable; // ← CORREGIDO: 'OwenIt' no 'Owenlt'
+use App\Models\Turno;
 
 class Schedule extends Model implements AuditableContract
 {
@@ -14,7 +15,9 @@ class Schedule extends Model implements AuditableContract
     //    ya no hay conflicto de nombres aquí.
     use HasUuids, Auditable;
 
+
     protected $table = 'schedules';
+    
     protected $primaryKey = 'id_hor';
     public $incrementing = false;
     protected $keyType = 'string';
@@ -103,4 +106,7 @@ class Schedule extends Model implements AuditableContract
             'cubiculo_id'
         );
     }
+    
+
+
 }

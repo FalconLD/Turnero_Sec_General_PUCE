@@ -11,7 +11,9 @@ class Shift extends Model implements Auditable
     use HasUuids, \OwenIt\Auditing\Auditable;
 
     protected $table = 'shifts';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'id_shift';
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $appends = ['code'];
 
     public function getCodeAttribute()

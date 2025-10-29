@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StudentRegistrationController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\ShiftUnlockController;
  
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -74,6 +75,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
  
     Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
+
+    
+
+Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
+Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
+Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
+
  
  
 });

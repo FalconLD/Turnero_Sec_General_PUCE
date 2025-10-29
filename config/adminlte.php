@@ -361,7 +361,7 @@ return [
         ],
         [
             'text' => 'Desbloquear usuario',
-            'url' => '#',
+            'url'  => '/shift-unlock', // apunta a la ruta real
             'icon' => 'fa fa-unlock',
         ],
 

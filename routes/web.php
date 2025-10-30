@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StudentRegistrationController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ShiftUnlockController;
+use App\Http\Controllers\ProfileController;
  
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -28,7 +29,12 @@ Route::middleware(['auth'])->group(function () {
     // Ruta para la página de inicio principal después de iniciar sesión.
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
- 
+    // Esta ruta mostrará la página de edición del perfil
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    
+    // Esta ruta recibirá los datos del formulario y los guardará
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
     // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.

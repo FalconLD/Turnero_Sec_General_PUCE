@@ -90,8 +90,19 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                         </div>
+                                        
                                         <input type="password" name="password" id="password" 
-                                               class="form-control @error('password') is-invalid @enderror">
+                                            class="form-control @error('password') is-invalid @enderror"
+                                            autocomplete="new-password"> {{-- Buena práctica --}}
+                                        
+                                        {{-- INICIO DE LA MODIFICACIÓN --}}
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                        {{-- FIN DE LA MODIFICACIÓN --}}
+
                                     </div>
                                     @error('password')
                                         <span class="invalid-feedback d-block" role="alert">
@@ -111,7 +122,19 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                         </div>
-                                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control">
+
+                                        <input type="password" name="password_confirmation" 
+                                            id="password_confirmation" class="form-control"
+                                            autocomplete="new-password"> {{-- Buena práctica --}}
+
+                                        {{-- INICIO DE LA MODIFICACIÓN --}}
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirmation">
+                                                <i class="fas fa-eye" id="togglePasswordConfirmationIcon"></i>
+                                            </button>
+                                        </div>
+                                        {{-- FIN DE LA MODIFICACIÓN --}}
+
                                     </div>
                                 </div>
                             </div>
@@ -130,4 +153,52 @@
             </div> {{-- Fin .card --}}
         </div> {{-- Fin .col-md-6 --}}
     </div> {{-- Fin .row --}}
+@stop
+
+@section('js')
+    <script>
+        $(document).ready(function() {
+
+            // --- Lógica para el campo 'Nueva Contraseña' ---
+            $('#togglePassword').on('click', function() {
+                // Obtener el input de contraseña
+                var passwordInput = $('#password');
+                var passwordIcon = $('#togglePasswordIcon');
+
+                // Comprobar el tipo de input
+                if (passwordInput.attr('type') === 'password') {
+                    // Mostrar contraseña
+                    passwordInput.attr('type', 'text');
+                    // Cambiar icono a 'ojo tachado'
+                    passwordIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    // Ocultar contraseña
+                    passwordInput.attr('type', 'password');
+                    // Cambiar icono a 'ojo'
+                    passwordIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // --- Lógica para el campo 'Confirmar Nueva Contraseña' ---
+            $('#togglePasswordConfirmation').on('click', function() {
+                // Obtener el input de contraseña
+                var passwordInput = $('#password_confirmation');
+                var passwordIcon = $('#togglePasswordConfirmationIcon');
+
+                // Comprobar el tipo de input
+                if (passwordInput.attr('type') === 'password') {
+                    // Mostrar contraseña
+                    passwordInput.attr('type', 'text');
+                    // Cambiar icono a 'ojo tachado'
+                    passwordIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    // Ocultar contraseña
+                    passwordInput.attr('type', 'password');
+                    // Cambiar icono a 'ojo'
+                    passwordIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+        });
+    </script>
 @stop

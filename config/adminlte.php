@@ -331,7 +331,7 @@ return [
         ['header' => 'CONFIGURACIONES'],
         [
             'text' => 'Atención',
-            'url'  => '/shifts/attention', //  usar la ruta directamente
+            'route' => 'attention.index', //  usar la ruta directamente
             'icon' => 'fas fa-fw fa-user',
         ],
         [

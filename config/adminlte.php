@@ -339,7 +339,11 @@ return [
             'url'  => '/shift-unlock', // apunta a la ruta real
             'icon' => 'fa fa-unlock',
         ],
-
+        [
+            'text' => 'Permisos de Usuario',
+            'url'  => '/user-permissions', // apunta a la ruta real
+            'icon' => 'fas fa-user-shield',
+        ],
         [
             'text' => 'Administración',
             'icon' => 'fa fa-list',

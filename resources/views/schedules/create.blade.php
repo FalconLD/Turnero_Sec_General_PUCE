@@ -46,6 +46,19 @@
                         <input type="number" name="attention_minutes" class="form-control" min="1" required value="{{ old('attention_minutes', 1) }}">
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="valid_from">Válido desde</label>
+                        <input 
+                            type="date" 
+                            name="valid_from" 
+                            id="valid_from" 
+                            class="form-control" 
+                            required 
+                            value="{{ old('valid_from', now()->toDateString()) }}">
+                    </div>
+                </div>
+
 
                 {{-- Cubículos --}}
                 <div class="mb-3">

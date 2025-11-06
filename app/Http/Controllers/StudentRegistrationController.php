@@ -8,7 +8,8 @@ use App\Models\Parameter; // Donde está el parámetro TERM
 use App\Models\Shift;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentRegistered;
-
+use App\Models\Schedule;
+use Carbon\Carbon;
 class StudentRegistrationController extends Controller
 {
     // Paso 1: Términos
@@ -33,11 +34,31 @@ class StudentRegistrationController extends Controller
     // Paso 2: Datos personales
     public function showPersonalForm()
     {
-        // Ya no hace falta validar session('accepted_terms')
-        // porque el usuario acepta los términos dentro del mismo formulario.
+        
 
-        $terminos = Parameter::where('clave', 'TERM')->first();
+        $terminos = \App\Models\Parameter::where('clave', 'TERM')->first();
 
+       
+        $schedule = \App\Models\Schedule::orderBy('valid_from', 'desc')->first();
+        $today = Carbon::today();
+
+        $isAvailable = false;
+        $startDate = null;
+
+        if ($schedule) {
+            $startDate = Carbon::parse($schedule->valid_from);
+            $isAvailable = $today->greaterThanOrEqualTo($startDate);
+        }
+
+        
+        if (!$isAvailable) {
+            return view('student.not_available', [
+                'startDate' => $startDate?->format('d/m/Y'),
+                'terminos' => $terminos
+            ]);
+        }
+
+        
         return view('student.personal_data', compact('terminos'));
     }
 

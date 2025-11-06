@@ -88,8 +88,9 @@
                             <input type="email" class="form-control" name="correo_puce" placeholder="ejemplo@correo.com" required>
                         </div>
                         <div class="col-md-6">
-                            <label>Teléfono</label>
-                            <input type="text" class="form-control" name="telefono" required>
+                            <label>Celular</label>
+                            <input type="text" class="form-control" name="telefono" maxlength="10" pattern="\d{10}" 
+                                title="Debe contener exactamente 10 dígitos numéricos" required>
                         </div>
                         <div class="col-md-12">
                             <label>Dirección</label>
@@ -524,6 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nextBtn.disabled = true;
 
         try {
+            console.log('URL:', `/shifts/${fecha}?modalidad=${modalidad}`);
             const res = await fetch(`/shifts/${fecha}?modalidad=${modalidad}`);
             if (!res.ok) throw new Error('No se pudo cargar los turnos');
             const data = await res.json();

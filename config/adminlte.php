@@ -342,18 +342,18 @@ return [
             'can' => 'manage-blog',
         ],
         
-        ['header' => 'Configuracion de Perfil'],
+        /*['header' => 'Configuracion de Perfil'],
         [
             'text' => 'Perfil',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-user',
-        ],
+        ],*/
         ['header' => 'CONFIGURACIONES'],
-        [
+        /*[
             'text' => 'Cambiar contraseña',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-lock',
-        ],
+        ],*/
         [
             'text' => 'Atención',
             'url'  => '/shifts/attention', // ✅ usar la ruta directamente
@@ -400,7 +400,7 @@ return [
                     'route' => 'parameters.index',
                     'icon' => 'fa fa-cogs',
                 ],                
-                [
+                /*[
                     'text' => 'Encuestas',
                     'route' => 'encuesta.index',
                     'icon' => 'fa fa-pencil-alt',
@@ -409,7 +409,7 @@ return [
                     'text' => 'Auditorías',
                     'route' => 'auditoria.index',
                     'icon' => 'fa fa-thumbs-up',
-                ],
+                ],*/
                 
             ],
         ],

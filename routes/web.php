@@ -74,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
  
     Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
- 
+    
     Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
 
     

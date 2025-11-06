@@ -38,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
 
+    //Ruta para el registro de la hora y fecha de estudiantes. 
+    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
     // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.
@@ -82,7 +85,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
     
     Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
-    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
     
     Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
 

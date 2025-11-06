@@ -53,6 +53,19 @@
                         <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', 0) }}">
                     </div>                    
                 </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="valid_from">Válido desde</label>
+                        <input 
+                            type="date" 
+                            name="valid_from" 
+                            id="valid_from" 
+                            class="form-control" 
+                            required 
+                            value="{{ old('valid_from', now()->toDateString()) }}">
+                    </div>
+                </div>
+
 
                 {{-- Cubículos --}}
                 <div class="mb-3">

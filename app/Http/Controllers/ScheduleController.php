@@ -67,6 +67,7 @@ class ScheduleController extends Controller
             $request->validate([
                 'start_time' => 'required|date_format:H:i',
                 'end_time' => 'required|date_format:H:i|after:start_time',
+                'valid_from' => 'required|date',
                 'break_minutes' => 'required|integer|min:0',
                 'attention_minutes' => 'required|integer|min:1',
                 'cubicles' => 'required|array|min:1', // Cubículos asociados

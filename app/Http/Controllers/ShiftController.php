@@ -20,11 +20,22 @@ class ShiftController extends Controller
     {
         $idNumber = $request['identification'];
         $email = $request['email'];
+        $schedule = \App\Models\Schedule::orderBy('valid_from', 'desc')->first();
+        if ($schedule) {
+        $today = Carbon::today();
+        $validFrom = Carbon::parse($schedule->valid_from);
 
-
-        // Buscamos usando los nombres de columna correctos
-        $person = StudentRegistration::where('cedula', $idNumber) 
-            ->orWhere('correo_puce', $email) 
+        // 🔹 Verificar si hoy es antes de la fecha de inicio válida
+        if ($today->lt($validFrom)) {
+            return response()->json([
+                'error' => true,
+                'message' => "Aún no es posible agendar turnos. 
+                              Los turnos estarán disponibles a partir del " . $validFrom->format('d/m/Y') . "."
+            ], 403);
+        }
+    }
+        $person = StudentRegistration::where('dni', $idNumber)
+            ->orWhere('email', $email)
             ->first();
 
         if (!$person) {

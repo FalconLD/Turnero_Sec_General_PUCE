@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StudentRegistrationController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ShiftUnlockController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AttentionController;
  
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
@@ -28,7 +30,17 @@ Route::middleware(['auth'])->group(function () {
     // Ruta para la página de inicio principal después de iniciar sesión.
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
- 
+    // Esta ruta mostrará la página de edición del perfil
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    
+    // Esta ruta recibirá los datos del formulario y los guardará
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
+
+    //Ruta para el registro de la hora y fecha de estudiantes. 
+    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
     // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.
@@ -68,20 +80,22 @@ Route::middleware(['auth'])->group(function () {
  
   /* Antiguo */
       
-        Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
-        Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
-        Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
- 
+    Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
+    Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+    Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+    
     Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
-    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
     
     Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
 
-    
+        
 
-Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
-Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
-Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
+    Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
+    Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
+    Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
 
  
  

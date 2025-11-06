@@ -13,6 +13,7 @@ use App\Models\StudentRegistration;
 use App\Notifications\FeedbackRequestNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShiftController extends Controller
 {
@@ -170,6 +171,7 @@ class ShiftController extends Controller
         ]);
 
     }
+/*    
 public function getShifts(Request $request, $fecha)
 {
     $modalidad = $request->query('modalidad'); // puede ser 'presencial' o 'virtual'
@@ -186,7 +188,54 @@ public function getShifts(Request $request, $fecha)
     $turnos = $query->orderBy('shifts.start_shift')->get();
 
     return response()->json($turnos);
+}*/
+
+// ShiftController.php
+
+public function getShifts(Request $request, $fecha)
+{
+    $modalidad = $request->query('modalidad'); // 'presencial' o 'virtual'
+
+    try {
+        // ... (la lógica de la fecha está bien) ...
+        try {
+            $fechaFormateada = Carbon::createFromFormat('Y-m-d', $fecha)->format('Y-m-d');
+        } catch (\Exception $e) {
+            $fechaFormateada = Carbon::createFromFormat('d/m/Y', $fecha)->format('Y-m-d');
+        }
+
+        $query = DB::table('shifts')
+            ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
+            ->whereDate('shifts.date_shift', $fechaFormateada)
+            
+            // ===== LA CORRECCIÓN ESTÁ AQUÍ =====
+            ->where('shifts.status_shift', 1) // Debe ser el entero 1
+            // ===================================
+            
+            ->select(
+                'shifts.id_shift', 
+                'shifts.start_shift', 
+                'shifts.end_shift', 
+                'cubiculos.nombre as cubiculo', 
+                'cubiculos.tipo_atencion'
+            );
+
+        if ($modalidad) {
+            $query->where('cubiculos.tipo_atencion', $modalidad);
+        }
+
+        $turnos = $query->orderBy('shifts.start_shift')->get();
+
+        return response()->json($turnos);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error interno al procesar la solicitud.',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 }
+
 
 public function attention(Request $request)
 {

@@ -1,7 +1,9 @@
 @extends('adminlte::page')
 
 @section('title', 'Registro de Estudiante')
+
 @section('layout_topnav', true)
+@section('layout_sidebar', false)
 
 @section('content_header')
     <h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
@@ -68,16 +70,21 @@
                 </div>
 
                 {{-- Paso 2: Datos personales --}}
+                @php
+    $student = session('student_data');
+@endphp
                 <div class="form-step" style="display:none;">
                     <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label>Nombre completo</label>
-                            <input type="text" class="form-control" name="names" placeholder="Ingrese su nombre" required>
+                            <input type="text" class="form-control" name="names"
+                            value="{{ $student['nombre'] ?? '' }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label>Cédula</label>
-                            <input type="text" class="form-control" name="cedula" required>
+                            <input type="text" class="form-control" name="cedula"
+                            value="{{ $student['cedula'] ?? '' }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label>Edad</label>
@@ -85,7 +92,8 @@
                         </div>
                         <div class="col-md-6">
                             <label>Correo electrónico</label>
-                            <input type="email" class="form-control" name="correo_puce" placeholder="ejemplo@correo.com" required>
+                            <input type="email" class="form-control" name="correo_puce"
+                   value="{{ $student['correo_puce'] ?? '' }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label>Teléfono</label>
@@ -108,17 +116,13 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label>Facultad</label>
-                            <select class="form-select" name="facultad" required>
-                                <option value="" selected disabled>Seleccione...</option>
-                                <option>Facultad de Ingeniería</option>
-                                <option>Facultad de Ciencias Humanas</option>
-                                <option>Facultad de Medicina</option>
-                                <option>Facultad de Ciencias Administrativas</option>
-                            </select>
+                            <input type="text" class="form-control" name="facultad"
+                   value="{{ $student['facultad'] ?? '' }}" readonly>
                         </div>
                         <div class="col-md-12">
                             <label>Carrera</label>
-                            <input type="text" class="form-control" name="carrera" required>
+                            <input type="text" class="form-control" name="carrera"
+                   value="{{ $student['carrera'] ?? '' }}" readonly>
                         </div>
                         <div class="col-md-12">
                             <label>Nivel</label>

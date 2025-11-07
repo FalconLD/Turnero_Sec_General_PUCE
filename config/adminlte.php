@@ -379,7 +379,7 @@ return [
                     'route' => 'parameters.index',
                     'icon' => 'fa fa-cogs',
                 ],                
-                [
+                /*[
                     'text' => 'Encuestas',
                     'route' => 'encuesta.index',
                     'icon' => 'fa fa-pencil-alt',
@@ -388,7 +388,7 @@ return [
                     'text' => 'Auditorías',
                     'route' => 'auditoria.index',
                     'icon' => 'fa fa-thumbs-up',
-                ],
+                ],*/
                 
             ],
         ],

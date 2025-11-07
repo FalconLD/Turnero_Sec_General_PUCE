@@ -71,7 +71,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                             </div>
-                                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Mínimo 8 caracteres">
+                                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Mínimo 6 caracteres">
                                         </div>
                                         @error('password')
                                             <span class="text-danger">{{ $message }}</span>

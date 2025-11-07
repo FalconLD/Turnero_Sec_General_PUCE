@@ -97,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
     Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
 
- 
+    Route::post('/validar-datos', [App\Http\Controllers\StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
+
  
 });

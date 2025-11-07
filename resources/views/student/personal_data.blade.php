@@ -404,6 +404,7 @@
 
 
 {{-- === Script de funcionalidad === --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const steps = document.querySelectorAll('.form-step');
@@ -414,7 +415,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const stepIndicators = document.querySelectorAll('.step-item');
     let currentStep = 0;
 
-    // === Control de pasos ===
     function updateStepIndicator() {
         stepIndicators.forEach((s, i) => s.classList.toggle('active', i === currentStep));
     }
@@ -430,7 +430,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
-    nextBtn.onclick = () => { if (!validateCurrentStep()) return; currentStep++; showStep(currentStep); };
+
+    // ✅ MODIFICADO: validación AJAX en el paso 2
+    nextBtn.onclick = async () => {
+        if (!validateCurrentStep()) return;
+
+        // Si estamos en el paso 2 (índice 1)
+        if (currentStep === 1) {
+            const cedula = document.querySelector('[name="cedula"]').value.trim();
+            const correo = document.querySelector('[name="correo_puce"]').value.trim();
+
+            try {
+                const res = await fetch("{{ route('validar.datos') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ cedula: cedula, correo_puce: correo })
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.message); // ⚠️ Mensaje si ya existe
+                    return; // No avanza
+                }
+            } catch (error) {
+                console.error("Error al validar los datos:", error);
+                alert("Ocurrió un error al validar los datos. Intenta nuevamente.");
+                return;
+            }
+        }
+
+        // ✅ Si pasa la validación, continúa al siguiente paso
+        currentStep++;
+        showStep(currentStep);
+    };
+
     prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
 
     function validateCurrentStep() {
@@ -458,15 +495,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!nivelSeleccionado) return;
 
         if (nivelSeleccionado === 'posgrado') {
-            // Ocultar beca y mostrar valor fijo
             if (becaPregunta) becaPregunta.style.display = "none";
             mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
         } 
         else if (nivelSeleccionado === 'grado') {
-            // Mostrar beca
             if (becaPregunta) becaPregunta.style.display = "block";
 
-            // Calcular valor según beca
             if (becaSeleccionada === 'si') {
                 mensajePago.textContent = "Pago de $0.50 (Atención Psicológica Única - APSU con beca)";
             } else if (becaSeleccionada === 'no') {
@@ -484,9 +518,6 @@ document.addEventListener('DOMContentLoaded', function() {
     nivelRadios.forEach(r => r.addEventListener('change', actualizarPago));
     becaRadios.forEach(r => r.addEventListener('change', actualizarPago));
 
-    // === FIN LÓGICA ===
-
-
     // === PAGO Y COMPROBANTE ===
     const tipoPagoSelect = document.getElementById('tipo-pago');
     const comprobanteContainer = document.getElementById('comprobante-container');
@@ -497,7 +528,6 @@ document.addEventListener('DOMContentLoaded', function() {
         comprobanteContainer.style.display = (val === 'una_sola_vez' || val === 'transferencia') ? 'block' : 'none';
         pagoEfectivoNote.style.display = val === 'efectivo' ? 'block' : 'none';
     });
-
 
     // === AGENDAMIENTO ===
     const fechaInput = document.getElementById('fechaSeleccionada');
@@ -525,7 +555,6 @@ document.addEventListener('DOMContentLoaded', function() {
         nextBtn.disabled = true;
 
         try {
-            console.log('URL:', `/shifts/${fecha}?modalidad=${modalidad}`);
             const res = await fetch(`/shifts/${fecha}?modalidad=${modalidad}`);
             if (!res.ok) throw new Error('No se pudo cargar los turnos');
             const data = await res.json();
@@ -569,7 +598,6 @@ document.addEventListener('DOMContentLoaded', function() {
     fechaInput.addEventListener('change', cargarTurnos);
     modalidadSelect.addEventListener('change', cargarTurnos);
 
-
     // === CONFIRMACIÓN FINAL ===
     function populateConfirmation() {
         document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
@@ -580,11 +608,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
     }
 
-    // Inicialización
     showStep(currentStep);
 });
 </script>
-
 
 
 @stop

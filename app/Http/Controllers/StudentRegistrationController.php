@@ -174,4 +174,28 @@ class StudentRegistrationController extends Controller
     return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');
 }
 
+public function validarDatos(Request $request)
+{
+    $request->validate([
+        'cedula' => 'required',
+        'correo_puce' => 'required|email',
+    ]);
+
+    $existe = \App\Models\StudentRegistration::where('cedula', $request->cedula)
+        ->orWhere('correo_puce', $request->correo_puce)
+        ->exists();
+
+    if ($existe) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Correo o cédula ya existentes'
+        ]);
+    }
+
+    return response()->json([
+        'success' => true
+    ]);
+}
+
+
 }

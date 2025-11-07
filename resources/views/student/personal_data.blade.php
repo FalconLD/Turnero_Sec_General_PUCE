@@ -245,6 +245,11 @@
 
                 {{-- Paso 6: Confirmación --}}
                 <div class="form-step" style="display:none;">
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                     <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
                     <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
                     <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>

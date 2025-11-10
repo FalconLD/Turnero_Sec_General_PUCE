@@ -38,8 +38,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
 
+    // Obtener facultades y programas para el formulario de registro de estudiantes
+    Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
+    Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
+
     //Ruta para el registro de la hora y fecha de estudiantes. 
     Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
+
 
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.

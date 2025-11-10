@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentRegistered;
 use App\Models\Schedule;
 use Carbon\Carbon;
+use App\Models\Faculty; // <-- AÑADIR ESTE
+use Illuminate\Validation\Rule; // <-- AÑADIR ESTE
+
 class StudentRegistrationController extends Controller
 {
     // Paso 1: Términos
@@ -110,7 +113,11 @@ class StudentRegistrationController extends Controller
     // Guardar todo y asignar turno
     public function finish(Request $request)
     {
+        // =======================================================
+        // 1. REGLAS DE VALIDACIÓN 
+        // =======================================================
         $request->validate([
+            // Datos Personales
             'names' => 'required|string|max:255',
             'cedula' => 'required|string|max:36',
             'edad' => 'required|integer|min:0',
@@ -118,37 +125,46 @@ class StudentRegistrationController extends Controller
             'telefono' => 'required|string|max:20',
             'direccion' => 'required|string|max:255',
             'correo_puce' => 'required|email',
-            'facultad' => 'required|string',
-            'carrera' => 'required|string',
-            'nivel' => 'required|string',
-            'motivo' => 'required|string',
-            'nivel_instruccion' => 'required|string',
-            'beca_san_ignacio' => 'required|string',
-            'forma_pago' => 'required|string',
+            
+            // Turno
             'turno_id' => 'required|exists:shifts,id_shift',
+            
+            // --- VALIDACIÓN ACADÉMICA 
+            'nivel_instruccion' => 'required|string|in:grado,tec,posgrado,especializacion',
+            'facultad' => 'required|string', 
+            'carrera' => 'required|string', 
+            'nivel' => [ // Nivel de semestre (Primero, Segundo...)
+                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                'nullable', // Permite que sea nulo si es posgrado
+                'string',
+            ],
+            'beca_san_ignacio' => [
+                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                'nullable', // Permite que sea nulo si es posgrado
+                'string',
+            ],
+            // --- FIN VALIDACIÓN ACADÉMICA ---
+
+            // Pago y Motivo
+            'motivo' => 'required|string',
+            'forma_pago' => 'required|string',
         ]);
 
+        $cedula = trim($request->cedula);
+        $correo = trim($request->correo_puce);
         // ===== Validación de identificadores unicos y controlar errores =====
-        // 1. Validamos la CÉDULA primero, porque es el identificador principal.
-        if (StudentRegistration::where('cedula', $request->cedula)->exists()) {
-            
-            // ¡Error! La cédula ya existe. Detenemos todo y avisamos.
+        if (StudentRegistration::where('cedula', $cedula)->exists()) { // Usar $cedula (limpia)
             return redirect()->back()
-                            ->with('error', 'La cédula ' . $request->cedula . ' ya se encuentra registrada.')
-                            ->withInput(); // Devuelve los datos para no borrar el formulario
-        }
-
-        // 2. Si la cédula pasó, AHORA validamos el CORREO.
-        if (StudentRegistration::where('correo_puce', $request->correo_puce)->exists()) {
-            
-            // ¡Error! El correo ya existe. Detenemos todo y avisamos.
-            return redirect()->back()
-                            ->with('error', 'El correo electrónico ' . $request->correo_puce . ' ya se encuentra registrado.')
-                            ->withInput(); // Devuelve los datos
+                            ->with('error', 'La cédula ' . $cedula . ' ya se encuentra registrada.')
+                            ->withInput(); 
         }
         
+        if (StudentRegistration::where('correo_puce', $correo)->exists()) { // Usar $correo (limpio)
+            return redirect()->back()
+                            ->with('error', 'El correo electrónico ' . $correo . ' ya se encuentra registrado.')
+                            ->withInput();
+        }
         // ===== FIN DE LA VALIDACIÓN =====
-
 
         $comprobantePath = null;
         if ($request->hasFile('comprobante')) {
@@ -157,26 +173,33 @@ class StudentRegistrationController extends Controller
         }
 
         
-        $valor = ($request->nivel_instruccion === 'grado')
-                    ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
-                    : 7.50;
+       // 2.LÓGICA DE VALOR A PAGAR
+        $isGradoOrTec = in_array($request->nivel_instruccion, ['grado', 'tec']); // <--- CAMBIO AQUÍ
+        
+        $valor = ($isGradoOrTec)
+                    ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50) // Lógica Grado/Tec
+                    : 7.50; // Lógica Posgrado/Especialización
 
-        // Guardar registro del estudiante
-        // Ahora, este 'create' solo se ejecutará si el estudiante es nuevo.
+        // =======================================================
+        // 2. CORRECCIÓN DEL CREATE (Añadiendo 'motivo')
+        // =======================================================
         $student = StudentRegistration::create([
             'names' => $request->names,
-            'cedula' => $request->cedula,
+            'cedula' => $cedula,
             'edad' => $request->edad,
             'fecha_nacimiento' => $request->fecha_nacimiento,
             'telefono' => $request->telefono,
             'direccion' => $request->direccion,
-            'correo_puce' => $request->correo_puce,
+            'correo_puce' => $correo,
             'facultad' => $request->facultad,
             'carrera' => $request->carrera,
-            'nivel' => $request->nivel,
-            'motivo' => $request->motivo,
             'nivel_instruccion' => $request->nivel_instruccion,
-            'beca_san_ignacio' => $request->beca_san_ignacio,
+            // SI es 'grado', guarda el nivel (ej: 'Primero'). SI NO, guarda 'N/A'.
+            'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
+            // SI es 'grado', guarda la respuesta (ej: 'si' o 'no'). SI NO, guarda 'no' por defecto.
+            'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
+            
+            'motivo' => $request->motivo, 
             'forma_pago' => $request->forma_pago,
             'valor_pagar' => $valor,
             'acepta_terminos' => true,
@@ -186,7 +209,7 @@ class StudentRegistrationController extends Controller
         
         $turno = Shift::find($request->turno_id);
         $turno->person_shift = $student->cedula;
-        $turno->status_shift = 0;
+        $turno->status_shift = 0; // 0 = Ocupado
         $turno->save();
 
 
@@ -205,8 +228,12 @@ class StudentRegistrationController extends Controller
             'correo_puce' => 'required|email',
         ]);
 
-        $existe = \App\Models\StudentRegistration::where('cedula', $request->cedula)
-            ->orWhere('correo_puce', $request->correo_puce)
+        // --- CORRECCIÓN: Usar trim() ---
+        $cedula = trim($request->cedula);
+        $correo = trim($request->correo_puce);
+
+        $existe = \App\Models\StudentRegistration::where('cedula', $cedula)
+            ->orWhere('correo_puce', $correo)
             ->exists();
 
         if ($existe) {
@@ -219,6 +246,80 @@ class StudentRegistrationController extends Controller
         return response()->json([
             'success' => true
         ]);
+    }
+
+
+
+
+    /**
+     * Devuelve facultades filtradas por nivel de instrucción (Grado/Posgrado)
+     */
+    public function getFaculties(Request $request)
+    {
+        $request->validate(['nivel_instruccion' => 'required|string']);
+        $nivelForm = $request->nivel_instruccion; // 'grado', 'tec', 'posgrado', 'especializacion'
+
+        $query = Faculty::select('facultad')->distinct();
+
+        // Mapeo de los valores del formulario a los valores de la BD
+        switch ($nivelForm) {
+            case 'grado':
+                $query->where('nivel', 'Grado');
+                break;
+            case 'tec':
+                $query->where('nivel', 'Tec');
+                break;
+            case 'posgrado':
+                // Asumiendo que 'posgrado' en el form se refiere a 'Maestría' en tu BD
+                $query->where('nivel', 'Maestría'); 
+                break;
+            case 'especializacion':
+                $query->where('nivel', 'Especialización');
+                break;
+            default:
+                $query->whereRaw('1 = 0'); // No devuelve nada si el valor es inválido
+        }
+
+        $faculties = $query->orderBy('facultad')->get();
+        return response()->json($faculties);
+    }
+
+    /**
+     * Devuelve programas (carreras) filtrados por facultad y nivel.
+     */
+    public function getPrograms(Request $request)
+    {
+        $request->validate([
+            'nivel_instruccion' => 'required|string',
+            'facultad' => 'required|string',
+        ]);
+
+        $nivelForm = $request->nivel_instruccion;
+        $facultad = $request->facultad;
+
+        $query = Faculty::select('programa_desc')
+                        ->where('facultad', $facultad);
+        
+        // Mapeo de los valores del formulario a los valores de la BD
+        switch ($nivelForm) {
+            case 'grado':
+                $query->where('nivel', 'Grado');
+                break;
+            case 'tec':
+                $query->where('nivel', 'Tec');
+                break;
+            case 'posgrado':
+                $query->where('nivel', 'Maestría'); 
+                break;
+            case 'especializacion':
+                $query->where('nivel', 'Especialización');
+                break;
+            default:
+                $query->whereRaw('1 = 0'); // No devuelve nada
+        }
+
+        $programs = $query->orderBy('programa_desc')->get();
+        return response()->json($programs);
     }
 
 }

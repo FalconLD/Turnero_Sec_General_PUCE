@@ -13,13 +13,16 @@ use App\Http\Controllers\DayController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShiftController;
-
-// Controladores de estudiantes y token
-use App\Http\Controllers\StudentRegistrationController;
-use App\Http\Controllers\Auth\TokenLoginController;
-
-
-// --- AUTENTICACIÓN NORMAL (usuarios administrativos, etc.) ---
+use App\Http\Controllers\ShiftUnlockController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AttentionController;
+ use App\Http\Controllers\StudentRegistrationController;
+ use App\Http\Controllers\Auth\TokenLoginController;
+ 
+ 
+// --- Rutas de Autenticación ---
+// Esta única línea registra todas las rutas necesarias para la autenticación:
+// login, logout, registro, olvido de contraseña, etc.
 Auth::routes();
 
 
@@ -63,32 +66,79 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard principal
     Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::get('/home', [HomeController::class, 'index']);
+    Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
+    // Esta ruta mostrará la página de edición del perfil
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    
+    // Esta ruta recibirá los datos del formulario y los guardará
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 
-    // Recursos principales
+    Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
+
+    // Obtener facultades y programas para el formulario de registro de estudiantes
+    Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
+    Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
+
+    //Ruta para el registro de la hora y fecha de estudiantes. 
+    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
+
+
+    // --- Rutas de Recursos (CRUD) ---
+    // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
+    // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.
     Route::resource('asignacion', AsignacionController::class);
     Route::resource('cubiculos', CubiculoController::class);
     Route::resource('users', UserController::class);
     Route::resource('forms', FormController::class);
     Route::resource('schedules', ScheduleController::class);
     Route::resource('parameters', ParameterController::class);
+    Route::resource('shifts', ShiftController::class);
 
-    // Días del horario
+
+
+Route::middleware(['auth'])->group(function () {
     Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
     Route::get('/days/{schedule}/edit', [DayController::class, 'edit'])->name('days.edit');
     Route::post('/days', [DayController::class, 'store'])->name('days.store');
-
-    // Flujo de creación de horarios
-    Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])
-        ->name('schedules.selectDays');
-    Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])
-        ->name('schedules.storeDays');
-
-    // Vistas estáticas
-    Route::get('/encuesta', fn() => view('encuesta.index'))->name('encuesta.index');
-    Route::get('/auditorias', fn() => view('auditoria.index'))->name('auditoria.index');
-
-    // Turnos
-    Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
+});
+ 
+ 
+    // --- Rutas Específicas para Horarios (Schedules) ---
+    // Estas son rutas adicionales para el controlador de horarios que no forman parte del CRUD estándar.
+    // Se utilizan para el flujo de creación de horarios en varios pasos.
+    Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
+    Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
+ 
+    // --- Rutas Estáticas (solo muestran una vista) ---
+    // Aunque es mejor usar controladores, si solo necesitas mostrar una vista, esta es una forma limpia.
+    // Se recomienda crear controladores para estas secciones si su lógica crece en el futuro.
+    Route::get('/encuesta', function () {
+        return view('encuesta.index');
+    })->name('encuesta.index');
+ 
+    Route::get('/auditorias', function () {
+        return view('auditoria.index');
+    })->name('auditoria.index');
+ 
+  /* Antiguo */
+      
+   
     
+    Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
+    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+
+    
+
+
+        
+
+    Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
+    Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
+    Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
+
+    Route::post('/validar-datos', [App\Http\Controllers\StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
+
+ 
 });

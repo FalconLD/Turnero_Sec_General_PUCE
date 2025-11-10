@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\UpdateView;
 use App\Helpers\Responses;
 use App\Http\Requests\NewShift;
+use App\Models\Schedule;
 use App\Models\Person;
 use App\Models\SurveySetting;
 use App\Models\Shift;
@@ -12,6 +13,7 @@ use App\Models\StudentRegistration;
 use App\Notifications\FeedbackRequestNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShiftController extends Controller
 {
@@ -39,20 +41,31 @@ class ShiftController extends Controller
 
         if (!$person) {
             $person = new StudentRegistration();
-            $person->dni = $idNumber;
-            $person->email = $email;
-            $person->phone = $request['phone'];
+            
+            // --- ARREGLO AQUÍ ---
+            // Guardamos usando los nombres de columna correctos
+            $person->cedula = $idNumber;
+            $person->correo_puce = $email;
+            
+            // Asumo que 'names' también viene en el request, deberías añadirlo
+            // $person->names = $request['names']; 
+            
+            $person->phone = $request['phone']; // Verifica que esta columna exista
             $person->is_puce = $request['isPuce'];
             $person->save();
         }
 
         $shift = new Shift();
-        $shift->cubicle_id = $request['cubicle'];
-        $shift->date = $request['date'];
-        $shift->start_time = $request['start_time'];
-        $shift->end_time = $request['end_time'];
-        $shift->person_id = $person->id;
-        $shift->status = true;
+        // Verifica que estas columnas de 'shifts' sean correctas
+        $shift->cubicle_shift = $request['cubicle']; // Asumiendo 'cubicle_shift'
+        $shift->date_shift = $request['date']; // Asumiendo 'date_shift'
+        $shift->start_shift = $request['start_time']; // Asumiendo 'start_shift'
+        $shift->end_shift = $request['end_time']; // Asumiendo 'end_shift'
+        
+        // Esto debe coincidir con el JOIN del método index()
+        $shift->person_shift = $person->cedula; 
+        
+        $shift->status_shift = true; // Asumiendo 'status_shift'
         $shift->save();
 
         return ['data' => $shift, 'message' => 'New shift created successfully'];
@@ -61,14 +74,18 @@ class ShiftController extends Controller
     public function destroy($id)
     {
         try {
-            $shift = Shift::findOrFail($id);
-            $shift->status = false;
-            $shift->deleted_at = now()->toDateTimeString();
-            $shift->update();
+            // Buscamos por 'id_shift' ya que es el 'id' que pasas desde el index
+            $shift = Shift::where('id_shift', $id)->firstOrFail();
 
-            return response()->json(['message' => 'Shift deleted successfully']);
+            // Eliminamos el turno de la base de datos
+            $shift->delete();
+
+            // Redirigimos "atrás" para mantener los filtros de la URL.
+            return redirect()->back()->with('success', 'Turno eliminado correctamente.');
+
         } catch (\Exception $e) {
-           // return Responses::errorResponse('Error deleting shift', $e->getMessage());
+            // Redirigimos "atrás" también en caso de error.
+            return redirect()->back()->with('error', 'Error al eliminar el turno.');
         }
     }
 
@@ -89,84 +106,72 @@ class ShiftController extends Controller
 
     public function update(Request $request, $id)
     {
-      /*  try {
-            $shift = Shift::findOrFail($request->shift);
-
-            if ($request->status == 3 && $shift->status == 1) {
-                $surveyHash = md5($shift->id . $shift->person_id);
-                $surveySetting = SurveySetting::first();
-
-                if ($surveySetting && $surveySetting->survey_enabled) {
-                    $surveyUrl = $surveySetting->survey_type === 'system_survey'
-                        ? env('APP_URL') . "/survey/" . $surveyHash
-                        : $surveySetting->survey_link;
-
-                    $shift->person->notify(new FeedbackRequestNotification($shift, $surveyUrl));
-                }
-            }
-
-            $shift->status = $request->status;
-            $shift->update();
-
-            event(new UpdateView($shift));
-
-            return response()->json(['message' => 'Shift updated successfully']);
-        } catch (\Exception $e) {
-            return Responses::errorResponse('Error updating shift', $e->getMessage());
-        }*/
+      
     }
 
     public function index(Request $request)
     {
-        $userId = auth()->user()->id;
-        $date = $request->date ? Carbon::parse($request->date) : now();
-
-        $dateUTC = $date->copy()->setTimezone('UTC');
-        $time = $dateUTC->toTimeString();
-        $date = $dateUTC->toDateString();
-
-        $assignedShifts = Shift::join("cubicles", 'cubicle_id', '=', 'id')
-            ->leftJoin("people", 'person_id', '=', 'id')
-            ->where("user_id", $userId)
-            ->where("date", $date)
-            ->where("status", 1)
-            ->whereNotNull("person_id")
-            ->whereTime("end_time", ">=", $time)
+              
+        // 1. Iniciar la consulta base con los joins
+        $query = Shift::join("cubiculos", "cubiculos.id", "=", "shifts.cubicle_shift")
+            ->leftJoin("student_registrations", "student_registrations.cedula", "=", "shifts.person_shift")          
             ->select(
-                "shifts.id",
-                "start_time",
-                "end_time",
-                "cubicles.name",
-                "people.dni",
-                "people.name",
-                "people.email",
-                "people.phone",
-                "status"
-            )
-            ->orderBy("start_time")
-            ->get();
+                "shifts.id_shift as id",
+                "shifts.date_shift",
+                "shifts.start_shift as start_time",
+                "shifts.end_shift as end_time",
+                "cubiculos.nombre as cubicle_name",
+                "student_registrations.names as student_name",
+                "student_registrations.cedula as student_dni",  
+                "student_registrations.correo_puce as student_email",
+                "shifts.status_shift as status"
+            );
 
-        $modifiedShifts = Shift::join("cubicles", 'cubicle_id', '=', 'id')
-            ->leftJoin("people", 'person_id', '=', 'id')
-            ->where("user_id", $userId)
-            ->where("date", $date)
-            ->where("status", '!=', 1)
-            ->select(
-                "shifts.id",
-                "start_time",
-                "end_time",
-                "cubicles.name",
-                "people.dni",
-                "people.name",
-                "people.email",
-                "people.phone",
-                "status"
-            )
-            ->orderBy("start_time", "desc")
-            ->get();
+        // --- INICIO DE FILTROS ---
 
-        return ['assigned' => $assignedShifts, 'modified' => $modifiedShifts];
+        // 2. Filtrar por Cubículo(s)
+        if ($request->has('cubiculo_id')) {
+            // Si se pasa UN solo cubículo
+            $query->where('cubiculos.id', $request->input('cubiculo_id'));
+
+        } elseif ($request->has('cubiculo_ids')) {
+            // Si se pasa una LISTA de cubículos (para "Todos los cubículos")
+            $query->whereIn('cubiculos.id', $request->input('cubiculo_ids'));
+        }
+
+        // 3. Filtrar por las fechas del Horario
+        if ($request->has('horario_id')) {
+            
+            // Buscamos el horario usando el 'horario_id' de la URL
+            $schedule = Schedule::with('days')->find($request->input('horario_id'));
+
+            if ($schedule) {
+                // Si encontramos el horario, extraemos sus días
+                // Esto funciona gracias a la relación 'days' que ya usas en tu vista
+                $scheduleDates = $schedule->days->pluck('date_day')->map(function ($date) {
+                    // Nos aseguramos que la fecha esté en formato Y-m-d para la BD
+                    return Carbon::parse($date)->format('Y-m-d');
+                });
+
+                // Aplicamos el filtro de fechas a la consulta
+                $query->whereIn('shifts.date_shift', $scheduleDates);
+            }
+        }
+        
+        // --- FIN DE FILTROS ---
+
+        // 4. Aplicar ordenamiento y obtener los resultados
+        $shifts = $query->orderBy("shifts.date_shift", "asc")
+                       ->orderBy("shifts.start_shift", "asc")
+                       ->get();
+
+        // 5. Devolver la vista con los turnos filtrados
+        return view('shifts.index', [
+            'shifts' => $shifts
+        ]);
+
     }
+/*    
 public function getShifts(Request $request, $fecha)
 {
     $modalidad = $request->query('modalidad'); // puede ser 'presencial' o 'virtual'
@@ -183,7 +188,54 @@ public function getShifts(Request $request, $fecha)
     $turnos = $query->orderBy('shifts.start_shift')->get();
 
     return response()->json($turnos);
+}*/
+
+// ShiftController.php
+
+public function getShifts(Request $request, $fecha)
+{
+    $modalidad = $request->query('modalidad'); // 'presencial' o 'virtual'
+
+    try {
+        // ... (la lógica de la fecha está bien) ...
+        try {
+            $fechaFormateada = Carbon::createFromFormat('Y-m-d', $fecha)->format('Y-m-d');
+        } catch (\Exception $e) {
+            $fechaFormateada = Carbon::createFromFormat('d/m/Y', $fecha)->format('Y-m-d');
+        }
+
+        $query = DB::table('shifts')
+            ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
+            ->whereDate('shifts.date_shift', $fechaFormateada)
+            
+            // ===== LA CORRECCIÓN ESTÁ AQUÍ =====
+            ->where('shifts.status_shift', 1) // Debe ser el entero 1
+            // ===================================
+            
+            ->select(
+                'shifts.id_shift', 
+                'shifts.start_shift', 
+                'shifts.end_shift', 
+                'cubiculos.nombre as cubiculo', 
+                'cubiculos.tipo_atencion'
+            );
+
+        if ($modalidad) {
+            $query->where('cubiculos.tipo_atencion', $modalidad);
+        }
+
+        $turnos = $query->orderBy('shifts.start_shift')->get();
+
+        return response()->json($turnos);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error interno al procesar la solicitud.',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 }
+
 
 public function attention(Request $request)
 {

@@ -17,21 +17,72 @@
 
                             {{-- Fila para Nombre y Tipo de Atención --}}
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="nombre">Nombre del Cubículo <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-person-booth"></i></span>
+                                {{-- Columna para el GRUPO "Nombre del Cubículo" --}}
+                                    <div class="col-md-6">
+                                        <div class="cubiculo-name-container">
+                                            {{-- Título del grupo (Centrado) --}}
+                                            <h6 class="font-weight-bold text-center" style="margin-bottom: 0.9rem;">Nombre del Cubículo</h6>
+                                            {{-- Fila interna para los dos campos (esta ya la tienes) --}}
+                                            <div class="row">
+                                                
+                                                {{-- Columna para el Prefijo --}}
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+
+                                                        {{-- Mantenemos su label original para claridad --}}
+                                                        <label for="prefijo">Prefijo <span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                            </div>
+                                                            <select name="prefijo" id="prefijo" class="form-control @error('prefijo') is-invalid @enderror" required>
+                                                                <option value="" disabled {{ old('prefijo') ? '' : 'selected' }}>-- P --</option>
+                                                                <option value="C -" {{ old('prefijo') == 'C -' ? 'selected' : '' }}>C -</option>
+                                                                <option value="P1 -" {{ old('prefijo') == 'P1 -' ? 'selected' : '' }}>P1 -</option>
+                                                                <option value="P -" {{ old('prefijo') == 'P -' ? 'selected' : '' }}>P -</Hoption>
+                                                                <option value="SALA-1 -" {{ old('prefijo') == 'SALA-1 -' ? 'selected' : '' }}>SALA-1 -</option>
+                                                                <option value="SALA -" {{ old('prefijo') == 'SALA -' ? 'selected' : '' }}>SALA -</option>
+                                                            </select>
+                                                        </div>
+                                                        @error('prefijo')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+
+                                                {{-- Columna para el Número --}}
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        {{-- Mantenemos su label original para claridad --}}
+                                                        <label for="numero">Número <span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                                            </div>
+                                                            <input type="text" 
+                                                                name="numero" 
+                                                                id="numero" 
+                                                                class="form-control @error('numero') is-invalid @enderror" 
+                                                                value="{{ old('numero') }}" 
+                                                                placeholder="Ej: 001" 
+                                                                pattern="[0-9]{3}" 
+                                                                maxlength="3" 
+                                                                inputmode="numeric" 
+                                                                title="Debe ingresar un número de 3 dígitos (ej: 001, 101)." 
+                                                                required>
+                                                        </div>
+                                                        @error('numero')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+
                                             </div>
-                                            <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre') }}" required placeholder="Ej: C-101">
                                         </div>
-                                        @error('nombre')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
                                     </div>
-                                </div>
+
                                 <div class="col-md-6">
+                                    <h6 class="font-weight-bold" style="margin-bottom: 0.9rem; visibility: hidden;">&nbsp;</h6>
                                     <div class="form-group">
                                         <label for="tipo_atencion">Tipo de Atención <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -104,6 +155,20 @@
     </div>
 @stop
 
+@push('css')
+<style>
+/* Este es el estilo para el contenedor 
+  que agrupará "Prefijo" y "Número"
+*/
+.cubiculo-name-container {
+    background-color: #f8f9fa; /* Un fondo gris muy claro (opaco) */
+    border: 1px solid #e9ecef;   /* Un borde sutil */
+    border-radius: 0.35rem;     /* Bordes redondeados */
+    padding: 1rem;             /* Espaciado interno */
+}
+</style>
+@endpush
+
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -139,35 +204,82 @@
             actualizarCampoDinamico();
 
 
-            // --- NUEVA VALIDACIÓN AL ENVIAR EL FORMULARIO ---
+            // --- VALIDACIÓN AL ENVIAR EL FORMULARIO ---
             createForm.addEventListener('submit', function (event) {
                 const tipo = tipoSelect.value;
-                const valorEnlace = input.value;
+                const valorCampo = input.value.trim(); // Usamos .trim()
                 
-                // Expresión regular simple para verificar si empieza con http:// o https://
+                // Expresión regular para verificar si empieza con http:// o https://
                 const urlPattern = new RegExp('^(https://|http://)'); 
 
                 if (tipo === 'virtual') {
-                    if (valorEnlace.trim() === '' || !urlPattern.test(valorEnlace)) {
-                        
-                        // 1. Detiene el envío del formulario
+                    // Si es virtual, DEBE ser un enlace válido
+                    if (valorCampo === '' || !urlPattern.test(valorCampo)) {
                         event.preventDefault(); 
-                        
-                        // 2. Muestra un alerta al usuario
                         alert('Error: Para atención virtual, debe ingresar un enlace válido (ej: https://...).');
-                        
-                        // 3. Resalta el campo con error
+                        input.classList.add('is-invalid');
+                    }
+                
+                } else if (tipo === 'presencial') {
+                    // Si es presencial, NO DEBE ser un enlace
+                    if (valorCampo !== '' && urlPattern.test(valorCampo)) {
+                        event.preventDefault(); 
+                        alert('Error: Para atención presencial, la ubicación no puede ser un enlace. Ingrese solo texto (ej: Piso 2, Oficina 10).');
                         input.classList.add('is-invalid');
                     }
                 }
             });
 
-            // Opcional: Quita la clase de error cuando el usuario corrija
+
+            //Quita la clase de error cuando el usuario corrija
             input.addEventListener('input', function() {
                 if(input.classList.contains('is-invalid')) {
                     input.classList.remove('is-invalid');
                 }
             });
+
+            // Seleccionamos el campo de número
+            const inputNumero = document.getElementById('numero');
+
+            if (inputNumero) {
+
+                /**
+                 * 1. Bloqueo Proactivo (keydown)
+                 * Bloquea teclas antes de que se escriban.
+                 */
+                inputNumero.addEventListener('keydown', function (event) {
+                    
+                    // Permite teclas de control: Backspace, Tab, Delete, Flechas, Home, End
+                    if ([
+                        'Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'
+                    ].includes(event.key)) {
+                        return; // Deja que la tecla funcione
+                    }
+
+                    // Permite atajos comunes (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X / Cmd+A...)
+                    if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) {
+                        return;
+                    }
+
+                    // Si la tecla presionada NO es un dígito (0-9)
+                    if (!/^[0-9]$/.test(event.key)) {
+                        event.preventDefault(); // Detiene la acción (la tecla no se escribe)
+                    }
+                });
+
+                /**
+                 * 2. Limpieza Reactiva (input) - La "Red de Seguridad"
+                 * Limpia el valor si algo se filtra (ej. al pegar con el mouse).
+                 */
+                inputNumero.addEventListener('input', function (event) {
+                    // Reemplaza todo lo que NO sea un dígito por una cadena vacía
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+
+
         });
     </script>
+
+
 @endpush

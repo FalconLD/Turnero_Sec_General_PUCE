@@ -12,18 +12,8 @@ class Shift extends Model implements Auditable
 
     protected $table = 'shifts';
     protected $primaryKey = 'id_shift';
-    public $timestamps = true;
-
-    protected $fillable = [
-        'schedule_shift', 
-        'cubicle_shift', 
-        'date_shift',
-        'start_shift', 
-        'end_shift', 
-        'person_shift',
-        'status_shift'
-    ];
-
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $appends = ['code'];
 
     // Ajuste para code

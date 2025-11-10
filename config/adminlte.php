@@ -2,6 +2,7 @@
 
 use function Laravel\Prompts\search;
 
+
 return [
 
     /*
@@ -154,11 +155,12 @@ return [
     */
 
     'usermenu_enabled' => true,
-    'usermenu_header' => false,
-    'usermenu_header_class' => 'bg-primary',
-    'usermenu_image' => false,
-    'usermenu_desc' => false,
-    'usermenu_profile_url' => false,
+    'usermenu_header' => true,
+    'usermenu_header_class' => 'bg-info',
+    'usermenu_image' => true,
+    'usermenu_desc' => true,
+    'usermenu_profile_url' => true,
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -285,7 +287,7 @@ return [
     'password_email_url' => 'password/email',
     'profile_url' => false,
     'disable_darkmode_routes' => false,
-   
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -320,51 +322,28 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        [
-            //'type' => 'navbar-search',
-            //'text' => 'search',
-            //'topnav_right' => true,
-        ],
-        [
-            //'type' => 'fullscreen-widget',
-            //'topnav_right' => true,
-        ],
-
-        // Sidebar items:
-        [
-            //'type' => 'sidebar-menu-search',
-            //'text' => 'search',
-        ],
+        
         [
             'text' => 'blog',
             'url' => 'admin/blog',
             'can' => 'manage-blog',
         ],
-        
-        ['header' => 'Configuracion de Perfil'],
-        [
-            'text' => 'Perfil',
-            'url' => 'admin/settings',
-            'icon' => 'fas fa-fw fa-user',
-        ],
         ['header' => 'CONFIGURACIONES'],
         [
-            'text' => 'Cambiar contraseña',
-            'url' => 'admin/settings',
-            'icon' => 'fas fa-fw fa-lock',
-        ],
-        [
             'text' => 'Atención',
-            'url'  => '/shifts/attention', // ✅ usar la ruta directamente
+            'route' => 'attention.index', //  usar la ruta directamente
             'icon' => 'fas fa-fw fa-user',
         ],
         [
             'text' => 'Desbloquear usuario',
-            'url' => '#',
+            'url'  => '/shift-unlock', // apunta a la ruta real
             'icon' => 'fa fa-unlock',
         ],
-
+        [
+            'text' => 'Permisos de Usuario',
+            'url'  => '/user-permissions', // apunta a la ruta real
+            'icon' => 'fas fa-user-shield',
+        ],
         [
             'text' => 'Administración',
             'icon' => 'fa fa-list',
@@ -400,7 +379,7 @@ return [
                     'route' => 'parameters.index',
                     'icon' => 'fa fa-cogs',
                 ],                
-                [
+                /*[
                     'text' => 'Encuestas',
                     'route' => 'encuesta.index',
                     'icon' => 'fa fa-pencil-alt',
@@ -409,7 +388,7 @@ return [
                     'text' => 'Auditorías',
                     'route' => 'auditoria.index',
                     'icon' => 'fa fa-thumbs-up',
-                ],
+                ],*/
                 
             ],
         ],

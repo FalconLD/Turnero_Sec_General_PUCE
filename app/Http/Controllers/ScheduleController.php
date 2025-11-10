@@ -6,6 +6,7 @@ use App\Models\Schedule;
 use App\Models\ScheduleBreak;
 use App\Models\CubicleSchedule;
 use Illuminate\Http\Request;
+use App\Models\Turno;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
@@ -41,7 +42,8 @@ class ScheduleController extends Controller
         // Relaciones y conteo
         $schedules = $query->withCount(['occupiedShifts', 'shifts', 'days', 'cubicles', 'breaks'])
             ->with(['cubicles', 'days', 'breaks'])
-            ->paginate($perPage);
+            ->orderBy('valid_from', 'desc')
+            ->get();
 
         return view('schedules.index', compact('schedules'));
     }
@@ -191,7 +193,7 @@ class ScheduleController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('schedules.index')->with('success', 'Schedule updated successfully.');
+            return redirect()->route('days.edit', ['schedule' => $schedule->id_hor])->with('success', 'Horario actualizado. Por favor, reconfigure los días.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Error updating schedule: ' . $e->getMessage()])->withInput();
@@ -224,4 +226,92 @@ class ScheduleController extends Controller
             return back()->withErrors(['error' => 'Error al eliminar el horario: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * ===================================================================
+     * FUNCIÓN DE GENERACIÓN DE TURNOS
+     * ===================================================================
+     * Esta función toma un Horario y crea todas sus filas de Turno.
+     * La llamaremos desde el controlador de Días.
+     */
+
+    /*
+    public function generateShifts(Schedule $schedule)
+    {
+        // 1. Cargar las relaciones que necesitamos (días, cubículos, descansos)
+        // Usamos fresh() para asegurarnos de tener los datos más actuales.
+        $schedule->load('days', 'cubicles', 'breaks');
+
+        // Si no hay días o cubículos, no podemos generar nada.
+        if ($schedule->days->isEmpty() || $schedule->cubicles->isEmpty()) {
+            // Puedes loggear un error aquí si lo deseas
+            return; 
+        }
+
+        $turnosParaInsertar = [];
+        $ahora = now(); // Para los timestamps created_at/updated_at
+
+        // 2. Parsear los datos del Horario
+        $inicioHorario = Carbon::parse($schedule->start_time);
+        $finHorario = Carbon::parse($schedule->end_time);
+        $duracionTurno = (int)$schedule->attention_minutes;
+        $duracionDescansoEntreTurnos = (int)$schedule->break_minutes; // El descanso *entre* turnos
+        $duracionTotalSlot = $duracionTurno + $duracionDescansoEntreTurnos;
+
+        // 3. Loop 1: Iterar por cada DÍA asignado al horario
+        // Asumimos que tu modelo 'Day' tiene una columna 'date_day'
+        foreach ($schedule->days as $day) {
+            
+            // 4. Loop 2: Iterar por cada CUBÍCULO asignado al horario
+            foreach ($schedule->cubicles as $cubicle) {
+                
+                // 5. Loop 3: Iterar por el TIEMPO (desde inicio hasta fin)
+                $horaInicioSlot = $inicioHorario->copy();
+
+                while ($horaInicioSlot->copy()->addMinutes($duracionTurno) <= $finHorario) {
+                    
+                    $horaFinSlot = $horaInicioSlot->copy()->addMinutes($duracionTurno);
+
+                    // 6. Comprobar si este slot cae en un DESCANSO (Break)
+                    $enDescanso = false;
+                    foreach ($schedule->breaks as $break) {
+                        $inicioDescanso = Carbon::parse($break->start_break);
+                        $finDescanso = Carbon::parse($break->end_break);
+
+                        // Comprobar si el slot se solapa con el descanso
+                        if ($horaInicioSlot < $finDescanso && $horaFinSlot > $inicioDescanso) {
+                            $enDescanso = true;
+                            // Movemos el inicio del próximo slot al final del descanso
+                            $horaInicioSlot = $finDescanso->copy();
+                            break; // Salir del loop de descansos
+                        }
+                    }
+
+                    if ($enDescanso) {
+                        continue; // Saltar al siguiente ciclo del 'while' con la nueva $horaInicioSlot
+                    }
+
+                    // 7. Si NO está en descanso, preparamos el Turno para la inserción
+                    // Asegúrate de que los nombres de columna coincidan con tu BD (horario_tur, etc.)
+                    $turnosParaInsertar[] = [
+                        'id' => (string) \Illuminate\Support\Str::uuid(), // O como generes tus IDs
+                        'horario_tur' => $schedule->id_hor,
+                        'cubiculo_tur' => $cubicle->id,
+                        'fecha_tur' => $day->date_day, // ¡Importante! Asegúrate que tu modelo Day tenga 'date_day'
+                        'inicio_tur' => $horaInicioSlot->format('H:i:s'),
+                        'fin_tur' => $horaFinSlot->format('H:i:s'),
+                        'estado_tur' => 0, // 0 = Disponible
+                        'created_at' => $ahora,
+                        'updated_at' => $ahora,
+                    ];
+
+                    // 8. Avanzar al siguiente slot (sumando turno + descanso entre turnos)
+                    $horaInicioSlot->addMinutes($duracionTotalSlot);
+                }
+            }
+        }
+
+        
+    }*/
+
 }

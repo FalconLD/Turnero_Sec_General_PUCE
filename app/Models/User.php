@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\HtmlString;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,5 +47,24 @@ class User extends Authenticatable
     public function cubiculos()
     {
         return $this->hasMany(Cubiculo::class);
+    }
+
+    // ESTA ES LA NUEVA FUNCIÓN
+    public function adminlte_desc()
+    {
+        $role = $this->role ?? 'Usuario';
+        $description = $this->email . '<br>' . $role;
+        return new HtmlString($description);
+    }
+    
+    public function adminlte_profile_url()
+    {
+        return route('profile.edit');
+    }
+
+    public function adminlte_image()
+    {
+        // Puedes personalizar la ruta de la imagen según tus necesidades
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=FFFFFF&background=random';
     }
 }

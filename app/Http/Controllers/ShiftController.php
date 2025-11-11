@@ -197,26 +197,27 @@ public function getShifts(Request $request, $fecha)
     $modalidad = $request->query('modalidad'); // 'presencial' o 'virtual'
 
     try {
-        // ... (la lógica de la fecha está bien) ...
+        // Normaliza la fecha
         try {
-            $fechaFormateada = Carbon::createFromFormat('Y-m-d', $fecha)->format('Y-m-d');
+            $fechaFormateada = Carbon::parse($fecha)->format('Y-m-d');
         } catch (\Exception $e) {
-            $fechaFormateada = Carbon::createFromFormat('d/m/Y', $fecha)->format('Y-m-d');
+            return response()->json([
+                'error' => 'Formato de fecha inválido',
+                'message' => $e->getMessage(),
+                'fecha_recibida' => $fecha
+            ], 400);
         }
 
+        // Construye la consulta
         $query = DB::table('shifts')
             ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
             ->whereDate('shifts.date_shift', $fechaFormateada)
-            
-            // ===== LA CORRECCIÓN ESTÁ AQUÍ =====
-            ->where('shifts.status_shift', 1) // Debe ser el entero 1
-            // ===================================
-            
+            ->where('shifts.status_shift', 1)
             ->select(
-                'shifts.id_shift', 
-                'shifts.start_shift', 
-                'shifts.end_shift', 
-                'cubiculos.nombre as cubiculo', 
+                'shifts.id_shift',
+                'shifts.start_shift',
+                'shifts.end_shift',
+                'cubiculos.nombre as cubiculo',
                 'cubiculos.tipo_atencion'
             );
 
@@ -226,33 +227,22 @@ public function getShifts(Request $request, $fecha)
 
         $turnos = $query->orderBy('shifts.start_shift')->get();
 
-        return response()->json($turnos);
+        return response()->json([
+            'success' => true,
+            'fecha_consulta' => $fechaFormateada,
+            'total_turnos' => $turnos->count(),
+            'data' => $turnos
+        ]);
 
     } catch (\Exception $e) {
         return response()->json([
             'error' => 'Error interno al procesar la solicitud.',
-            'message' => $e->getMessage()
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ], 500);
     }
 }
 
-
-public function attention(Request $request)
-{
-    $date = $request->query('date', now()->toDateString());
-
-    // Solo los turnos tomados (person_shift no es null)
-    $shifts = Shift::with('person') // asegúrate que la relación se llama student()
-        ->whereDate('date_shift', $date)
-        ->whereNotNull('person_shift')   // <-- esto filtra solo los tomados
-        ->orderBy('start_shift')
-        ->get();
-
-    return view('shifts.attention', [
-        'shifts' => $shifts,
-        'selectedDate' => $date
-    ]);
-}
 
 
 }

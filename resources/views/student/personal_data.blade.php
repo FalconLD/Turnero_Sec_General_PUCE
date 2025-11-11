@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 
 
@@ -152,13 +152,13 @@
                         <div class="col-md-6">
 
                             <label>Nombre completo</label>
-                            <input type="text" class="form-control" name="names" placeholder="Ingrese su nombre" required>
+                            <input type="text" class="form-control" name="names" value="{{ $student['nombre'] ?? '' }}" readonly>
                         </div>
 
                         <div class="col-md-3">
 
                             <label>Cédula</label>
-                            <input type="text" class="form-control" name="cedula" required>
+                            <input type="text" class="form-control" name="cedula" value="{{ $student['cedula'] ?? '' }}" readonly>
                         </div>
 
                         <div class="col-md-3">
@@ -172,7 +172,7 @@
                         <div class="col-md-6">
 
                             <label>Correo electrónico</label>
-                            <input type="email" class="form-control" name="correo_puce" placeholder="ejemplo@correo.com" required>
+                            <input type="email" class="form-control" name="correo_puce" value="{{ $student['correo_puce'] ?? '' }}" readonly>
                         </div>
 
                         <div class="col-md-6">

@@ -1,12 +1,12 @@
 @component('mail::message')
 # Estimado {{ $student->names }},
 
-Usted ha tomado una cita para Psicología Aplicada APsU.
+**Los datos de su cita son:**
 
-**Su cita es:** {{ $shift->date }} a las {{ $shift->time }}  
-**Cubículo:** {{ $shift->cubicle_name }}  
-**Modalidad:** {{ $shift->modalidad }}  
-**Enlace o ubicación:** {{ $shift->location }}
+* **Fecha y Hora:** {{ $shift->date_shift }} a las {{ $shift->start_shift }}
+* **Cubículo:** {{ $shift->cubicle->nombre }}
+* **Modalidad:** {{ $shift->cubicle->tipo_atencion }}
+* **Ubicación:** {{ $shift->cubicle->enlace_o_ubicacion }}
 
 Gracias por su atención,  
 {{ config('app.name') }}

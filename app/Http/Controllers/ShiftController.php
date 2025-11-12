@@ -28,13 +28,13 @@ class ShiftController extends Controller
 
         // 🔹 Verificar si hoy es antes de la fecha de inicio válida
         if ($today->lt($validFrom)) {
-            return response()->json([
-                'error' => true,
-                'message' => "Aún no es posible agendar turnos. 
-                              Los turnos estarán disponibles a partir del " . $validFrom->format('d/m/Y') . "."
-            ], 403);
+                return response()->json([
+                    'error' => true,
+                    'message' => "Aún no es posible agendar turnos. 
+                                Los turnos estarán disponibles a partir del " . $validFrom->format('d/m/Y') . "."
+                ], 403);
+            }
         }
-    }
         $person = StudentRegistration::where('dni', $idNumber)
             ->orWhere('email', $email)
             ->first();

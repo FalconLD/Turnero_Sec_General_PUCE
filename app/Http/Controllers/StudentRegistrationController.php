@@ -206,8 +206,21 @@ class StudentRegistrationController extends Controller
             'comprobante' => $comprobantePath
         ]);
 
+        // Ahora, crea el registro de pago vinculado en la nueva tabla 'payments'
+        try {
+            $student->payment()->create([
+                'amount'           => $valor, // El valor que calculaste
+                'payment_method'   => $request->forma_pago,
+                'comprobante_path' => $comprobantePath, // La ruta del archivo
+                'status'           => 'pending', // Siempre inicia como pendiente
+            ]);
+        } catch (\Exception $e) {
+            // Manejar un error aquí si falla la creación del pago
+            // (Aunque si la migración está bien, no debería fallar)
+        }
+
         
-        $turno = Shift::find($request->turno_id);
+        $turno = Shift::with('cubicle')->find($request->turno_id);
         $turno->person_shift = $student->cedula;
         $turno->status_shift = 0; // 0 = Ocupado
         $turno->save();

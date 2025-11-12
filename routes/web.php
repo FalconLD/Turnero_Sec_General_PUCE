@@ -16,7 +16,7 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ShiftUnlockController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttentionController;
- 
+use App\Http\Controllers\PaymentController; 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
 // login, logout, registro, olvido de contraseña, etc.
@@ -45,7 +45,16 @@ Route::middleware(['auth'])->group(function () {
     //Ruta para el registro de la hora y fecha de estudiantes. 
     Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
 
+    
+    Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
+     ->name('payments.index');
+     
+    // La ruta ahora recibe el ID del {payment}
+    Route::post('payments/{payment}/verify', [App\Http\Controllers\Admin\PaymentController::class, 'verify'])
+        ->name('payments.verify');
 
+    Route::post('payments/{payment}/reject', [App\Http\Controllers\Admin\PaymentController::class, 'reject'])
+        ->name('payments.reject');
 
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.

@@ -193,12 +193,12 @@ return [
     |
     */
 
-    'classes_auth_card'   => 'bg-white',                  // tarjeta blanca
-    'classes_auth_header' => 'bg-primary',               // encabezado azul
-    'classes_auth_body'   => 'bg-light',                 // cuerpo claro
-    'classes_auth_footer' => '',                        // pie de página predeterminado
-    'classes_auth_icon'   => '',                        // icono predeterminado
-    'classes_auth_btn'    => 'btn-flat btn-info',  
+    'classes_auth_card'   => 'bg-white',                   // tarjeta blanca
+    'classes_auth_header' => 'bg-primary',                 // encabezado azul
+    'classes_auth_body'   => 'bg-light',                   // cuerpo claro
+    'classes_auth_footer' => '',                           // pie de página predeterminado
+    'classes_auth_icon'   => '',                           // icono predeterminado
+    'classes_auth_btn'    => 'btn-flat btn-info', 
 
     /*
     |--------------------------------------------------------------------------
@@ -343,6 +343,11 @@ return [
             'text' => 'Permisos de Usuario',
             'url'  => '/user-permissions', // apunta a la ruta real
             'icon' => 'fas fa-user-shield',
+        ],
+        [
+            'text' => 'Revisión de Pagos',
+            'route'  => 'payments.index', // La ruta que crearemos
+            'icon' => 'fas fa-fw fa-cash-register',            
         ],
         [
             'text' => 'Administración',
@@ -516,6 +521,29 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+
+        // --- AQUÍ ESTÁ EL CAMBIO ---
+        // He añadido este bloque que faltaba
+        'Daterangepicker' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '//cdn.jsdelivr.net/momentjs/latest/moment.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css',
                 ],
             ],
         ],

@@ -31,9 +31,13 @@ Auth::routes();
 Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])
     ->name('api.shifts')
     ->withoutMiddleware(['auth']);
+    Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])
+    ->name('api.shifts.modalidad')
+    ->withoutMiddleware(['auth']);
 Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])
     ->name('student.agendar.turno');
-
+Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])
+    ->name('student.finish');
 // Login automático desde token
 // Login automático desde token
 Route::get('/registro/{token}', [TokenLoginController::class, 'loginWithToken'])
@@ -69,7 +73,8 @@ Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'ag
     Route::post('/student/turno/eliminar', [StudentRegistrationController::class, 'eliminarTurno'])
     ->name('student.turno.eliminar');
 Route::get('/student/logout', [StudentRegistrationController::class, 'studentLogout'])->name('student.logout');
-
+ Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
+    Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
 
 // --- RUTAS PROTEGIDAS (requieren login normal) ---
 Route::middleware(['auth'])->group(function () {
@@ -86,8 +91,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
 
     // Obtener facultades y programas para el formulario de registro de estudiantes
-    Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
-    Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
+   
 
     //Ruta para el registro de la hora y fecha de estudiantes. 
    // Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');

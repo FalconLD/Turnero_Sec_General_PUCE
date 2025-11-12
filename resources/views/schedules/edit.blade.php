@@ -43,10 +43,21 @@
                     <div class="col-md-6 mb-3">
                         <label for="break_minutes">Duración del Descanso (min)</label>
                         <input type="number" name="break_minutes" class="form-control" min="0" required value="{{ old('break_minutes', $schedule->break_minutes) }}">
-                    </div>
-                    
+                    </div>                    
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="valid_from">Válido desde</label>
+                        <input 
+                            type="date" 
+                            name="valid_from" 
+                            class="form-control" 
+                            required 
+                            value="{{ old('valid_from', \Carbon\Carbon::parse($schedule->valid_from)->format('Y-m-d')) }}">
+                    </div>
+                </div>
+                
                 <div class="mb-3">
                     <label for="cubicles">Cubículos</label>
                     <select name="cubicles[]" class="form-control" multiple required>

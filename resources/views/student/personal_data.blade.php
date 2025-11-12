@@ -140,8 +140,8 @@
 
                 {{-- Paso 2: Datos personales --}}
                 @php
-    $student = session('student_data');
-@endphp
+                    $student = session('student_data');
+                @endphp
 
                 <div class="form-step" style="display:none;">
 
@@ -152,13 +152,13 @@
                         <div class="col-md-6">
 
                             <label>Nombre completo</label>
-                            <input type="text" class="form-control" name="names" value="{{ $student['nombre'] ?? '' }}" readonly>
+                            <input type="text" class="form-control" name="names" value="{{ old('names') }}" readonly>
                         </div>
 
                         <div class="col-md-3">
 
                             <label>Cédula</label>
-                            <input type="text" class="form-control" name="cedula" value="{{ $student['cedula'] ?? '' }}" readonly>
+                            <input type="text" class="form-control" name="cedula" value="{{ old('cedula') }}" readonly>
                         </div>
 
                         <div class="col-md-3">
@@ -172,7 +172,7 @@
                         <div class="col-md-6">
 
                             <label>Correo electrónico</label>
-                            <input type="email" class="form-control" name="correo_puce" value="{{ $student['correo_puce'] ?? '' }}" readonly>
+                            <input type="email" class="form-control" name="correo_puce" value="{{ old('correo_puce') }}" readonly>
                         </div>
 
                         <div class="col-md-6">

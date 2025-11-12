@@ -3,19 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Portal de Estudiantes')</title>
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ config('app.name', 'APUS') }}</title>
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     
+    <!-- 1. Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- 2. Font Awesome (para iconos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Tus propios estilos (si tienes un CSS personalizado) -->
+    {{-- <link href="{{ asset('css/student-portal.css') }}" rel="stylesheet"> --}}
+    @stack('css')
 </head>
-<body>
+<body class="bg-light">
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
@@ -89,5 +90,8 @@
         @yield('content')
     </main>
 </div>
+<!-- 3. Bootstrap JS (necesario para menús desplegables) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('js')
 </body>
 </html>

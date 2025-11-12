@@ -124,11 +124,17 @@ class TokenLoginController extends Controller
 
     // 🔹 Si no existe, crear nuevo estudiante
     $student = StudentRegistration::create([
-        'cedula' => $cedula,
-        'names' => $nombre,
-        'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
-        'facultad' => $facultad,
-        'carrera' => $carrera,
+    'cedula' => $cedula,
+    'names' => $nombre,
+    'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+    'facultad' => $facultad,
+    'carrera' => $carrera,
+    'edad' => 0,
+    'fecha_nacimiento' => null,
+    'telefono' => '',
+    'direccion' => '',
+    'motivo' => '',
+    'acepta_terminos' => false,
     ]);
 
     // Guardar sesión

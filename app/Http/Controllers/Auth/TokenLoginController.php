@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\StudentRegistration;
 use Carbon\Carbon;
 class TokenLoginController extends Controller
@@ -80,11 +81,44 @@ class TokenLoginController extends Controller
 
         return redirect()->route('token.login.form');
     }
-   public function loginWithToken($token)
+   public function loginWithToken($token,Request $request)
 {
     // 🔹 Llamada al servicio remoto (ajusta la URL si tu entorno cambia)
     $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
     $response = Http::get($url);
+    $request->validate([
+            // Datos Personales
+            'names' => 'required|string|max:255',
+            'cedula' => 'required|string|max:36',
+            'edad' => 'required|integer|min:0',
+            'fecha_nacimiento' => 'required|date',
+            'telefono' => 'required|string|max:20',
+            'direccion' => 'required|string|max:255',
+            'correo_puce' => 'required|email',
+            
+            // Turno
+            'turno_id' => 'required|exists:shifts,id_shift',
+            
+            // --- VALIDACIÓN ACADÉMICA 
+            'nivel_instruccion' => 'required|string|in:grado,tec,posgrado,especializacion',
+            'facultad' => 'required|string', 
+            'carrera' => 'required|string', 
+            'nivel' => [ // Nivel de semestre (Primero, Segundo...)
+                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                'nullable', // Permite que sea nulo si es posgrado
+                'string',
+            ],
+            'beca_san_ignacio' => [
+                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                'nullable', // Permite que sea nulo si es posgrado
+                'string',
+            ],
+            // --- FIN VALIDACIÓN ACADÉMICA ---
+
+            // Pago y Motivo
+            'motivo' => 'required|string',
+            'forma_pago' => 'required|string',
+        ]);
 
     if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
         return redirect()->route('student.token.error')
@@ -121,7 +155,7 @@ class TokenLoginController extends Controller
             ->route('student.agendamiento')
             ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
     }
-
+    $isGradoOrTec = in_array($request->nivel_instruccion, ['grado', 'tec']);
     // 🔹 Si no existe, crear nuevo estudiante
     $student = StudentRegistration::create([
     'cedula' => $cedula,
@@ -131,10 +165,13 @@ class TokenLoginController extends Controller
     'carrera' => $carrera,
     'edad' => 0,
     'fecha_nacimiento' =>Carbon::now()->toDateString(),
-    'telefono' => '',
-    'direccion' => '',
-    'motivo' => '',
+    'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
+    'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
+    'telefono' => $request->telefono,
+    'direccion' => $request->direccion,
+    'motivo' => $request->motivo, 
     'acepta_terminos' => false,
+    'tomado' => 0,
     ]);
 
     // Guardar sesión

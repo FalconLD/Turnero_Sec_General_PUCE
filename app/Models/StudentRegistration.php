@@ -27,6 +27,7 @@ class StudentRegistration extends Model
         'forma_pago',
         'acepta_terminos',
         'comprobante',
+        'tomado'
     ];
 
     /**

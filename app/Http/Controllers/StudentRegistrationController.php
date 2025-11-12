@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+
 use App\Models\StudentRegistration;
 use App\Models\Parameter; // Donde está el parámetro TERM
 use App\Models\Shift;
@@ -12,9 +12,79 @@ use App\Models\Schedule;
 use Carbon\Carbon;
 use App\Models\Faculty; // <-- AÑADIR ESTE
 use Illuminate\Validation\Rule; // <-- AÑADIR ESTE
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StudentRegistrationController extends Controller
 {
+    // NUEVO: Login mediante token (desde PUCE)
+    public function loginWithToken($token)
+    {
+        // Ejemplo: URL del servicio remoto (ajústala según tu API real)
+        $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
+
+        $response = Http::get($url);
+
+        if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
+            return redirect()->route('student.token.error')
+                ->withErrors(['error' => 'Token inválido o expirado.']);
+        }
+
+        $data = $response->json('data');
+
+        // Extraer los datos que vienen del token
+        $cedula = $data['cedula'] ?? null;
+        $nombre = $data['nombre'] ?? null;
+        $usuario = $data['usuario'] ?? null;
+        $facultad = $data['facultad'] ?? null;
+        $carrera = $data['carrera'] ?? null;
+
+        if (!$cedula) {
+            return redirect()->route('student.token.error')
+                ->withErrors(['error' => 'El token no contiene cédula válida.']);
+        }
+         $student = StudentRegistration::where('cedula', $cedula)->first();
+
+        if ($student) {
+        // ✅ Ya existe — guardar sesión y redirigir directamente al agendamiento
+        session([
+            'student_logged_in' => true,
+            'student_id' => $student->id,
+            'student_cedula' => $student->cedula,
+            'student_name' => $student->names,
+        ]);
+
+            // Redirige al formulario de agendamiento (puedes cambiar el nombre de la ruta)
+           return redirect()
+            ->route('student.agendamiento')
+            ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
+        }
+
+        // Buscar o crear el estudiante
+        $student = StudentRegistration::firstOrCreate(
+            ['cedula' => $cedula],
+            [
+                'names' => $nombre,
+                'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+                'facultad' => $facultad,
+                'carrera' => $carrera,
+            ]
+        );
+
+        // Guardar sesión
+        session()->put([
+            'student_logged_in' => true,
+            'student_id' => $student->id,
+            'student_cedula' => $student->cedula,
+            'student_name' => $student->names,
+        ]);
+
+        // Redirigir al formulario de datos personales
+        return redirect()->route('student.personal');
+    }
+
     // Paso 1: Términos
     public function showTerms()
     {
@@ -37,12 +107,14 @@ class StudentRegistrationController extends Controller
     // Paso 2: Datos personales
     public function showPersonalForm()
     {
-        
+        //  Verificar sesión de estudiante
+        if (!session('student_logged_in')) {
+            return redirect()->route('token.login.form')->withErrors(['error' => 'Debe iniciar sesión con su token.']);
+        }
 
-        $terminos = \App\Models\Parameter::where('clave', 'TERM')->first();
+        $terminos = Parameter::where('clave', 'TERM')->first();
 
-       
-        $schedule = \App\Models\Schedule::orderBy('valid_from', 'desc')->first();
+        $schedule = Schedule::orderBy('valid_from', 'desc')->first();
         $today = Carbon::today();
 
         $isAvailable = false;
@@ -53,7 +125,6 @@ class StudentRegistrationController extends Controller
             $isAvailable = $today->greaterThanOrEqualTo($startDate);
         }
 
-        
         if (!$isAvailable) {
             return view('student.not_available', [
                 'startDate' => $startDate?->format('d/m/Y'),
@@ -61,13 +132,22 @@ class StudentRegistrationController extends Controller
             ]);
         }
 
-        
-        return view('student.personal_data', compact('terminos'));
+        //  Recuperar datos del estudiante logueado
+        $student = StudentRegistration::find(session('student_id'));
+
+        // Pasamos los datos del estudiante al formulario
+        return view('student.personal_data', [
+            'terminos' => $terminos,
+            'student' => $student
+        ]);
     }
 
     // Guardar datos personales (opcional si usas finish())
     public function store(Request $request)
     {
+        if (!session('student_logged_in')) {
+            return redirect()->route('token.login.form')->withErrors(['error' => 'Debe iniciar sesión con su token.']);
+        }
         $request->validate([
             'names' => 'required|string|max:255',
             'cedula' => 'required|string|max:36',
@@ -203,7 +283,8 @@ class StudentRegistrationController extends Controller
             'forma_pago' => $request->forma_pago,
             'valor_pagar' => $valor,
             'acepta_terminos' => true,
-            'comprobante' => $comprobantePath
+            'comprobante' => $comprobantePath,
+            'tomado' => 0, 
         ]);
 
         // Ahora, crea el registro de pago vinculado en la nueva tabla 'payments'
@@ -231,8 +312,45 @@ class StudentRegistrationController extends Controller
 
         return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');
     }
-
     
+       public function agendarTurno(Request $request)
+{
+    $request->validate([
+        'turno_id' => 'required|exists:shifts,id_shift',
+        'cedula' => 'required|exists:student_registrations,cedula',
+    ]);
+
+    $student = StudentRegistration::where('cedula', $request->cedula)->first();
+    $turno = Shift::find($request->turno_id);
+
+    if (!$student || !$turno) {
+        return back()->with('error', 'No se encontró el estudiante o el turno.');
+    }
+
+    // Validar si el turno ya está ocupado
+    if ($turno->status_shift == 0) {
+        return back()->with('error', 'El turno seleccionado ya fue ocupado.');
+    }
+
+    // Asignar turno
+    $turno->person_shift = $student->cedula;
+    $turno->status_shift = 0; // 0 = Ocupado
+    $turno->save();
+
+    $student->tomado = 0;
+    $student->save();
+    // Enviar correo
+    try {
+        Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
+    } catch (\Exception $e) {
+        Log::error("Error enviando correo: " . $e->getMessage());
+    }
+
+    return redirect()
+        ->route('student.success')
+        ->with('success', 'Su cita ha sido agendada correctamente.');
+}
+
 
     public function validarDatos(Request $request)
     {
@@ -260,6 +378,18 @@ class StudentRegistrationController extends Controller
             'success' => true
         ]);
     }
+    public function studentLogout(Request $request)
+        {
+            // Cierra sesión de Laravel (usuarios normales)
+            Auth::logout();
+
+            // Limpia sesión del estudiante
+            $request->session()->flush();
+
+            // Mostrar vista de despedida
+            return view('student.logout'); // <- crea esta vista
+        }
+
 
 
 
@@ -334,5 +464,74 @@ class StudentRegistrationController extends Controller
         $programs = $query->orderBy('programa_desc')->get();
         return response()->json($programs);
     }
+  public function agendamiento()
+{
+    $student = StudentRegistration::find(session('student_id'));
+
+    if (!$student) {
+        return redirect()->route('student.token.error');
+    }
+    session()->put('student_name', $student->names);
+    // Buscar si el estudiante ya tiene un turno tomado
+    $turnoActual = Shift::where('person_shift', $student->cedula)
+        ->where('status_shift', 0)
+        ->first();
+
+    // Si tiene un turno y tomado = 0, mostrar el turno actual
+    if ($turnoActual && $student->tomado == 0) {
+        return view('student.turno_actual', compact('student', 'turnoActual'));
+    }
+
+    // Si tomado = 1, permitir agendar otro turno
+    if ($student->tomado == 1) {
+        return view('student.agendamiento', compact('student'));
+    }
+
+    // Si no tiene turno asignado en absoluto
+    if (!$turnoActual) {
+        return view('student.agendamiento', compact('student'));
+    }
+
+    // Caso de respaldo (por si ocurre algo inesperado)
+    return redirect()->route('student.token.error')->with('error', 'No se pudo determinar el estado del turno.');
+}
+
+
+public function eliminarTurno(Request $request)
+{
+    $cedula = $request->cedula;
+
+    // Buscar estudiante por cédula
+    $student = StudentRegistration::where('cedula', $cedula)->first();
+
+    if (!$student) {
+        return redirect()->back()->with('error', 'Estudiante no encontrado.');
+    }
+
+    // Buscar turno asociado al estudiante
+    $turno = Shift::where('person_shift', $cedula)->first();
+
+    if (!$turno) {
+        return redirect()->back()->with('error', 'No se encontró un turno asociado a esta cédula.');
+    }
+
+    try {
+        // Liberar turno
+        $turno->person_shift = null;
+        $turno->status_shift = 1; // 1 = Disponible
+        $turno->save();
+
+        // Marcar al estudiante como "puede tomar otro turno"
+        $student->tomado = 1;
+        $student->save();
+
+        return redirect()->route('student.turno')
+            ->with('success', 'El turno ha sido eliminado correctamente. Ahora puede agendar un nuevo turno.');
+    } catch (\Exception $e) {
+        Log::error('Error al eliminar turno: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Ocurrió un error al eliminar el turno.');
+    }
+}
+
 
 }

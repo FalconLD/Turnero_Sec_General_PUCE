@@ -1,6 +1,9 @@
 <?php
- 
-// Importación de todos los controladores utilizados en este archivo.
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Controladores generales
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\CubiculoController;
 use App\Http\Controllers\FormController;
@@ -9,25 +12,69 @@ use App\Http\Controllers\ParameterController;
 use App\Http\Controllers\DayController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\StudentRegistrationController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ShiftUnlockController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttentionController;
-use App\Http\Controllers\PaymentController; 
+ use App\Http\Controllers\StudentRegistrationController;
+ use App\Http\Controllers\Auth\TokenLoginController;
+ 
+ 
 // --- Rutas de Autenticación ---
 // Esta única línea registra todas las rutas necesarias para la autenticación:
 // login, logout, registro, olvido de contraseña, etc.
 Auth::routes();
- 
-// --- Grupo de Rutas Protegidas por Autenticación ---
-// Todas las rutas dentro de este grupo requerirán que el usuario haya iniciado sesión.
+
+
+// --- RUTAS PÚBLICAS (acceso con token PUCE para estudiantes) ---
+// --- RUTAS PÚBLICAS ---
+Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])
+    ->name('api.shifts')
+    ->withoutMiddleware(['auth']);
+Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])
+    ->name('student.agendar.turno');
+
+// Login automático desde token
+// Login automático desde token
+Route::get('/registro/{token}', [TokenLoginController::class, 'loginWithToken'])
+    ->name('student.registro.token');
+
+// Página de error si el token no es válido o expiró
+Route::get('/registro/error', fn() => view('student.token_error'))
+    ->name('student.token.error');
+
+// Formulario de registro personal del estudiante
+Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])
+    ->name('student.personal');
+
+// ✅ Nueva vista de agendamiento (paso 5)
+Route::get('/student/agendamiento', [StudentRegistrationController::class, 'agendamiento'])
+    ->name('student.agendamiento');
+
+// Guardar los datos personales
+Route::post('/student/store', [StudentRegistrationController::class, 'store'])
+    ->name('student.store');
+
+// Finalizar registro (acepta términos y guarda turno)
+Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])
+    ->name('student.finish');
+
+// Página de éxito
+Route::get('/student/success', [StudentRegistrationController::class, 'success'])
+    ->name('student.success');
+
+Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])
+    ->name('student.agendarTurno');
+
+    Route::post('/student/turno/eliminar', [StudentRegistrationController::class, 'eliminarTurno'])
+    ->name('student.turno.eliminar');
+Route::get('/student/logout', [StudentRegistrationController::class, 'studentLogout'])->name('student.logout');
+
+
+// --- RUTAS PROTEGIDAS (requieren login normal) ---
 Route::middleware(['auth'])->group(function () {
- 
-    // --- Rutas Principales del Dashboard ---
-    // Ruta para la página de inicio principal después de iniciar sesión.
+
+    // Dashboard principal
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
     // Esta ruta mostrará la página de edición del perfil
@@ -43,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
 
     //Ruta para el registro de la hora y fecha de estudiantes. 
-    Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
+   // Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
 
     
     Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
@@ -95,16 +142,14 @@ Route::middleware(['auth'])->group(function () {
  
   /* Antiguo */
       
-    Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
-    Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
-    Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+   
     
     Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
     //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
 
     
-    Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
+
 
         
 

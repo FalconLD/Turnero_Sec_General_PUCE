@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
-
+use Carbon\Carbon;
 class TokenLoginController extends Controller
 {
     public function showLoginForm()
@@ -130,7 +130,7 @@ class TokenLoginController extends Controller
     'facultad' => $facultad,
     'carrera' => $carrera,
     'edad' => 0,
-    'fecha_nacimiento' =>'',
+    'fecha_nacimiento' =>Carbon::now()->toDateString(),
     'telefono' => '',
     'direccion' => '',
     'motivo' => '',

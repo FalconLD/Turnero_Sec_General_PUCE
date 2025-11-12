@@ -129,6 +129,7 @@ class TokenLoginController extends Controller
         'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
         'facultad' => $facultad,
         'carrera' => $carrera,
+        
     ]);
 
     // Guardar sesión

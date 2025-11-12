@@ -130,7 +130,7 @@ class TokenLoginController extends Controller
     'facultad' => $facultad,
     'carrera' => $carrera,
     'edad' => 0,
-    'fecha_nacimiento' => null,
+    'fecha_nacimiento' =>'',
     'telefono' => '',
     'direccion' => '',
     'motivo' => '',

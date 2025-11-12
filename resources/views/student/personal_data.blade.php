@@ -152,13 +152,13 @@
                         <div class="col-md-6">
 
                             <label>Nombre completo</label>
-                            <input type="text" class="form-control" name="names" value="{{ old('names') }}" readonly>
+                            <input type="text" name="names" value="{{  old('names', $student_name ?? '')}}" class="form-control">
                         </div>
 
                         <div class="col-md-3">
 
                             <label>Cédula</label>
-                            <input type="text" class="form-control" name="cedula" value="{{ old('cedula') }}" readonly>
+                            <input type="text" name="cedula" value="{{ old('cedula', $student_cedula ?? '')  }}" class="form-control" readonly>
                         </div>
 
                         <div class="col-md-3">
@@ -172,7 +172,7 @@
                         <div class="col-md-6">
 
                             <label>Correo electrónico</label>
-                            <input type="email" class="form-control" name="correo_puce" value="{{ old('correo_puce') }}" readonly>
+                            <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
                         </div>
 
                         <div class="col-md-6">
@@ -849,75 +849,29 @@
 
         // ✅ MODIFICADO: validación AJAX en el paso 2
 
-        nextBtn.onclick = async () => {
+       nextBtn.onclick = async () => {
+    // ✅ Caso especial: paso 2 (índice 1) -> NO valida aún, solo avanza
+    if (currentStep === 1) {
+        currentStep++;
+        showStep(currentStep);
+        return;
+    }
 
-            if (!validateCurrentStep()) return;
+    // En los demás pasos, sí validamos campos requeridos
+    if (!validateCurrentStep()) return;
 
+    // Validación AJAX solo en paso 1 (Términos)
+    if (currentStep === 0) {
+        if (!aceptaTerminos.checked) {
+            alert("Debes aceptar los términos para continuar.");
+            return;
+        }
+    }
 
+    currentStep++;
+    showStep(currentStep);
+};
 
-            // Si estamos en el paso 2 (índice 1)
-
-            if (currentStep === 1) {
-
-                const cedula = document.querySelector('[name="cedula"]').value.trim();
-
-                const correo = document.querySelector('[name="correo_puce"]').value.trim();
-
-
-
-                try {
-
-                    const res = await fetch("{{ route('validar.datos') }}", {
-
-                        method: "POST",
-
-                        headers: {
-
-                            "Content-Type": "application/json",
-
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-
-                        },
-
-                        body: JSON.stringify({ cedula: cedula, correo_puce: correo })
-
-                    });
-
-
-
-                    const data = await res.json();
-
-
-
-                    if (!data.success) {
-
-                        alert(data.message); // ⚠️ Mensaje si ya existe
-
-                        return; // No avanza
-
-                    }
-
-                } catch (error) {
-
-                    console.error("Error al validar los datos:", error);
-
-                    alert("Ocurrió un error al validar los datos. Intenta nuevamente.");
-
-                    return;
-
-                }
-
-            }
-
-
-
-            // ✅ Si pasa la validación, continúa al siguiente paso
-
-            currentStep++;
-
-            showStep(currentStep);
-
-        };
 
 
 
@@ -1136,117 +1090,53 @@
 
 
 
-        async function cargarTurnos() {
+      function cargarTurnos() {
+    const modalidad = modalidadSelect.value;
+    const fecha = fechaInput.value;
 
-            const fecha = fechaInput.value;
+    if (!modalidad || !fecha) return;
 
-            const modalidad = modalidadSelect.value;
+    turnosContainer.innerHTML = '<p class="text-center text-muted">Cargando turnos...</p>';
 
+    fetch(`/shifts/${fecha}?modalidad=${modalidad}`)
+        .then(res => res.json())
+        .then(data => {
+            turnosContainer.innerHTML = '';
 
-
-            if (!fecha || !modalidad) {
-
-                turnosContainer.innerHTML = "<p class='text-muted'>Seleccione modalidad y fecha para ver los turnos...</p>";
-
+            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
                 return;
-
             }
 
+            data.data.forEach(turno => {
+                const div = document.createElement('div');
+                div.className = 'turno-card text-center';
+                div.innerHTML = `
+                    <strong>${turno.start_shift}</strong><br>
+                    <span class="text-muted small">${turno.end_shift}</span><br>
+                    <span class="badge bg-light text-dark mt-1">${turno.cubiculo}</span>
+                `;
+                div.onclick = () => {
+                    turnoIdInput.value = turno.id_shift;
+                    dateShiftInput.value = data.fecha_consulta; // viene del JSON principal
+                    shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
+                    modalidadShiftInput.value = turno.tipo_atencion;
+                    document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+                    div.classList.add('selected');
+                };
 
 
-            turnosContainer.innerHTML = "<p class='text-muted'>Cargando turnos disponibles...</p>";
+                turnosContainer.appendChild(div);
+            });
+        })
+        .catch(error => {
+            console.error("Error al cargar los turnos:", error);
+            turnosContainer.innerHTML = '<p class="text-danger text-center">Error al cargar los turnos.</p>';
+        });
+}
 
-            turnoIdInput.value = '';
+    
 
-            dateShiftInput.value = '';
-
-            shiftTimeInput.value = '';
-
-            modalidadShiftInput.value = '';
-
-            nextBtn.disabled = true;
-
-
-
-            try {
-
-                const res = await fetch(`/shifts/${fecha}?modalidad=${modalidad}`);
-
-                if (!res.ok) throw new Error('No se pudo cargar los turnos');
-
-                const data = await res.json();
-
-
-
-                if (!Array.isArray(data) || data.length === 0) {
-
-                    turnosContainer.innerHTML = "<p class='text-danger'>No hay turnos disponibles para esta fecha y modalidad.</p>";
-
-                    return;
-
-                }
-
-
-
-                turnosContainer.innerHTML = '';
-
-                data.forEach(t => {
-
-                    const boton = document.createElement("div");
-
-                    boton.className = "card turno-card m-2 p-3 text-center";
-
-                    boton.style.cursor = "pointer";
-
-                    boton.style.width = "180px";
-
-                    boton.innerHTML = `
-
-                        <h5 class="mb-2">${t.start_shift.substring(0,5)} - ${t.end_shift.substring(0,5)}</h5>
-
-                        <p class="mb-1 fw-bold">${t.cubiculo}</p>
-
-                        <small class="text-muted">${t.tipo_atencion}</small>
-
-                    `;
-
-
-
-                    boton.addEventListener('click', () => {
-
-                        document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('border-primary', 'bg-light'));
-
-                        boton.classList.add('border-primary', 'bg-light');
-
-                        turnoIdInput.value = t.id_shift;
-
-                        dateShiftInput.value = fecha;
-
-                        shiftTimeInput.value = `${t.start_shift.substring(0,5)} - ${t.end_shift.substring(0,5)}`;
-
-                        modalidadShiftInput.value = modalidad;
-
-                        nextBtn.disabled = false;
-
-                    });
-
-
-
-                    turnosContainer.appendChild(boton);
-
-                });
-
-
-
-            } catch (err) {
-
-                console.error(err);
-
-                turnosContainer.innerHTML = "<p class='text-danger'>Error al cargar los turnos.</p>";
-
-            }
-
-        }
 
 
 

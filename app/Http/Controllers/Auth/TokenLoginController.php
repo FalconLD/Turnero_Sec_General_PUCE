@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Models\StudentRegistration;
-use Carbon\Carbon;
+
 class TokenLoginController extends Controller
 {
     public function showLoginForm()
@@ -59,7 +58,7 @@ class TokenLoginController extends Controller
         );
 
         // 3️⃣ Guardar datos básicos del estudiante en la sesión
-        session([
+        session()->put([
             'student_logged_in' => true,
             'student_id' => $student->id,
             'student_name' => $student->names,
@@ -81,73 +80,66 @@ class TokenLoginController extends Controller
 
         return redirect()->route('token.login.form');
     }
-   public function loginWithToken($token) // <-- CORRECCIÓN: Eliminado 'Request $request'
+
+    
+    public function loginWithToken($token)
     {
-        // 🔹 Llamada al servicio remoto (ajusta la URL si tu entorno cambia)
+        // URL del servicio remoto
         $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
+
         $response = Http::get($url);
 
-        // --- CORRECCIÓN ---
-        // Se eliminó el bloque $request->validate([...])
-        // que causaba el bucle de redirección infinito.
-        // La validación se debe hacer en el controlador que RECIBE el formulario.
-        // --- FIN CORRECCIÓN ---
+            if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
+                return redirect()->route('student.token.error')
+                    ->withErrors(['error' => 'Token inválido o expirado.']);
+            }
 
-        if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
-            return redirect()->route('student.token.error')
-                ->withErrors(['error' => 'Token inválido o expirado.']);
-        }
-
+            
         $data = $response->json('data');
 
-        // 🔹 Extraer los datos del token
-        $cedula   = $data['cedula']   ?? null;
-        $nombre   = $data['nombre']   ?? null;
-        $usuario  = $data['usuario']  ?? null;
+        // Extraer datos del token
+        $cedula = $data['cedula'] ?? null;
+        $nombre = $data['nombre'] ?? null;
+        $usuario = $data['usuario'] ?? null;
         $facultad = $data['facultad'] ?? null;
-        $carrera  = $data['carrera']  ?? null;
+        $carrera = $data['carrera'] ?? null;
 
         if (!$cedula) {
             return redirect()->route('student.token.error')
                 ->withErrors(['error' => 'El token no contiene cédula válida.']);
         }
 
-        // 🔹 Buscar si el estudiante ya existe
+        // 🔹 Verificar si el estudiante ya existe
         $student = StudentRegistration::where('cedula', $cedula)->first();
 
         if ($student) {
-            // ✅ Ya existe — guardar sesión y redirigir directamente al agendamiento
+            // ✅ Ya existe → ir directamente al paso 5 (agendamiento)
             session([
                 'student_logged_in' => true,
                 'student_id' => $student->id,
                 'student_cedula' => $student->cedula,
-                'student_name' => $student->names, // Asegúrate de guardar el nombre también
+                'student_name' => $student->names,
             ]);
 
-            // 🔹 Nueva ruta que mostrará solo el paso 5
             return redirect()
                 ->route('student.agendamiento')
                 ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
         }
 
-        // --- CORRECCIÓN ---
-        // Se eliminó el bloque StudentRegistration::create([...])
-        // que causaba el error de 'edad' (ya que intentaba crear un usuario sin la edad).
-        
-        // 🔹 Si no existe, pre-llenamos el formulario 'student.personal'
-        $dataFromToken = [
-            'names' => $nombre,
-            'cedula' => $cedula,
-            'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
-            'facultad' => $facultad,
-            'carrera' => $carrera,
-        ];
+        // 🔹 NO crear registro, solo guardar datos en sesión
+        session([
+            'student_logged_in' => true,
+            'student_cedula' => $cedula,
+            'student_name' => $nombre,
+            'student_usuario' => $usuario,
+            'student_facultad' => $facultad,
+            'student_carrera' => $carrera,
+            'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+        ]);
 
-        // 🔹 Redirige a la vista de registro ('student.personal') con los datos
-        // 'withInput' flashea los datos a la sesión para que la función old() los pueda usar.
+        // Redirigir al formulario de datos personales (paso 1)
         return redirect()->route('student.personal')
-                        ->withInput($dataFromToken)
-                        ->with('info', 'Por favor complete su registro para continuar.');
+            ->with('info', 'Complete sus datos personales para continuar.');
     }
 
 }

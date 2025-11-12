@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
 use App\Models\Parameter; // Donde está el parámetro TERM
 use App\Models\Shift;
@@ -14,41 +14,42 @@ use App\Models\Faculty; // <-- AÑADIR ESTE
 use Illuminate\Validation\Rule; // <-- AÑADIR ESTE
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StudentRegistrationController extends Controller
 {
     // NUEVO: Login mediante token (desde PUCE)
-    public function loginWithToken($token)
-    {
-        // Ejemplo: URL del servicio remoto (ajústala según tu API real)
-        $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
+   public function loginWithToken($token)
+{
+    // URL del servicio remoto
+    $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
 
-        $response = Http::get($url);
+    $response = Http::get($url);
 
-        if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
-            return redirect()->route('student.token.error')
-                ->withErrors(['error' => 'Token inválido o expirado.']);
-        }
+    if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
+        return redirect()->route('student.token.error')
+            ->withErrors(['error' => 'Token inválido o expirado.']);
+    }
 
-        $data = $response->json('data');
+    $data = $response->json('data');
 
-        // Extraer los datos que vienen del token
-        $cedula = $data['cedula'] ?? null;
-        $nombre = $data['nombre'] ?? null;
-        $usuario = $data['usuario'] ?? null;
-        $facultad = $data['facultad'] ?? null;
-        $carrera = $data['carrera'] ?? null;
+    // Extraer datos del token
+    $cedula = $data['cedula'] ?? null;
+    $nombre = $data['nombre'] ?? null;
+    $usuario = $data['usuario'] ?? null;
+    $facultad = $data['facultad'] ?? null;
+    $carrera = $data['carrera'] ?? null;
 
-        if (!$cedula) {
-            return redirect()->route('student.token.error')
-                ->withErrors(['error' => 'El token no contiene cédula válida.']);
-        }
-         $student = StudentRegistration::where('cedula', $cedula)->first();
+    if (!$cedula) {
+        return redirect()->route('student.token.error')
+            ->withErrors(['error' => 'El token no contiene cédula válida.']);
+    }
 
-        if ($student) {
-        // ✅ Ya existe — guardar sesión y redirigir directamente al agendamiento
+    // 🔹 Verificar si el estudiante ya existe
+    $student = StudentRegistration::where('cedula', $cedula)->first();
+
+    if ($student) {
+        // ✅ Ya existe → ir directamente al paso 5 (agendamiento)
         session([
             'student_logged_in' => true,
             'student_id' => $student->id,
@@ -56,34 +57,27 @@ class StudentRegistrationController extends Controller
             'student_name' => $student->names,
         ]);
 
-            // Redirige al formulario de agendamiento (puedes cambiar el nombre de la ruta)
-           return redirect()
+        return redirect()
             ->route('student.agendamiento')
             ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
-        }
-
-        // Buscar o crear el estudiante
-        $student = StudentRegistration::firstOrCreate(
-            ['cedula' => $cedula],
-            [
-                'names' => $nombre,
-                'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
-                'facultad' => $facultad,
-                'carrera' => $carrera,
-            ]
-        );
-
-        // Guardar sesión
-        session()->put([
-            'student_logged_in' => true,
-            'student_id' => $student->id,
-            'student_cedula' => $student->cedula,
-            'student_name' => $student->names,
-        ]);
-
-        // Redirigir al formulario de datos personales
-        return redirect()->route('student.personal');
     }
+
+    // 🔹 NO crear registro, solo guardar datos en sesión
+    session([
+        'student_logged_in' => true,
+        'student_cedula' => $cedula,
+        'student_name' => $nombre,
+        'student_usuario' => $usuario,
+        'student_facultad' => $facultad,
+        'student_carrera' => $carrera,
+        'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+    ]);
+
+    // Redirigir al formulario de datos personales (paso 1)
+    return redirect()->route('student.personal')
+        ->with('info', 'Complete sus datos personales para continuar.');
+}
+
 
     // Paso 1: Términos
     public function showTerms()
@@ -106,41 +100,61 @@ class StudentRegistrationController extends Controller
 
     // Paso 2: Datos personales
     public function showPersonalForm()
-    {
-        //  Verificar sesión de estudiante
-        if (!session('student_logged_in')) {
-            return redirect()->route('token.login.form')->withErrors(['error' => 'Debe iniciar sesión con su token.']);
-        }
+{
+    // Verificar sesión de estudiante
+    if (!session('student_logged_in')) {
+        return redirect()->route('token.login.form')
+            ->withErrors(['error' => 'Debe iniciar sesión con su token.']);
+    }
 
-        $terminos = Parameter::where('clave', 'TERM')->first();
+    $terminos = Parameter::where('clave', 'TERM')->first();
+    $schedule = Schedule::orderBy('valid_from', 'desc')->first();
+    $today = Carbon::today();
 
-        $schedule = Schedule::orderBy('valid_from', 'desc')->first();
-        $today = Carbon::today();
+    $isAvailable = false;
+    $startDate = null;
 
-        $isAvailable = false;
-        $startDate = null;
+    if ($schedule) {
+        $startDate = Carbon::parse($schedule->valid_from);
+        $isAvailable = $today->greaterThanOrEqualTo($startDate);
+    }
 
-        if ($schedule) {
-            $startDate = Carbon::parse($schedule->valid_from);
-            $isAvailable = $today->greaterThanOrEqualTo($startDate);
-        }
-
-        if (!$isAvailable) {
-            return view('student.not_available', [
-                'startDate' => $startDate?->format('d/m/Y'),
-                'terminos' => $terminos
-            ]);
-        }
-
-        //  Recuperar datos del estudiante logueado
-        $student = StudentRegistration::find(session('student_id'));
-
-        // Pasamos los datos del estudiante al formulario
-        return view('student.personal_data', [
-            'terminos' => $terminos,
-            'student' => $student
+    if (!$isAvailable) {
+        return view('student.not_available', [
+            'startDate' => $startDate?->format('d/m/Y'),
+            'terminos' => $terminos
         ]);
     }
+
+    // 🔹 Recuperar datos del estudiante (BD o sesión)
+    $student = null;
+
+    if (session('student_id')) {
+        // Caso: ya tiene registro en BD
+        $student = StudentRegistration::find(session('student_id'));
+    }
+
+    if (!$student) {
+        // Caso: estudiante nuevo → usar los datos del token en sesión
+        $student = (object) [
+            'names' => session('student_name'),
+            'cedula' => session('student_cedula'),
+            'correo_puce' => session('student_correo'),
+            'facultad' => session('student_facultad'),
+            'carrera' => session('student_carrera'),
+        ];
+    }
+
+    // Pasamos los datos al formulario
+    return view('student.personal_data', [
+        'terminos' => $terminos,
+        'student' => $student,
+        'student_name' => session('student_name'),
+        'student_cedula' => session('student_cedula'),
+        'student_correo' => session('student_correo'),
+    ]);
+}
+
 
     // Guardar datos personales (opcional si usas finish())
     public function store(Request $request)
@@ -278,8 +292,8 @@ class StudentRegistrationController extends Controller
             'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
             // SI es 'grado', guarda la respuesta (ej: 'si' o 'no'). SI NO, guarda 'no' por defecto.
             'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
+            'motivo'=>$request->motivo,
             
-            'motivo' => $request->motivo, 
             'forma_pago' => $request->forma_pago,
             'valor_pagar' => $valor,
             'acepta_terminos' => true,

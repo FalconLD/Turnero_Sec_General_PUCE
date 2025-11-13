@@ -263,7 +263,7 @@ class StudentRegistrationController extends Controller
         $comprobantePath = null;
         if ($request->hasFile('comprobante')) {
             $comprobantePath = $request->file('comprobante')->store('public/comprobantes');
-            $comprobantePath = str_replace('public/', '', $comprobantePath);
+            $comprobantePath = str_replace('public/', 'storage/', $comprobantePath);
         }
 
         

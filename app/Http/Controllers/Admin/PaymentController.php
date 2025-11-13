@@ -117,4 +117,38 @@ class PaymentController extends Controller
 
         return redirect()->back()->with('warning', 'Pago rechazado.');
     }
+    /**
+ * Muestra el comprobante asociado al pago en el navegador.
+ */
+public function verComprobante(Payment $payment)
+{
+    if (!$payment->comprobante_base64) {
+        abort(404, 'Comprobante no encontrado.');
+    }
+
+    $data = base64_decode($payment->comprobante_base64);
+
+    return response($data)
+        ->header('Content-Type', $payment->comprobante_mime)
+        ->header('Content-Disposition', 'inline; filename="comprobante.' . explode('/', $payment->comprobante_mime)[1] . '"');
+}
+
+/**
+ * Descarga el comprobante asociado al pago.
+ */
+public function descargarComprobante(Payment $payment)
+{
+    if (!$payment->comprobante_base64) {
+        abort(404, 'Comprobante no encontrado.');
+    }
+
+    $data = base64_decode($payment->comprobante_base64);
+    $extension = explode('/', $payment->comprobante_mime)[1];
+    $filename = 'comprobante_' . $payment->id . '.' . $extension;
+
+    return response($data)
+        ->header('Content-Type', $payment->comprobante_mime)
+        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+}
+
 }

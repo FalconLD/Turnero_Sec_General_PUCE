@@ -183,16 +183,26 @@ class StudentRegistrationController extends Controller
                     ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
                     : 7.50;
 
+        $comprobanteBase64 = null;
+        $comprobanteMime = null;
+
+        if ($request->hasFile('comprobante')) {
+            $file = $request->file('comprobante');
+            $comprobanteBase64 = base64_encode(file_get_contents($file));
+            $comprobanteMime = $file->getMimeType();
+        }
+
         StudentRegistration::create(array_merge(
             $request->only([
-                'names','cedula','edad','fecha_nacimiento','telefono','direccion',
-                'correo_puce','facultad','carrera','nivel','motivo',
-                'nivel_instruccion','beca_san_ignacio','forma_pago'
+                'names', 'cedula', 'edad', 'fecha_nacimiento', 'telefono', 'direccion',
+                'correo_puce', 'facultad', 'carrera', 'nivel', 'motivo',
+                'nivel_instruccion', 'beca_san_ignacio', 'forma_pago'
             ]),
             [
                 'valor_pagar' => $valor,
                 'acepta_terminos' => true,
-                'comprobante' => $request->file('comprobante') ? $request->file('comprobante')->store('comprobantes') : null
+                'comprobante_base64' => $comprobanteBase64,
+                'comprobante_mime' => $comprobanteMime,
             ]
         ));
 
@@ -260,10 +270,13 @@ class StudentRegistrationController extends Controller
         }
         // ===== FIN DE LA VALIDACIÓN =====
 
-        $comprobantePath = null;
+        $comprobanteBase64 = null;
+        $comprobanteMime = null;
+
         if ($request->hasFile('comprobante')) {
-            $comprobantePath = $request->file('comprobante')->store('public/comprobantes');
-            $comprobantePath = str_replace('public/', '', $comprobantePath);
+            $file = $request->file('comprobante');
+            $comprobanteBase64 = base64_encode(file_get_contents($file));
+            $comprobanteMime = $file->getMimeType();
         }
 
         
@@ -297,7 +310,8 @@ class StudentRegistrationController extends Controller
             'forma_pago' => $request->forma_pago,
             'valor_pagar' => $valor,
             'acepta_terminos' => true,
-            'comprobante' => $comprobantePath,
+            'comprobante_base64' => $comprobanteBase64,
+            'comprobante_mime' => $comprobanteMime,
             'tomado' => 0, 
         ]);
 
@@ -306,7 +320,8 @@ class StudentRegistrationController extends Controller
             $student->payment()->create([
                 'amount'           => $valor, // El valor que calculaste
                 'payment_method'   => $request->forma_pago,
-                'comprobante_path' => $comprobantePath, // La ruta del archivo
+                'comprobante_base64' => $comprobanteBase64,
+                'comprobante_mime' => $comprobanteMime, // La ruta del archivo
                 'status'           => 'pending', // Siempre inicia como pendiente
             ]);
         } catch (\Exception $e) {

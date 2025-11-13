@@ -400,22 +400,9 @@ return [
         ],
         [
             'text' => 'Reportes',
-            'url' => '#',
+            'route' => 'dashboard.index',
             'icon' => 'fa fa-file',
-            'submenu' => [
-                [
-                    'text' => 'Reportes actuales',
-                    'url' => '#', 
-                ],
-                [
-                    'text' => 'Reportes históricos',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'Reportes Formularios',
-                    'url' => '#',
-                ],
-            ],
+            
         ],
         
     ],

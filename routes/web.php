@@ -1,23 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+    use Illuminate\Support\Facades\Route;
+    use Illuminate\Support\Facades\Auth;
 
-// Controladores generales
-use App\Http\Controllers\AsignacionController;
-use App\Http\Controllers\CubiculoController;
-use App\Http\Controllers\FormController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ParameterController;
-use App\Http\Controllers\DayController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\ShiftUnlockController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AttentionController;
- use App\Http\Controllers\StudentRegistrationController;
- use App\Http\Controllers\Auth\TokenLoginController;
+    // Controladores generales
+    use App\Http\Controllers\AsignacionController;
+    use App\Http\Controllers\CubiculoController;
+    use App\Http\Controllers\FormController;
+    use App\Http\Controllers\HomeController;
+    use App\Http\Controllers\ParameterController;
+    use App\Http\Controllers\DayController;
+    use App\Http\Controllers\ScheduleController;
+    use App\Http\Controllers\UserController;
+    use App\Http\Controllers\ShiftController;
+    use App\Http\Controllers\ShiftUnlockController;
+    use App\Http\Controllers\ProfileController;
+    use App\Http\Controllers\AttentionController;
+    use App\Http\Controllers\StudentRegistrationController;
+    use App\Http\Controllers\Auth\TokenLoginController;
+    use App\Http\Controllers\DashboardController;
  
  
 // --- Rutas de Autenticación ---
@@ -163,5 +164,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/validar-datos', [App\Http\Controllers\StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
  
 });

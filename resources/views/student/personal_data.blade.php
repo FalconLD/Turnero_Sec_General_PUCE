@@ -73,6 +73,68 @@
                             <label for="acepta_terminos">Acepto los términos y condiciones</label>
                         </div>
                     </div>
+                </div>
+
+
+
+                {{-- Paso 4: Pago --}}
+
+                <div class="form-step" style="display:none;">
+
+                    <h5 class="text-secondary mb-3">Datos de Pago y Motivo</h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label>Tipo de pago</label>
+
+                            <select class="form-select" id="tipo-pago" name="forma_pago" required>
+
+                                <option value="" selected disabled>Seleccione...</option>
+
+                                <option value="DeUna">DeUna</option>
+
+                                <option value="transferencia">Transferencia</option>
+
+                                <option value="efectivo">Efectivo</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-12" id="comprobante-container" style="display:none;">
+
+                            <label>Subir comprobante</label>
+
+                            <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf">
+                            <input type="hidden" name="comprobante_base64" id="comprobante_base64">
+
+                        </div>
+
+                        <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
+
+                            Una vez finalizada la inscripción, acérquese 10 minutos antes al Centro Médico de Fundación PuceSalud.
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <label>Motivo de consulta</label>
+
+                            <textarea class="form-control" name="motivo" rows="3" required></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                {{-- Paso 5: Agendamiento --}}
+
+               {{-- Paso 5: Agendamiento --}}
 
                     {{-- Paso 2: Datos personales --}}
                     @php
@@ -533,8 +595,150 @@
                     }
                 }
 
-                currentStep++;
-                showStep(currentStep);
+                // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
+                mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
+            
+            } else {
+                mensajePago.textContent = "";
+            }
+
+            mensajePago.classList.add("fs-5", "text-success", "mt-3");
+        }
+
+
+
+        // --- NUEVOS EVENT LISTENERS (AJAX) ---
+
+        // 1. Cuando cambia "Nivel de Instrucción" (Grado/Posgrado)
+        nivelRadios.forEach(radio => {
+            radio.addEventListener('change', async (e) => {
+                const nivelVal = e.target.value; // 'grado' o 'posgrado'
+
+                // A) Ejecutar la lógica de visibilidad y pago
+                actualizarPago(); 
+                
+                // B) Resetear y deshabilitar los selects dependientes
+                resetSelect(facultadSelect, 'Cargando facultades...');
+                resetSelect(carreraSelect, 'Seleccione primero una facultad...');
+
+                // C) Buscar facultades vía AJAX
+                try {
+                    // Usamos la ruta que creamos en web.php
+                    const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
+                    if (!response.ok) throw new Error('Error al cargar facultades');
+                    const faculties = await response.json();
+                    
+                    // D) Poblar el select de facultades
+                    populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
+                } catch (error) {
+                    console.error(error);
+                    resetSelect(facultadSelect, 'Error al cargar facultades');
+                }
+            });
+        });
+
+        // 2. Cuando cambia "Facultad"
+        facultadSelect.addEventListener('change', async (e) => {
+            const facultadVal = e.target.value;
+            const nivelVal = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
+
+            if (!facultadVal || !nivelVal) return;
+
+            // A) Resetear y deshabilitar el select de carrera
+            resetSelect(carreraSelect, 'Cargando carreras...');
+
+            // B) Buscar carreras vía AJAX
+            try {
+                // Usamos la ruta que creamos en web.php
+                const response = await fetch(`{{ route('get.programs') }}?nivel_instruccion=${nivelVal}&facultad=${facultadVal}`);
+                if (!response.ok) throw new Error('Error al cargar carreras');
+                const programs = await response.json();
+
+                // C) Poblar el select de carreras
+                populateSelect(carreraSelect, programs, 'programa_desc', 'programa_desc', 'Seleccione una carrera...');
+            } catch (error) {
+                console.error(error);
+                resetSelect(carreraSelect, 'Error al cargar carreras');
+            }
+        });
+
+        becaRadios.forEach(r => r.addEventListener('change', actualizarPago));
+
+
+
+        // === PAGO Y COMPROBANTE ===
+
+        const tipoPagoSelect = document.getElementById('tipo-pago');
+
+        const comprobanteContainer = document.getElementById('comprobante-container');
+
+        const pagoEfectivoNote = document.getElementById('pago-efectivo-note');
+
+
+
+        tipoPagoSelect.addEventListener('change', () => {
+            const val = tipoPagoSelect.value;
+
+            // Debe coincidir EXACTO con los valores de tu enum
+            comprobanteContainer.style.display = 
+                (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
+
+            pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
+        });
+
+
+
+        // === AGENDAMIENTO ===
+
+        const fechaInput = document.getElementById('fechaSeleccionada');
+
+        const modalidadSelect = document.getElementById('modalidadSelect');
+
+        const turnosContainer = document.getElementById('turnosContainer');
+
+        const turnoIdInput = document.getElementById('turno_id');
+
+        const dateShiftInput = document.getElementById('date_shift');
+
+        const shiftTimeInput = document.getElementById('shift_time');
+
+        const modalidadShiftInput = document.getElementById('modalidad_shift');
+
+
+
+      function cargarTurnos() {
+    const modalidad = modalidadSelect.value;
+    const fecha = fechaInput.value;
+
+    if (!modalidad || !fecha) return;
+
+    turnosContainer.innerHTML = '<p class="text-center text-muted">Cargando turnos...</p>';
+
+    fetch(`/shifts/${fecha}?modalidad=${modalidad}`)
+        .then(res => res.json())
+        .then(data => {
+            turnosContainer.innerHTML = '';
+
+            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
+                return;
+            }
+
+            data.data.forEach(turno => {
+                const div = document.createElement('div');
+                div.className = 'turno-card text-center';
+                div.innerHTML = `
+                    <strong>${turno.start_shift}</strong><br>
+                    <span class="text-muted small">${turno.end_shift}</span><br>
+                    <span class="badge bg-light text-dark mt-1">${turno.cubiculo}</span>
+                `;
+                div.onclick = () => {
+                    turnoIdInput.value = turno.id_shift;
+                    dateShiftInput.value = data.fecha_consulta; // viene del JSON principal
+                    shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
+                    modalidadShiftInput.value = turno.tipo_atencion;
+                    document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+                    div.classList.add('selected');
                 };
 
                 prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
@@ -809,5 +1013,74 @@
                     showStep(currentStep);
                 
             });
-    </script>
+        })
+        .catch(error => {
+            console.error("Error al cargar los turnos:", error);
+            turnosContainer.innerHTML = '<p class="text-danger text-center">Error al cargar los turnos.</p>';
+        });
+}
+
+    
+
+
+
+
+        fechaInput.addEventListener('change', cargarTurnos);
+
+        modalidadSelect.addEventListener('change', cargarTurnos);
+
+
+
+        // === CONFIRMACIÓN FINAL ===
+
+        function populateConfirmation() {
+
+            document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
+
+            document.getElementById('namesConfirm').textContent = document.querySelector('[name="names"]').value;
+
+            document.getElementById('correoConfirm').textContent = document.querySelector('[name="correo_puce"]').value;
+
+            document.getElementById('telefonoConfirm').textContent = document.querySelector('[name="telefono"]').value;
+
+            document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
+
+            document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
+
+        }
+
+
+
+        showStep(currentStep);
+
+    });
+    // === CONVERTIR ARCHIVO A BASE64 ===
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById("comprobante");
+    const base64Input = document.getElementById("comprobante_base64");
+
+    if (fileInput) {
+        fileInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                base64Input.value = reader.result; // Guarda base64 en el hidden
+            };
+
+            reader.readAsDataURL(file); // Convierte a base64
+        });
+    }
+
+});
+
+</script>
+
+
+
+
+
 @stop

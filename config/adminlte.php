@@ -369,6 +369,7 @@ return [
                     'route' => 'schedules.index',
                     'icon' => 'fa fa-clock',
                 ],
+                /* Secomenta en caso de necesitar mas funcionalidades o mas departamenteos para terminos y condiciones
                 [
                     'text' => 'Asignación',
                     'route' => 'asignacion.index',
@@ -378,7 +379,7 @@ return [
                     'text' => 'Formularios',
                     'route' => 'forms.index',
                     'icon' => 'fa fa-indent',
-                ],
+                ],*/
                 [
                     'text' => 'Parametros',
                     'route' => 'parameters.index',

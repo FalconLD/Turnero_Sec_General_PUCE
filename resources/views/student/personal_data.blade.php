@@ -309,23 +309,24 @@
 
                                 <option value="" selected disabled>Seleccione...</option>
 
-                                <option value="una_sola_vez">DE UNA</option>
+                                <option value="DeUna">DeUna</option>
 
-                                <option value="transferencia">TRANSFERENCIA</option>
+                                <option value="transferencia">Transferencia</option>
 
-                                <option value="efectivo">Pago en Efectivo</option>
+                                <option value="efectivo">Efectivo</option>
 
                             </select>
 
                         </div>
 
-                        <div class="mb-3">
-                            <label for="comprobante" class="form-label">Subir comprobante de pago (opcional)</label>
-                            <input type="file" class="form-control" id="comprobante" accept="image/*,application/pdf">
+                        <div class="col-md-12" id="comprobante-container" style="display:none;">
+
+                            <label>Subir comprobante</label>
+
+                            <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf">
                             <input type="hidden" name="comprobante_base64" id="comprobante_base64">
 
                         </div>
-
 
                         <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
 
@@ -1061,13 +1062,13 @@
 
 
         tipoPagoSelect.addEventListener('change', () => {
-
             const val = tipoPagoSelect.value;
 
-            comprobanteContainer.style.display = (val === 'una_sola_vez' || val === 'transferencia') ? 'block' : 'none';
+            // Debe coincidir EXACTO con los valores de tu enum
+            comprobanteContainer.style.display = 
+                (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
 
-            pagoEfectivoNote.style.display = val === 'efectivo' ? 'block' : 'none';
-
+            pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
         });
 
 
@@ -1145,23 +1146,6 @@
         modalidadSelect.addEventListener('change', cargarTurnos);
 
 
-            // === Convertir archivo comprobante a Base64 ===
-            document.getElementById('comprobante').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                const hiddenInput = document.getElementById('comprobante_base64');
-
-                if (!file) {
-                    hiddenInput.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    hiddenInput.value = e.target.result; // Guarda el base64 completo (data:...;base64,...)
-                    console.log('✅ Comprobante convertido a base64');
-                };
-                reader.readAsDataURL(file);
-            });
 
         // === CONFIRMACIÓN FINAL ===
 
@@ -1186,6 +1170,28 @@
         showStep(currentStep);
 
     });
+    // === CONVERTIR ARCHIVO A BASE64 ===
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById("comprobante");
+    const base64Input = document.getElementById("comprobante_base64");
+
+    if (fileInput) {
+        fileInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                base64Input.value = reader.result; // Guarda base64 en el hidden
+            };
+
+            reader.readAsDataURL(file); // Convierte a base64
+        });
+    }
+
+});
 
 </script>
 

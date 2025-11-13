@@ -176,13 +176,19 @@
                         </div>
 
                         <div class="col-md-6">
-
                             <label>Celular</label>
-
-                            <input type="text" class="form-control" name="telefono" maxlength="10" pattern="\d{10}"
-
-                                title="Debe contener exactamente 10 dígitos numéricos" required>
-
+                            <input type="text" 
+                                class="form-control" 
+                                name="telefono" 
+                                id="inputTelefono"
+                                maxlength="10" 
+                                inputmode="numeric"
+                                placeholder="0999999999"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                required>
+                            <div id="errorTelefono" class="text-danger small mt-1" style="display:none;">
+                                El número debe empezar con 09 y tener 10 dígitos.
+                            </div>
                         </div>
 
                         <div class="col-md-12">
@@ -880,25 +886,54 @@
 
 
         function validateCurrentStep() {
+    const step = steps[currentStep];
+    const requireds = step.querySelectorAll('[required]');
+    
+    // Ocultar mensaje de error de teléfono previo si existe
+    const errorTel = document.getElementById('errorTelefono');
+    if(errorTel) errorTel.style.display = 'none';
 
-            const step = steps[currentStep];
+    for (let el of requireds) {
+        // 1. Validación de campos vacíos (Tu lógica original)
+        if (el.type === 'radio') {
+            const name = el.name;
+            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
+                        el.focus(); 
+                        return false; 
+                    }
+                } else if (!el.value || el.value.trim() === '') { 
+                    el.focus(); 
+                    // Añadimos borde rojo para feedback visual
+                    el.classList.add('is-invalid'); 
+                    // Quitamos borde rojo cuando el usuario empiece a escribir
+                    el.addEventListener('input', () => el.classList.remove('is-invalid'), {once: true});
+                    return false; 
+                }
 
-            const requireds = step.querySelectorAll('[required]');
-
-            for (let el of requireds) {
-
-                if (el.type === 'radio') {
-
-                    const name = el.name;
-
-                    if (!step.querySelector(`input[name="${name}"]:checked`)) { el.focus(); return false; }
-
-                } else if (!el.value || el.value.trim() === '') { el.focus(); return false; }
-
+                // 2. Validación ESPECÍFICA para el Celular de Ecuador
+                if (el.name === 'telefono') {
+                    // Regex: Empieza con 09 (^09) seguido de 8 dígitos (\d{8}) y fin de cadena ($)
+                    const ecuadorPhonePattern = /^09\d{8}$/;
+                    
+                    if (!ecuadorPhonePattern.test(el.value)) {
+                        el.focus();
+                        el.classList.add('is-invalid');
+                        
+                        // Mostramos el mensaje de error específico
+                        if(errorTel) errorTel.style.display = 'block';
+                        
+                        alert("Por favor, ingrese un número de celular válido de Ecuador (Empieza con 09 y tiene 10 dígitos).");
+                        
+                        el.addEventListener('input', () => {
+                            el.classList.remove('is-invalid');
+                            if(errorTel) errorTel.style.display = 'none';
+                        }, {once: true});
+                        
+                        return false;
+                    }
+                }
             }
-
             return true;
-
         }
 
 

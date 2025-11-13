@@ -165,9 +165,9 @@ class StudentRegistrationController extends Controller
         $request->validate([
             'names' => 'required|string|max:255',
             'cedula' => 'required|string|max:36',
-            'edad' => 'required|integer|min:0',
-            'fecha_nacimiento' => 'required|date',
-            'telefono' => 'required|string|max:20',
+            'edad' => 'required|integer|min:17|max:80',
+            'fecha_nacimiento' => 'required|date|before_or_equal:today',
+            'telefono' => 'required|string|digits:10|regex:/^09\d{8}$/', // <-- AHORA
             'direccion' => 'required|string|max:255',
             'correo_puce' => 'required|email',
             'facultad' => 'required|string',
@@ -224,9 +224,9 @@ class StudentRegistrationController extends Controller
             // Datos Personales
             'names' => 'required|string|max:255',
             'cedula' => 'required|string|max:36',
-            'edad' => 'required|integer|min:0',
-            'fecha_nacimiento' => 'required|date',
-            'telefono' => 'required|string|max:20',
+            'edad' => 'required|integer|min:17|max:80',
+            'fecha_nacimiento' => 'required|date|before_or_equal:today',
+            'telefono' => 'required|string|digits:10|regex:/^09\d{8}$/',
             'direccion' => 'required|string|max:255',
             'correo_puce' => 'required|email',
             

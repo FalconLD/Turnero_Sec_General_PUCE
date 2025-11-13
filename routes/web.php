@@ -1,23 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+    use Illuminate\Support\Facades\Route;
+    use Illuminate\Support\Facades\Auth;
 
-// Controladores generales
-use App\Http\Controllers\AsignacionController;
-use App\Http\Controllers\CubiculoController;
-use App\Http\Controllers\FormController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ParameterController;
-use App\Http\Controllers\DayController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\ShiftUnlockController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AttentionController;
- use App\Http\Controllers\StudentRegistrationController;
- use App\Http\Controllers\Auth\TokenLoginController;
+    // Controladores generales
+    use App\Http\Controllers\AsignacionController;
+    use App\Http\Controllers\CubiculoController;
+    use App\Http\Controllers\FormController;
+    use App\Http\Controllers\HomeController;
+    use App\Http\Controllers\ParameterController;
+    use App\Http\Controllers\DayController;
+    use App\Http\Controllers\ScheduleController;
+    use App\Http\Controllers\UserController;
+    use App\Http\Controllers\ShiftController;
+    use App\Http\Controllers\ShiftUnlockController;
+    use App\Http\Controllers\ProfileController;
+    use App\Http\Controllers\AttentionController;
+    use App\Http\Controllers\StudentRegistrationController;
+    use App\Http\Controllers\Auth\TokenLoginController;
+    use App\Http\Controllers\DashboardController;
  
  
 // --- Rutas de Autenticación ---
@@ -96,7 +97,16 @@ Route::middleware(['auth'])->group(function () {
     //Ruta para el registro de la hora y fecha de estudiantes. 
    // Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
 
+    
+    Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
+     ->name('payments.index');
+     
+    // La ruta ahora recibe el ID del {payment}
+    Route::post('payments/{payment}/verify', [App\Http\Controllers\Admin\PaymentController::class, 'verify'])
+        ->name('payments.verify');
 
+    Route::post('payments/{payment}/reject', [App\Http\Controllers\Admin\PaymentController::class, 'reject'])
+        ->name('payments.reject');
 
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
@@ -154,5 +164,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/validar-datos', [App\Http\Controllers\StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
  
 });

@@ -29,4 +29,13 @@ class StudentRegistration extends Model
         'comprobante',
         'tomado'
     ];
+
+    /**
+     * Obtiene el registro de pago asociado con este registro de estudiante.
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
 }

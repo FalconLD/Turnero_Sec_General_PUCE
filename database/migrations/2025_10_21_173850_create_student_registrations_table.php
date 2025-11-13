@@ -25,7 +25,7 @@ return new class extends Migration
             $table->text('motivo');
 
             // Campos de selección
-            $table->enum('nivel_instruccion', ['grado', 'posgrado']);
+            $table->enum('nivel_instruccion', ['tec','grado', 'posgrado','especializacion']);
             $table->enum('beca_san_ignacio', ['si', 'no']);
 
             // Valor calculado

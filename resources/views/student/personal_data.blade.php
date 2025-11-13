@@ -140,8 +140,8 @@
 
                 {{-- Paso 2: Datos personales --}}
                 @php
-    $student = session('student_data');
-@endphp
+                    $student = session('student_data');
+                @endphp
 
                 <div class="form-step" style="display:none;">
 

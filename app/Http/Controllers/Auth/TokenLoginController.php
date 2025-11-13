@@ -82,63 +82,64 @@ class TokenLoginController extends Controller
     }
 
     
-   public function loginWithToken($token)
-{
-    // URL del servicio remoto
-    $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
+    public function loginWithToken($token)
+    {
+        // URL del servicio remoto
+        $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
 
-    $response = Http::get($url);
+        $response = Http::get($url);
 
-    if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
-        return redirect()->route('student.token.error')
-            ->withErrors(['error' => 'Token inválido o expirado.']);
-    }
+            if ($response->failed() || !$response->json('status') || $response->json('status') !== 'success') {
+                return redirect()->route('student.token.error')
+                    ->withErrors(['error' => 'Token inválido o expirado.']);
+            }
 
-    $data = $response->json('data');
+            
+        $data = $response->json('data');
 
-    // Extraer datos del token
-    $cedula = $data['cedula'] ?? null;
-    $nombre = $data['nombre'] ?? null;
-    $usuario = $data['usuario'] ?? null;
-    $facultad = $data['facultad'] ?? null;
-    $carrera = $data['carrera'] ?? null;
+        // Extraer datos del token
+        $cedula = $data['cedula'] ?? null;
+        $nombre = $data['nombre'] ?? null;
+        $usuario = $data['usuario'] ?? null;
+        $facultad = $data['facultad'] ?? null;
+        $carrera = $data['carrera'] ?? null;
 
-    if (!$cedula) {
-        return redirect()->route('student.token.error')
-            ->withErrors(['error' => 'El token no contiene cédula válida.']);
-    }
+        if (!$cedula) {
+            return redirect()->route('student.token.error')
+                ->withErrors(['error' => 'El token no contiene cédula válida.']);
+        }
 
-    // 🔹 Verificar si el estudiante ya existe
-    $student = StudentRegistration::where('cedula', $cedula)->first();
+        // 🔹 Verificar si el estudiante ya existe
+        $student = StudentRegistration::where('cedula', $cedula)->first();
 
-    if ($student) {
-        // ✅ Ya existe → ir directamente al paso 5 (agendamiento)
+        if ($student) {
+            // ✅ Ya existe → ir directamente al paso 5 (agendamiento)
+            session([
+                'student_logged_in' => true,
+                'student_id' => $student->id,
+                'student_cedula' => $student->cedula,
+                'student_name' => $student->names,
+            ]);
+
+            return redirect()
+                ->route('student.agendamiento')
+                ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
+        }
+
+        // 🔹 NO crear registro, solo guardar datos en sesión
         session([
             'student_logged_in' => true,
-            'student_id' => $student->id,
-            'student_cedula' => $student->cedula,
-            'student_name' => $student->names,
+            'student_cedula' => $cedula,
+            'student_name' => $nombre,
+            'student_usuario' => $usuario,
+            'student_facultad' => $facultad,
+            'student_carrera' => $carrera,
+            'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null,
         ]);
 
-        return redirect()
-            ->route('student.agendamiento')
-            ->with('info', 'Bienvenido nuevamente, por favor agende su cita.');
+        // Redirigir al formulario de datos personales (paso 1)
+        return redirect()->route('student.personal')
+            ->with('info', 'Complete sus datos personales para continuar.');
     }
-
-    // 🔹 NO crear registro, solo guardar datos en sesión
-    session([
-        'student_logged_in' => true,
-        'student_cedula' => $cedula,
-        'student_name' => $nombre,
-        'student_usuario' => $usuario,
-        'student_facultad' => $facultad,
-        'student_carrera' => $carrera,
-        'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null,
-    ]);
-
-    // Redirigir al formulario de datos personales (paso 1)
-    return redirect()->route('student.personal')
-        ->with('info', 'Complete sus datos personales para continuar.');
-}
 
 }

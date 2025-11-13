@@ -23,7 +23,7 @@
                     <th>Estado</th>
                     <td>
                         @if($student)
-                            {{ $student->tomado == 1 ? 'Bloqueado' : 'Desbloqueado' }}
+                            {{ $student->tomado == 1 ? 'Desbloqueado' : 'Bloqueado' }}
                         @else
                             No disponible
                         @endif
@@ -31,7 +31,7 @@
                 </tr>
             </table>
 
-            @if($student && $student->tomado == 1)
+            @if($student && $student->tomado == 0)
                 <div class="text-center mt-3">
                     <a href="{{ route('shift_unlock.unlock', $shift->person_shift) }}" class="btn btn-success">
                         Desbloquear

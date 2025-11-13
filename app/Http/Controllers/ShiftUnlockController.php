@@ -47,7 +47,7 @@ class ShiftUnlockController extends Controller
             return redirect()->back()->with('error', 'No se encontró el estudiante.');
         }
 
-        $student->tomado = 0;
+        $student->tomado = 1; // esta parte depende 
         $student->save();
 
         return redirect()->route('shift_unlock.search')->with('success', 'Estudiante desbloqueado correctamente.');

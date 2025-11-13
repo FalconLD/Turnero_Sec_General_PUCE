@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
 use App\Models\Parameter; // Donde está el parámetro TERM
 use App\Models\Shift;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentRegistered;
 use App\Models\Schedule;
@@ -15,6 +16,7 @@ use Illuminate\Validation\Rule; // <-- AÑADIR ESTE
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+
 
 class StudentRegistrationController extends Controller
 {
@@ -157,57 +159,79 @@ class StudentRegistrationController extends Controller
 
 
     // Guardar datos personales (opcional si usas finish())
-    public function store(Request $request)
-    {
-        if (!session('student_logged_in')) {
-            return redirect()->route('token.login.form')->withErrors(['error' => 'Debe iniciar sesión con su token.']);
-        }
-        $request->validate([
-            'names' => 'required|string|max:255',
-            'cedula' => 'required|string|max:36',
-            'edad' => 'required|integer|min:0',
-            'fecha_nacimiento' => 'required|date',
-            'telefono' => 'required|string|max:20',
-            'direccion' => 'required|string|max:255',
-            'correo_puce' => 'required|email',
-            'facultad' => 'required|string',
-            'carrera' => 'required|string',
-            'nivel' => 'required|string',
-            'motivo' => 'required|string',
-            'nivel_instruccion' => 'required|string',
-            'beca_san_ignacio' => 'required|string',
-            'forma_pago' => 'required|string',
-        ]);
+            public function store(Request $request)
+            {
+                if (!session('student_logged_in')) {
+                    return redirect()->route('token.login.form')->withErrors(['error' => 'Debe iniciar sesión con su token.']);
+                }
 
-        $valor = ($request->nivel_instruccion === 'grado')
-                    ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
-                    : 7.50;
+                $request->validate([
+                    'names' => 'required|string|max:255',
+                    'cedula' => 'required|string|max:36',
+                    'edad' => 'required|integer|min:0',
+                    'fecha_nacimiento' => 'required|date',
+                    'telefono' => 'required|string|max:20',
+                    'direccion' => 'required|string|max:255',
+                    'correo_puce' => 'required|email',
+                    'facultad' => 'required|string',
+                    'carrera' => 'required|string',
+                    'nivel' => 'required|string',
+                    'motivo' => 'required|string',
+                    'nivel_instruccion' => 'required|string',
+                    'beca_san_ignacio' => 'required|string',
+                    'forma_pago' => 'required|string',
+                    'comprobante' => 'nullable|file|max:5120',
+                ]);
 
-        $comprobanteBase64 = null;
-        $comprobanteMime = null;
+                $valor = ($request->nivel_instruccion === 'grado')
+                            ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
+                            : 7.50;
 
-        if ($request->hasFile('comprobante')) {
-            $file = $request->file('comprobante');
-            $comprobanteBase64 = base64_encode(file_get_contents($file));
-            $comprobanteMime = $file->getMimeType();
-        }
+                $comprobanteBase64 = null;
+                $comprobanteMime = null;
 
-        StudentRegistration::create(array_merge(
-            $request->only([
-                'names', 'cedula', 'edad', 'fecha_nacimiento', 'telefono', 'direccion',
-                'correo_puce', 'facultad', 'carrera', 'nivel', 'motivo',
-                'nivel_instruccion', 'beca_san_ignacio', 'forma_pago'
-            ]),
-            [
-                'valor_pagar' => $valor,
-                'acepta_terminos' => true,
-                'comprobante_base64' => $comprobanteBase64,
-                'comprobante_mime' => $comprobanteMime,
-            ]
-        ));
+                if ($request->hasFile('comprobante')) {
+                    $file = $request->file('comprobante');
+                    $comprobanteBase64 = base64_encode(file_get_contents($file));
+                    $comprobanteMime = $file->getMimeType();
+                }
 
-        return redirect()->route('student.success')->with('success', 'Registro guardado correctamente.');
-    }
+                $student = StudentRegistration::create([
+                    'names' => $request->names,
+                    'cedula' => $request->cedula,
+                    'edad' => $request->edad,
+                    'fecha_nacimiento' => $request->fecha_nacimiento,
+                    'telefono' => $request->telefono,
+                    'direccion' => $request->direccion,
+                    'correo_puce' => $request->correo_puce,
+                    'facultad' => $request->facultad,
+                    'carrera' => $request->carrera,
+                    'nivel' => $request->nivel,
+                    'motivo' => $request->motivo,
+                    'nivel_instruccion' => $request->nivel_instruccion,
+                    'beca_san_ignacio' => $request->beca_san_ignacio,
+                    'forma_pago' => $request->forma_pago,
+                    'valor_pagar' => $valor,
+                    'acepta_terminos' => true,
+                    'comprobante_base64' => $comprobanteBase64,
+                    'comprobante_mime' => $comprobanteMime,
+                    'tomado' => 0,
+                ]);
+
+                try {
+                    $student->payment()->create([
+                        'amount' => $valor,
+                        'payment_method' => $request->forma_pago,
+                        'comprobante_base64' => $comprobanteBase64,
+                        'comprobante_mime' => $comprobanteMime,
+                        'status' => 'pending',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear el pago: ' . $e->getMessage());
+                }
+
+                return redirect()->route('student.success')->with('success', 'Registro guardado correctamente.');
+            }
 
     public function success()
     {
@@ -215,132 +239,107 @@ class StudentRegistrationController extends Controller
     }
 
     // Guardar todo y asignar turno
-    public function finish(Request $request)
-    {
-        // =======================================================
-        // 1. REGLAS DE VALIDACIÓN 
-        // =======================================================
-        $request->validate([
-            // Datos Personales
-            'names' => 'required|string|max:255',
-            'cedula' => 'required|string|max:36',
-            'edad' => 'required|integer|min:0',
-            'fecha_nacimiento' => 'required|date',
-            'telefono' => 'required|string|max:20',
-            'direccion' => 'required|string|max:255',
-            'correo_puce' => 'required|email',
-            
-            // Turno
-            'turno_id' => 'required|exists:shifts,id_shift',
-            
-            // --- VALIDACIÓN ACADÉMICA 
-            'nivel_instruccion' => 'required|string|in:grado,tec,posgrado,especializacion',
-            'facultad' => 'required|string', 
-            'carrera' => 'required|string', 
-            'nivel' => [ // Nivel de semestre (Primero, Segundo...)
-                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
-                'nullable', // Permite que sea nulo si es posgrado
-                'string',
-            ],
-            'beca_san_ignacio' => [
-                Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
-                'nullable', // Permite que sea nulo si es posgrado
-                'string',
-            ],
-            // --- FIN VALIDACIÓN ACADÉMICA ---
+            public function finish(Request $request)
+            {
+                $request->validate([
+                    'names' => 'required|string|max:255',
+                    'cedula' => 'required|string|max:36',
+                    'edad' => 'required|integer|min:0',
+                    'fecha_nacimiento' => 'required|date',
+                    'telefono' => 'required|string|max:20',
+                    'direccion' => 'required|string|max:255',
+                    'correo_puce' => 'required|email',
+                    'turno_id' => 'required|exists:shifts,id_shift',
+                    'nivel_instruccion' => 'required|string|in:grado,tec,posgrado,especializacion',
+                    'facultad' => 'required|string',
+                    'carrera' => 'required|string',
+                    'nivel' => [
+                        Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                        'nullable',
+                        'string',
+                    ],
+                    'beca_san_ignacio' => [
+                        Rule::requiredIf(in_array($request->input('nivel_instruccion'), ['grado', 'tec'])),
+                        'nullable',
+                        'string',
+                    ],
+                    'motivo' => 'required|string',
+                    'forma_pago' => 'required|string',
+                ]);
 
-            // Pago y Motivo
-            'motivo' => 'required|string',
-            'forma_pago' => 'required|string',
-        ]);
+                $cedula = trim($request->cedula);
+                $correo = trim($request->correo_puce);
 
-        $cedula = trim($request->cedula);
-        $correo = trim($request->correo_puce);
-        // ===== Validación de identificadores unicos y controlar errores =====
-        if (StudentRegistration::where('cedula', $cedula)->exists()) { // Usar $cedula (limpia)
-            return redirect()->back()
-                            ->with('error', 'La cédula ' . $cedula . ' ya se encuentra registrada.')
-                            ->withInput(); 
-        }
-        
-        if (StudentRegistration::where('correo_puce', $correo)->exists()) { // Usar $correo (limpio)
-            return redirect()->back()
-                            ->with('error', 'El correo electrónico ' . $correo . ' ya se encuentra registrado.')
-                            ->withInput();
-        }
-        // ===== FIN DE LA VALIDACIÓN =====
+                if (StudentRegistration::where('cedula', $cedula)->exists()) {
+                    return back()->with('error', 'La cédula ya está registrada.')->withInput();
+                }
 
-        $comprobanteBase64 = null;
-        $comprobanteMime = null;
+                if (StudentRegistration::where('correo_puce', $correo)->exists()) {
+                    return back()->with('error', 'El correo ya está registrado.')->withInput();
+                }
 
-        if ($request->hasFile('comprobante')) {
-            $file = $request->file('comprobante');
-            $comprobanteBase64 = base64_encode(file_get_contents($file));
-            $comprobanteMime = $file->getMimeType();
-        }
+                // ✅ Nuevo manejo de comprobante (acepta archivo o base64)
+                $comprobanteBase64 = null;
+                $comprobanteMime = null;
 
-        
-       // 2.LÓGICA DE VALOR A PAGAR
-        $isGradoOrTec = in_array($request->nivel_instruccion, ['grado', 'tec']); // <--- CAMBIO AQUÍ
-        
-        $valor = ($isGradoOrTec)
-                    ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50) // Lógica Grado/Tec
-                    : 7.50; // Lógica Posgrado/Especialización
+                if ($request->hasFile('comprobante')) {
+                    $file = $request->file('comprobante');
+                    $comprobanteBase64 = base64_encode(file_get_contents($file));
+                    $comprobanteMime = $file->getMimeType();
+                } elseif ($request->filled('comprobante_base64')) {
+                    $fileData = explode(',', $request->input('comprobante_base64'));
+                    $comprobanteBase64 = end($fileData);
+                    $comprobanteMime = finfo_buffer(finfo_open(), base64_decode($comprobanteBase64), FILEINFO_MIME_TYPE);
+                }
 
-        // =======================================================
-        // 2. CORRECCIÓN DEL CREATE (Añadiendo 'motivo')
-        // =======================================================
-        $student = StudentRegistration::create([
-            'names' => $request->names,
-            'cedula' => $cedula,
-            'edad' => $request->edad,
-            'fecha_nacimiento' => $request->fecha_nacimiento,
-            'telefono' => $request->telefono,
-            'direccion' => $request->direccion,
-            'correo_puce' => $correo,
-            'facultad' => $request->facultad,
-            'carrera' => $request->carrera,
-            'nivel_instruccion' => $request->nivel_instruccion,
-            // SI es 'grado', guarda el nivel (ej: 'Primero'). SI NO, guarda 'N/A'.
-            'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
-            // SI es 'grado', guarda la respuesta (ej: 'si' o 'no'). SI NO, guarda 'no' por defecto.
-            'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
-            'motivo'=>$request->motivo,
-            
-            'forma_pago' => $request->forma_pago,
-            'valor_pagar' => $valor,
-            'acepta_terminos' => true,
-            'comprobante_base64' => $comprobanteBase64,
-            'comprobante_mime' => $comprobanteMime,
-            'tomado' => 0, 
-        ]);
+                $isGradoOrTec = in_array($request->nivel_instruccion, ['grado', 'tec']);
+                $valor = $isGradoOrTec
+                    ? ($request->beca_san_ignacio === 'si' ? 0.50 : 2.50)
+                    : 7.50;
 
-        // Ahora, crea el registro de pago vinculado en la nueva tabla 'payments'
-        try {
-            $student->payment()->create([
-                'amount'           => $valor, // El valor que calculaste
-                'payment_method'   => $request->forma_pago,
-                'comprobante_base64' => $comprobanteBase64,
-                'comprobante_mime' => $comprobanteMime, // La ruta del archivo
-                'status'           => 'pending', // Siempre inicia como pendiente
-            ]);
-        } catch (\Exception $e) {
-            // Manejar un error aquí si falla la creación del pago
-            // (Aunque si la migración está bien, no debería fallar)
-        }
+                $student = StudentRegistration::create([
+                    'names' => $request->names,
+                    'cedula' => $cedula,
+                    'edad' => $request->edad,
+                    'fecha_nacimiento' => $request->fecha_nacimiento,
+                    'telefono' => $request->telefono,
+                    'direccion' => $request->direccion,
+                    'correo_puce' => $correo,
+                    'facultad' => $request->facultad,
+                    'carrera' => $request->carrera,
+                    'nivel_instruccion' => $request->nivel_instruccion,
+                    'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
+                    'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
+                    'motivo' => $request->motivo,
+                    'forma_pago' => $request->forma_pago,
+                    'valor_pagar' => $valor,
+                    'acepta_terminos' => true,
+                    'comprobante_base64' => $comprobanteBase64,
+                    'comprobante_mime' => $comprobanteMime,
+                    'tomado' => 0,
+                ]);
 
-        
-        $turno = Shift::with('cubicle')->find($request->turno_id);
-        $turno->person_shift = $student->cedula;
-        $turno->status_shift = 0; // 0 = Ocupado
-        $turno->save();
+                try {
+                    $student->payment()->create([
+                        'amount' => $valor,
+                        'payment_method' => $request->forma_pago,
+                        'comprobante_base64' => $comprobanteBase64,
+                        'comprobante_mime' => $comprobanteMime,
+                        'status' => 'pending',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear pago: ' . $e->getMessage());
+                }
 
+                $turno = Shift::with('cubicle')->find($request->turno_id);
+                $turno->person_shift = $student->cedula;
+                $turno->status_shift = 0;
+                $turno->save();
 
-        
-        Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
+                Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
 
-        return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');
-    }
+                return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');
+            }
     
        public function agendarTurno(Request $request)
 {

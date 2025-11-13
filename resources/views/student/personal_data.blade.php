@@ -319,13 +319,13 @@
 
                         </div>
 
-                        <div class="col-md-12" id="comprobante-container" style="display:none;">
-
-                            <label>Subir comprobante</label>
-
-                            <input type="file" class="form-control" accept=".pdf,.jpg,.png" name="comprobante">
+                        <div class="mb-3">
+                            <label for="comprobante" class="form-label">Subir comprobante de pago (opcional)</label>
+                            <input type="file" class="form-control" id="comprobante" accept="image/*,application/pdf">
+                            <input type="hidden" name="comprobante_base64" id="comprobante_base64">
 
                         </div>
+
 
                         <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
 
@@ -1145,6 +1145,23 @@
         modalidadSelect.addEventListener('change', cargarTurnos);
 
 
+            // === Convertir archivo comprobante a Base64 ===
+            document.getElementById('comprobante').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                const hiddenInput = document.getElementById('comprobante_base64');
+
+                if (!file) {
+                    hiddenInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    hiddenInput.value = e.target.result; // Guarda el base64 completo (data:...;base64,...)
+                    console.log('✅ Comprobante convertido a base64');
+                };
+                reader.readAsDataURL(file);
+            });
 
         // === CONFIRMACIÓN FINAL ===
 

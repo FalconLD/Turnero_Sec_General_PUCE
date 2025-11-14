@@ -19,6 +19,7 @@
     use App\Http\Controllers\StudentRegistrationController;
     use App\Http\Controllers\Auth\TokenLoginController;
     use App\Http\Controllers\DashboardController;
+    use App\Http\Controllers\Admin\PaymentController;
  
  
 // --- Rutas de Autenticación ---
@@ -107,6 +108,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('payments/{payment}/reject', [App\Http\Controllers\Admin\PaymentController::class, 'reject'])
         ->name('payments.reject');
+    Route::get('/admin/payments/{payment}/ver', [PaymentController::class, 'verComprobante'])->name('payments.verComprobante');
+    Route::get('/admin/payments/{payment}/descargar', [PaymentController::class, 'descargarComprobante'])->name('payments.descargarComprobante');
 
     // --- Rutas de Recursos (CRUD) ---
     // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.

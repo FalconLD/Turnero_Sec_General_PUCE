@@ -311,9 +311,9 @@
 
                                 <option value="DeUna">DeUna</option>
 
-                                <option value="transferencia">Transferencia</option>
+                                <option value="Transferencia">Transferencia</option>
 
-                                <option value="efectivo">Efectivo</option>
+                                <option value="Efectivo">Efectivo</option>
 
                             </select>
 
@@ -907,7 +907,7 @@
         // === LÓGICA NIVEL / BECA / PAGO ===
 
         const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
-        
+       
         // Contenedores dinámicos
         const becaPreguntaContainer = document.getElementById('beca_pregunta_container');
         const nivelSemestreContainer = document.getElementById('nivel_semestre_container');
@@ -937,7 +937,7 @@
             selectElement.disabled = true;
         }
 
-         // ---actualizarPago ---   
+         // ---actualizarPago ---  
         function actualizarPago() {
             const nivelSeleccionado = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
             const becaSeleccionada = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
@@ -946,7 +946,7 @@
 
             // --- GRUPO 1: Grado y Tec (Muestran beca y nivel de semestre) ---
             if (nivelSeleccionado === 'grado' || nivelSeleccionado === 'tec') {
-                
+               
                 // Muestra Beca y Nivel(semestre)
                 if (becaPreguntaContainer) becaPreguntaContainer.style.display = "block";
                 if (nivelSemestreContainer) nivelSemestreContainer.style.display = "block";
@@ -966,13 +966,13 @@
 
             // --- GRUPO 2: Posgrado y Especialización (Ocultan todo) ---
             } else if (nivelSeleccionado === 'posgrado' || nivelSeleccionado === 'especializacion') {
-                
+               
                 // Oculta Beca y Nivel(semestre)
                 if (becaPreguntaContainer) becaPreguntaContainer.style.display = "none";
                 if (nivelSemestreContainer) nivelSemestreContainer.style.display = "none";
-                
+               
                 // Quita 'required' de los campos ocultos
-                nivelSemestreSelect.required = false; 
+                nivelSemestreSelect.required = false;
                 document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = false);
 
                 // Selecciona automáticamente "No" en la beca (lógica de backend)
@@ -982,7 +982,7 @@
 
                 // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
                 mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
-            
+           
             } else {
                 mensajePago.textContent = "";
             }
@@ -1000,8 +1000,8 @@
                 const nivelVal = e.target.value; // 'grado' o 'posgrado'
 
                 // A) Ejecutar la lógica de visibilidad y pago
-                actualizarPago(); 
-                
+                actualizarPago();
+               
                 // B) Resetear y deshabilitar los selects dependientes
                 resetSelect(facultadSelect, 'Cargando facultades...');
                 resetSelect(carreraSelect, 'Seleccione primero una facultad...');
@@ -1012,7 +1012,7 @@
                     const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
                     if (!response.ok) throw new Error('Error al cargar facultades');
                     const faculties = await response.json();
-                    
+                   
                     // D) Poblar el select de facultades
                     populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
                 } catch (error) {
@@ -1065,7 +1065,7 @@
             const val = tipoPagoSelect.value;
 
             // Debe coincidir EXACTO con los valores de tu enum
-            comprobanteContainer.style.display = 
+            comprobanteContainer.style.display =
                 (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
 
             pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
@@ -1136,7 +1136,7 @@
         });
 }
 
-    
+   
 
 
 

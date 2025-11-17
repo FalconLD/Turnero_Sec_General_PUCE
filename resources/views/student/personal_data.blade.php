@@ -73,6 +73,12 @@
 
                             <label for="acepta_terminos">Acepto los términos y condiciones</label>
 
+                    <!-- 🆕 Segundo checkbox agregado -->
+                    <div class="form-check text-center">
+                        <input type="checkbox" id="acepta_politicas" name="acepta_politicas" value="1">
+                        <label for="acepta_politicas">Consiento el manejo de mis datos personales bajo las normas de privacidad y confidencialidad.</label>
+                    </div>
+
                         </div>
                     </div>
 
@@ -357,6 +363,12 @@
         </div>
     </div>
 
+    <div class="bg-light text-center py-3 mt-4 border-top">
+  <div class="container">
+    <small>Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador</small>
+  </div>
+</div>
+
     {{-- === Estilos personalizados === --}}
     <style>
         .steps .step-item {
@@ -515,6 +527,8 @@
                 const prevBtn = document.getElementById('prevBtn');
                 const submitBtn = document.getElementById('submitBtn');
                 const aceptaTerminos = document.getElementById('acepta_terminos');
+                const aceptaPoliticas = document.getElementById('acepta_politicas');
+
                 const stepIndicators = document.querySelectorAll('.step-item');
                 const inputTelefonoSuffix = document.getElementById('inputTelefonoSuffix');
                 const inputTelefonoFull = document.getElementById('inputTelefono');
@@ -535,6 +549,17 @@
                     if (step === steps.length - 1) populateConfirmation();
                 }
 
+                    function validarChecks() {
+            nextBtn.disabled = !(aceptaTerminos.checked && aceptaPoliticas.checked);
+        }
+
+            // Eventos de ambos checks
+            aceptaTerminos.addEventListener('change', validarChecks);
+            aceptaPoliticas.addEventListener('change', validarChecks);
+
+            // Botón desactivado al inicio
+            nextBtn.disabled = true;
+
                 aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
 
 
@@ -549,10 +574,10 @@
                     // 2. SI LA VALIDACIÓN BÁSICA PASA, MANEJAMOS LA LÓGICA ESPECIAL DE CADA PASO
                     // Lógica especial para Paso 1 (Términos)
                     if (currentStep === 0) {
-                        if (!aceptaTerminos.checked) {
-                            alert("Debes aceptar los términos para continuar.");
-                            return;
-                        }
+                    if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+                                alert("Debes aceptar ambos términos para continuar.");
+                                return;
+                            }
                     }
 
                     // ✅ Caso especial: paso 2 (índice 1)
@@ -583,71 +608,40 @@
                     actualizarTelefonoCompleto(); 
                 }
 
-                prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
-                function validateCurrentStep() {
-                    const step = steps[currentStep];
-                    const requireds = step.querySelectorAll('[required]');
-                    for (let el of requireds) {
-                        if (el.type === 'radio') {
-                            const name = el.name;
-                            if (!step.querySelector(`input[name="${name}"]:checked`)) { el.focus(); return false; }
-                        } else if (!el.value || el.value.trim() === '') { el.focus(); return false; }
+                    prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
 
-                        // Validación ESPECÍFICA para la Edad
-                        if (el.name === 'edad') {
-                            const edadVal = parseInt(el.value);
-                            // Control estricto de rango
-                            if (isNaN(edadVal) || edadVal < 17 || edadVal > 80) {
-                                el.focus();
-                                el.classList.add('is-invalid');
-                                if(document.getElementById('errorEdad')) {
-                                    document.getElementById('errorEdad').style.display = 'block';
-                                }
-                                alert("La edad permitida es únicamente entre 17 y 80 años.");
-                                
-                                // Limpiar error al escribir
-                                el.addEventListener('input', () => {
-                                    el.classList.remove('is-invalid');
-                                    if(document.getElementById('errorEdad')) {
-                                        document.getElementById('errorEdad').style.display = 'none';
-                                    }
-                                }, {once: true});
-                                
-                                return false;
-                            }
-                        }
-                        
-                        // 2. Validación ESPECÍFICA para el Celular de Ecuador
-                        if (el.id === 'inputTelefonoSuffix') {
-                            
-                            // Regex: 8 dígitos numéricos exactos
-                            const suffixPattern = /^\d{8}$/;
-                            
-                            if (!suffixPattern.test(el.value)) {
-                                el.focus();
-                                el.classList.add('is-invalid');
-                                
-                                const errorTel = document.getElementById('errorTelefono');
-                                if(errorTel) {
-                                    errorTel.textContent = 'Debe ingresar los 8 dígitos restantes.';
-                                    errorTel.style.display = 'block';
-                                }
-                                
-                                alert("Por favor, ingrese los 8 dígitos de su celular.");
-                                
-                                // Limpiar error
-                                el.addEventListener('input', () => {
-                                    el.classList.remove('is-invalid');
-                                    if(errorTel) errorTel.style.display = 'none';
-                                }, {once: true});
-                                
-                                return false;
-                            }
-                        }
 
-                    }
-                    return true;
-                }
+
+  function validateCurrentStep() {
+    const step = steps[currentStep];
+    const requireds = step.querySelectorAll('[required]');
+
+    // Validación normal de campos requeridos
+    for (let el of requireds) {
+        if (el.type === 'radio') {
+            const name = el.name;
+            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
+                el.focus(); 
+                return false; 
+            }
+        } else if (!el.value || el.value.trim() === '') { 
+            el.focus(); 
+            return false; 
+        }
+    }
+
+    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
+    if (currentStep === 0) {
+        const aceptaTerminos = document.getElementById('acepta_terminos');
+        const aceptaPoliticas = document.getElementById('acepta_politicas');
+
+        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 
                 // === LÓGICA NIVEL / BECA / PAGO ===

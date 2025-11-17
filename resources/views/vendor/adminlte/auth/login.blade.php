@@ -14,6 +14,47 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/vendor/animsition/css/animsition.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/css/util.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('login_template/css/main.css') }}">
+
+    <!-- CSS personalizado dentro del blade -->
+    <style>
+                html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        .limiter {
+            min-height: 100%;            /* ocupa toda la altura de la ventana */
+            display: flex;
+            flex-direction: column;      /* organiza contenido y footer verticalmente */
+        }
+
+        /* Contenido principal centrado */
+        .container-login100 {
+            flex: 1;                     /* ocupa todo el espacio disponible */
+            display: flex;
+            align-items: center;         /* centra verticalmente */
+            justify-content: center;     /* centra horizontalmente */
+        }
+
+        /* Footer centrado */
+        .footer-login {
+            position: fixed;       /* lo fija en la ventana */
+            bottom: 0;             /* al final de la ventana */
+            left: 0;               /* empieza desde la izquierda */
+            width: 100%;           /* ocupa todo el ancho */
+            height: 50px;          /* altura del footer */
+            display: flex;
+            justify-content: center; /* centra el texto horizontalmente */
+            align-items: center;     /* centra el texto verticalmente */
+            background-color: #f8f9fa; /* fondo claro */
+            color: #333;             /* texto oscuro */
+            font-size: 14px;
+            z-index: 1000;           /* para que quede por encima del contenido */
+        }
+
+    </style>
+
+
 </head>
 <body style="background-color: #666666;">
     
@@ -89,12 +130,22 @@
         </div>
     </div>
     
-    
+     <footer class="footer-login">
+        Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador
+    </footer>
+
+
     <script src="{{ asset('login_template/vendor/jquery/jquery-3.2.1.min.js') }}"></script>
     <script src="{{ asset('login_template/vendor/animsition/js/animsition.min.js') }}"></script>
     <script src="{{ asset('login_template/vendor/bootstrap/js/popper.js') }}"></script>
     <script src="{{ asset('login_template/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('login_template/js/main.js') }}"></script>
 
+
+
 </body>
+
+
+
+
 </html>

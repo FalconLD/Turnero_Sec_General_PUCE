@@ -93,12 +93,17 @@ class StudentRegistrationController extends Controller
     {
         $request->validate([
             'acepta_terminos' => 'accepted',
+            'acepta_politicas' => 'accepted', // ✔️ segundo check agregado
         ]);
 
-        session(['accepted_terms' => true]);
+        session([
+            'accepted_terms' => true,
+            'accepted_policies' => true,
+        ]);
 
         return redirect()->route('student.personal');
     }
+
 
     // Paso 2: Datos personales
     public function showPersonalForm()

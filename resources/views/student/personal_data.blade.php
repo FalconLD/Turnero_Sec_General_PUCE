@@ -1,12 +1,6 @@
 @extends('layouts.app')
 
-
-
 @section('title', 'Registro de Estudiante')
-
-
-
-
 
 @section('layout_sidebar', false)
 
@@ -15,8 +9,6 @@
     <h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
 
 @stop
-
-
 
 @section('content')
 
@@ -131,7 +123,13 @@
                         <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
 
                         <label for="acepta_terminos">Acepto los términos y condiciones</label>
+                        
+                    </div>
 
+                      <!-- 🆕 Segundo checkbox agregado -->
+                    <div class="form-check text-center">
+                        <input type="checkbox" id="acepta_politicas" name="acepta_politicas" value="1">
+                        <label for="acepta_politicas">Consiento el manejo de mis datos personales bajo las normas de privacidad y confidencialidad.</label>
                     </div>
 
                 </div>
@@ -514,6 +512,12 @@
 
 </div>
 
+<div class="bg-light text-center py-3 mt-4 border-top">
+  <div class="container">
+    <small>Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador</small>
+  </div>
+</div>
+
 
 
 {{-- === Estilos personalizados === --}}
@@ -809,6 +813,8 @@
         const submitBtn = document.getElementById('submitBtn');
 
         const aceptaTerminos = document.getElementById('acepta_terminos');
+        const aceptaPoliticas = document.getElementById('acepta_politicas');
+
 
         const stepIndicators = document.querySelectorAll('.step-item');
 
@@ -842,11 +848,16 @@
 
         }
 
+        function validarChecks() {
+            nextBtn.disabled = !(aceptaTerminos.checked && aceptaPoliticas.checked);
+        }
 
+            // Eventos de ambos checks
+        aceptaTerminos.addEventListener('change', validarChecks);
+        aceptaPoliticas.addEventListener('change', validarChecks);
 
-        aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
-
-
+// Botón desactivado al inicio
+nextBtn.disabled = true;
 
         // ✅ MODIFICADO: validación AJAX en el paso 2
 
@@ -863,8 +874,8 @@
 
     // Validación AJAX solo en paso 1 (Términos)
     if (currentStep === 0) {
-        if (!aceptaTerminos.checked) {
-            alert("Debes aceptar los términos para continuar.");
+        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+            alert("Debes aceptar ambos términos para continuar.");
             return;
         }
     }
@@ -876,31 +887,41 @@
 
 
 
-        prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
+    prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
 
 
 
-        function validateCurrentStep() {
+  function validateCurrentStep() {
+    const step = steps[currentStep];
+    const requireds = step.querySelectorAll('[required]');
 
-            const step = steps[currentStep];
-
-            const requireds = step.querySelectorAll('[required]');
-
-            for (let el of requireds) {
-
-                if (el.type === 'radio') {
-
-                    const name = el.name;
-
-                    if (!step.querySelector(`input[name="${name}"]:checked`)) { el.focus(); return false; }
-
-                } else if (!el.value || el.value.trim() === '') { el.focus(); return false; }
-
+    // Validación normal de campos requeridos
+    for (let el of requireds) {
+        if (el.type === 'radio') {
+            const name = el.name;
+            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
+                el.focus(); 
+                return false; 
             }
-
-            return true;
-
+        } else if (!el.value || el.value.trim() === '') { 
+            el.focus(); 
+            return false; 
         }
+    }
+
+    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
+    if (currentStep === 0) {
+        const aceptaTerminos = document.getElementById('acepta_terminos');
+        const aceptaPoliticas = document.getElementById('acepta_politicas');
+
+        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 
 

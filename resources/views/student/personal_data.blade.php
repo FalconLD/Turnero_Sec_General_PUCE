@@ -612,36 +612,36 @@
 
 
 
-  function validateCurrentStep() {
-    const step = steps[currentStep];
-    const requireds = step.querySelectorAll('[required]');
+                function validateCurrentStep() {
+                    const step = steps[currentStep];
+                    const requireds = step.querySelectorAll('[required]');
 
-    // Validación normal de campos requeridos
-    for (let el of requireds) {
-        if (el.type === 'radio') {
-            const name = el.name;
-            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
-                el.focus(); 
-                return false; 
-            }
-        } else if (!el.value || el.value.trim() === '') { 
-            el.focus(); 
-            return false; 
-        }
-    }
+                    // Validación normal de campos requeridos
+                    for (let el of requireds) {
+                        if (el.type === 'radio') {
+                            const name = el.name;
+                            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
+                                el.focus(); 
+                                return false; 
+                            }
+                        } else if (!el.value || el.value.trim() === '') { 
+                            el.focus(); 
+                            return false; 
+                        }
+                    }
 
-    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
-    if (currentStep === 0) {
-        const aceptaTerminos = document.getElementById('acepta_terminos');
-        const aceptaPoliticas = document.getElementById('acepta_politicas');
+                    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
+                    if (currentStep === 0) {
+                        const aceptaTerminos = document.getElementById('acepta_terminos');
+                        const aceptaPoliticas = document.getElementById('acepta_politicas');
 
-        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
-            return false;
-        }
-    }
+                        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+                            return false;
+                        }
+                    }
 
-    return true;
-}
+                    return true;
+                }
 
 
                 // === LÓGICA NIVEL / BECA / PAGO ===
@@ -732,7 +732,6 @@
 
 
                 // --- NUEVOS EVENT LISTENERS (AJAX) ---
-
                 // 1. Cuando cambia "Nivel de Instrucción" (Grado/Posgrado)
                 nivelRadios.forEach(radio => {
                     radio.addEventListener('change', async (e) => {

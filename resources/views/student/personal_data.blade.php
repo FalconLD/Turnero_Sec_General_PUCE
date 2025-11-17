@@ -1,1223 +1,965 @@
 @extends('layouts.app')
 
-@section('title', 'Registro de Estudiante')
+    @section('title', 'Registro de Estudiante')
 
-@section('layout_sidebar', false)
+    @section('layout_sidebar', false)
 
-@section('content_header')
-
-    <h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
-
+    @section('content_header')
+        <h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
 @stop
 
 @section('content')
-
-<div class="container">
-
-    <div class="card shadow-lg border-0 rounded-4 mb-5">
-
-        <div class="card-body p-5">
-
-            <h4 class="card-title text-center mb-4 text-primary"></h4>
-
-
-
-            {{-- Wizard de pasos visual --}}
-
-            <div class="steps mb-4">
-
-                <ul class="step-list d-flex justify-content-between text-center list-unstyled">
-
-                    <li class="step-item active" data-step="0">
-
-                        <span class="step-number">1</span>
-
-                        <span class="step-title">Términos</span>
-
-                    </li>
-
-                    <li class="step-item" data-step="1">
-
-                        <span class="step-number">2</span>
-
-                        <span class="step-title">Datos</span>
-
-                    </li>
-
-                    <li class="step-item" data-step="2">
-
-                        <span class="step-number">3</span>
-
-                        <span class="step-title">Académicos</span>
-
-                    </li>
-
-                    <li class="step-item" data-step="3">
-
-                        <span class="step-number">4</span>
-
-                        <span class="step-title">Pago</span>
-
-                    </li>
-
-                    <li class="step-item" data-step="4">
-
-                        <span class="step-number">5</span>
-
-                        <span class="step-title">Agendamiento</span>
-
-                    </li>
-
-                    <li class="step-item" data-step="5">
-
-                        <span class="step-number">6</span>
-
-                        <span class="step-title">Confirmación</span>
-
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-
-            {{-- Barra de progreso --}}
-
-            <div class="progress mb-4" style="height: 8px;">
-
-                <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
-
-            </div>
-
-
-
-            <form action="{{ route('student.finish') }}" method="POST" enctype="multipart/form-data" id="multiStepForm">
-
-                @csrf
-
-
-
-                {{-- Paso 1: Términos --}}
-
-                <div class="form-step">
-
-                    <h5 class="text-secondary mb-3">Términos y Condiciones</h5>
-
-                    <div class="border rounded p-3 bg-light mb-3" style="max-height: 200px; overflow-y: auto;">
-
-                        @if($terminos)
-
-                            {!! nl2br(e($terminos->descripcion)) !!}
-
-                        @else
-
-                            <p class="text-muted">No se han configurado los términos y condiciones.</p>
-
-                        @endif
-
-                    </div>
-
-                    <div class="form-check text-center">
-
-                        <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
-
-                        <label for="acepta_terminos">Acepto los términos y condiciones</label>
+    <div class="container">
+        <div class="card shadow-lg border-0 rounded-4 mb-5">
+            <div class="card-body p-5">
+                <h4 class="card-title text-center mb-4 text-primary"></h4>
+                {{-- Wizard de pasos visual --}}
+                <div class="steps mb-4">
+                    <ul class="step-list d-flex justify-content-between text-center list-unstyled">
                         
-                    </div>
+                        <li class="step-item active" data-step="0">
+                            <span class="step-number">1</span>
+                            <span class="step-title">Términos</span>
+                        </li>
 
-                      <!-- 🆕 Segundo checkbox agregado -->
-                    <div class="form-check text-center">
-                        <input type="checkbox" id="acepta_politicas" name="acepta_politicas" value="1">
-                        <label for="acepta_politicas">Consiento el manejo de mis datos personales bajo las normas de privacidad y confidencialidad.</label>
-                    </div>
+                        <li class="step-item" data-step="1">
+                            <span class="step-number">2</span>
+                            <span class="step-title">Datos</span>
+                        </li>
 
+                        <li class="step-item" data-step="2">
+                            <span class="step-number">3</span>
+                            <span class="step-title">Académicos</span>
+                        </li>
+
+                        <li class="step-item" data-step="3">
+                            <span class="step-number">4</span>
+                            <span class="step-title">Pago</span>
+                        </li>
+
+                        <li class="step-item" data-step="4">
+                            <span class="step-number">5</span>
+                            <span class="step-title">Agendamiento</span>
+                        </li>
+
+                        <li class="step-item" data-step="5">
+                            <span class="step-number">6</span>
+                            <span class="step-title">Confirmación</span>
+                        </li>
+                    </ul>
                 </div>
 
-
-
-                {{-- Paso 2: Datos personales --}}
-                @php
-                    $student = session('student_data');
-                @endphp
-
-                <div class="form-step" style="display:none;">
-
-                    <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-
-                            <label>Nombre completo</label>
-                            <input type="text" name="names" value="{{  old('names', $student_name ?? '')}}" class="form-control">
-                        </div>
-
-                        <div class="col-md-3">
-
-                            <label>Cédula</label>
-                            <input type="text" name="cedula" value="{{ old('cedula', $student_cedula ?? '')  }}" class="form-control" readonly>
-                        </div>
-
-                        <div class="col-md-3">
-
-                            <label>Edad</label>
-
-                            <input type="number" class="form-control" name="edad" min="1" required>
-
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <label>Correo electrónico</label>
-                            <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <label>Celular</label>
-
-                            <input type="text" class="form-control" name="telefono" maxlength="10" pattern="\d{10}"
-
-                                title="Debe contener exactamente 10 dígitos numéricos" required>
-
-                        </div>
-
-                        <div class="col-md-12">
-
-                            <label>Dirección</label>
-
-                            <input type="text" class="form-control" name="direccion" required>
-
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <label>Fecha de nacimiento</label>
-
-                            <input type="date" class="form-control" name="fecha_nacimiento" required>
-
-                        </div>
-
-                    </div>
-
+                {{-- Barra de progreso --}}
+                <div class="progress mb-4" style="height: 8px;">
+                    <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
                 </div>
 
-                {{-- Paso 3: Académicos --}}
-                <div class="form-step" style="display:none;">
-                    <h5 class="text-secondary mb-3">Datos Académicos</h5>
-                    <div class="row g-3">
-
-                        {{-- 1. Nivel de Instrucción (EL TRIGGER) --}}
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-semibold">Nivel de instrucción</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="nivel_instruccion" id="tec" value="tec" required>
-                                <label class="form-check-label" for="tec">Tec</label>
-                            </div>                            
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="nivel_instruccion" id="grado" value="grado" required>
-                                <label class="form-check-label" for="grado">Grado</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="nivel_instruccion" id="posgrado" value="posgrado" required>
-                                <label class="form-check-label" for="posgrado">Posgrado</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="nivel_instruccion" id="especializacion" value="especializacion" required>
-                                <label class="form-check-label" for="especializacion">Especialización</label>
-                            </div>
+                <form action="{{ route('student.finish') }}" method="POST" enctype="multipart/form-data" id="multiStepForm">
+                    @csrf
+                    {{-- Paso 1: Términos --}}
+                    <div class="form-step">
+                        <h5 class="text-secondary mb-3">Términos y Condiciones</h5>
+                        <div class="border rounded p-3 bg-light mb-3" style="max-height: 200px; overflow-y: auto;">
+                            @if($terminos)
+                                {!! nl2br(e($terminos->descripcion)) !!}
+                            @else
+                                <p class="text-muted">No se han configurado los términos y condiciones.</p>
+                            @endif
                         </div>
 
-                        {{-- 2. Facultad (Se llenará con AJAX) --}}
-                        <div class="col-md-6">
-                            <label>Facultad</label>
-                            <select class="form-select" name="facultad" id="facultad_select" required disabled>
-                                <option value="" selected disabled>Seleccione primero un nivel...</option>
-                                {{-- Opciones se agregarán con JS --}}
-                            </select>
-                        </div>
+                        <div class="form-check text-center">
 
-                        {{-- 3. Carrera (Se llenará con AJAX) --}}
-                        <div class="col-md-12">
-                            <label>Carrera</label>
-                            {{-- CAMBIADO DE INPUT A SELECT --}}
-                            <select class="form-select" name="carrera" id="carrera_select" required disabled>
-                                <option value="" selected disabled>Seleccione primero una facultad...</option>
-                                {{-- Opciones se agregarán con JS --}}
-                            </select>
-                        </div>
+                            <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
 
-                        {{-- 4. Nivel (Semestre) (Se oculta/muestra) --}}
-                        {{-- ID 'nivel_semestre_container' es nuevo --}}
-                        <div class="col-md-12" id="nivel_semestre_container" style="display:none;">
-                            <label>Nivel (Semestre)</label>
-                            {{-- El name="nivel" original. ID 'nivel_semestre_select' es nuevo --}}
-                            <select class="form-select" name="nivel" id="nivel_semestre_select" required>
-                                <option value="" selected disabled>Seleccione...</option>
-                                <option>Primero</option>
-                                <option>Segundo</option>
-                                <option>Tercero</option>
-                                <option>Cuarto</option>
-                                <option>Quinto</option>
-                                <option>Sexto</option>
-                                <option>Séptimo</option>
-                                <option>Octavo</option>
-                                <option>Noveno</option>
-                                <option>Décimo</option>
-                            </select>
-                        </div>
+                            <label for="acepta_terminos">Acepto los términos y condiciones</label>
 
-                        {{-- 5. Beca (Se oculta/muestra) --}}
-                        {{-- El ID 'beca_pregunta_container' es nuevo --}}
-                        <div class="col-md-12 mb-3" id="beca_pregunta_container" style="display:none;">
-                            <label class="form-label fw-semibold">¿Cuenta con beca San Ignacio?</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_si" value="si">
-                                <label class="form-check-label" for="beca_si">Sí</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_no" value="no">
-                                <label class="form-check-label" for="beca_no">No</label>
-                            </div>
-                        </div>
-
-                        {{-- 6. Mensaje de Pago --}}
-                        <div class="col-md-12 text-center">
-                            <p id="mensaje_pago" class="text-primary fw-semibold"></p>
                         </div>
                     </div>
-                </div>
 
-
-
-                {{-- Paso 4: Pago --}}
-
-                <div class="form-step" style="display:none;">
-
-                    <h5 class="text-secondary mb-3">Datos de Pago y Motivo</h5>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-
-                            <label>Tipo de pago</label>
-
-                            <select class="form-select" id="tipo-pago" name="forma_pago" required>
-
-                                <option value="" selected disabled>Seleccione...</option>
-
-                                <option value="DeUna">DeUna</option>
-
-                                <option value="Transferencia">Transferencia</option>
-
-                                <option value="Efectivo">Efectivo</option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="col-md-12" id="comprobante-container" style="display:none;">
-
-                            <label>Subir comprobante</label>
-
-                            <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf">
-                            <input type="hidden" name="comprobante_base64" id="comprobante_base64">
-
-                        </div>
-
-                        <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
-
-                            Una vez finalizada la inscripción, acérquese 10 minutos antes al Centro Médico de Fundación PuceSalud.
-
-                        </div>
-
-                        <div class="col-md-12">
-
-                            <label>Motivo de consulta</label>
-
-                            <textarea class="form-control" name="motivo" rows="3" required></textarea>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                {{-- Paso 5: Agendamiento --}}
-
-               {{-- Paso 5: Agendamiento --}}
-
+                    {{-- Paso 2: Datos personales --}}
+                    @php
+                        $student = session('student_data');
+                    @endphp
                     <div class="form-step" style="display:none;">
-
-                        <h5 class="text-primary mb-4 text-center">📅 Seleccione modalidad, fecha y horario disponible</h5>
-
-
-
-                        <div class="row justify-content-center g-4">
-
-                            {{-- Columna izquierda: calendario y modalidad --}}
-
-                            <div class="col-lg-6 col-md-7">
-
-                                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-
-                                    <h6 class="fw-bold text-secondary mb-3">Configuración de cita</h6>
-
-
-
-                                    <div class="mb-3">
-
-                                        <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
-
-                                        <select id="modalidadSelect" class="form-select shadow-sm" required>
-
-                                            <option value="" selected disabled>Seleccione...</option>
-
-                                            <option value="presencial">Presencial</option>
-
-                                            <option value="virtual">Virtual</option>
-
-                                        </select>
-
-                                    </div>
-
-
-
-                                    <div class="mb-3">
-
-                                        <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
-
-                                        <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
-
-                                            min="{{ date('Y-m-d') }}" required>
-
-                                    </div>
-
-
-
-                                    {{-- Aquí podrías colocar un calendario visual si luego integras librerías como FullCalendar --}}
-
-                                    <div class="bg-light text-center p-4 rounded-3 border mt-3">
-
-                                        <i class="bi bi-calendar-date text-primary" style="font-size:2rem;"></i>
-
-                                        <p class="mt-2 text-muted small">Seleccione una fecha para mostrar los turnos</p>
-
-                                    </div>
-
-                                </div>
-
+                        <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Nombre completo</label>
+                                <input type="text" name="names" value="{{  old('names', $student_name ?? '')}}" class="form-control" readonly>
                             </div>
 
+                            <div class="col-md-3">
+                                <label>Cédula</label>
+                                <input type="text" name="cedula" value="{{ old('cedula', $student_cedula ?? '')  }}" class="form-control" readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Edad</label>
+                                <input type="number" 
+                                    class="form-control" 
+                                    name="edad" 
+                                    id="inputEdad" 
+                                    min="17" 
+                                    max="80" 
+                                    required
+                                    oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
+                                <div id="errorEdad" class="text-danger small mt-1" style="display:none;">
+                                    La edad debe ser mayor o igual a 17 años.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Correo electrónico</label>
+                                <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Celular</label>
+                                
+                                {{-- 1. Usamos un "input-group" de Bootstrap --}}
+                                <div class="input-group">
+                                    
+                                    {{-- 2. El prefijo "09" fijo --}}
+                                    <span class="input-group-text">09</span>
+                                    
+                                    {{-- 3. El input (solo para los 8 dígitos restantes) --}}
+                                    <input type="text" 
+                                        class="form-control" 
+                                        id="inputTelefonoSuffix" {{-- ID cambiado --}}
+                                        maxlength="8"           {{-- Longitud cambiada a 8 --}}
+                                        inputmode="numeric"
+                                        placeholder="XXXXXXXX"  {{-- El placeholder ahora sí se verá --}}
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                        required 
+                                    >
+                                </div>
+                                
+                                {{-- 4. Un campo oculto para enviar el número completo (09 + sufijo) --}}
+                                <input type="hidden" name="telefono" id="inputTelefono"> 
+                                
+                                <div id="errorTelefono" class="text-danger small mt-1" style="display:none;">
+                                    Debe ingresar los 8 dígitos restantes.
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Dirección</label>
+                                <input type="text" class="form-control" name="direccion" placeholder="Ingrese la dirección de su domicilio" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Fecha de nacimiento</label>
+                                <input type="date" 
+                                    class="form-control" 
+                                    name="fecha_nacimiento" 
+                                    id="inputFechaNacimiento" 
+                                    required>
+                                <small class="text-muted" id="infoFecha" style="display:none;">Año bloqueado por edad.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Paso 3: Académicos --}}
+                    <div class="form-step" style="display:none;">
+                        <h5 class="text-secondary mb-3">Datos Académicos</h5>
+                        <div class="row g-3">
+
+                            {{-- 1. Nivel de Instrucción (EL TRIGGER) --}}
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-semibold">Nivel de instrucción</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="tec" value="tec" required>
+                                    <label class="form-check-label" for="tec">Tec</label>
+                                </div>                            
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="grado" value="grado" required>
+                                    <label class="form-check-label" for="grado">Grado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="posgrado" value="posgrado" required>
+                                    <label class="form-check-label" for="posgrado">Posgrado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="especializacion" value="especializacion" required>
+                                    <label class="form-check-label" for="especializacion">Especialización</label>
+                                </div>
+                            </div>
+
+                            {{-- 2. Facultad (Se llenará con AJAX) --}}
+                            <div class="col-md-6">
+                                <label>Facultad</label>
+                                <select class="form-select" name="facultad" id="facultad_select" required disabled>
+                                    <option value="" selected disabled>Seleccione primero un nivel...</option>
+                                    {{-- Opciones se agregarán con JS --}}
+                                </select>
+                            </div>
+
+                            {{-- 3. Carrera (Se llenará con AJAX) --}}
+                            <div class="col-md-12">
+                                <label>Carrera</label>
+                                {{-- CAMBIADO DE INPUT A SELECT --}}
+                                <select class="form-select" name="carrera" id="carrera_select" required disabled>
+                                    <option value="" selected disabled>Seleccione primero una facultad...</option>
+                                    {{-- Opciones se agregarán con JS --}}
+                                </select>
+                            </div>
+
+                            {{-- 4. Nivel (Semestre) (Se oculta/muestra) --}}
+                            <div class="col-md-12" id="nivel_semestre_container" style="display:none;">
+                                <label>Nivel (Semestre)</label>
+                                {{-- El name="nivel" original. ID 'nivel_semestre_select' es nuevo --}}
+                                <select class="form-select" name="nivel" id="nivel_semestre_select" required>
+                                    <option value="" selected disabled>Seleccione...</option>
+                                    <option>Primero</option>
+                                    <option>Segundo</option>
+                                    <option>Tercero</option>
+                                    <option>Cuarto</option>
+                                    <option>Quinto</option>
+                                    <option>Sexto</option>
+                                    <option>Séptimo</option>
+                                    <option>Octavo</option>
+                                    <option>Noveno</option>
+                                    <option>Décimo</option>
+                                </select>
+                            </div>
+
+                            {{-- 5. Beca (Se oculta/muestra) --}}
+                            {{-- El ID 'beca_pregunta_container' es nuevo --}}
+                            <div class="col-md-12 mb-3" id="beca_pregunta_container" style="display:none;">
+                                <label class="form-label fw-semibold">¿Cuenta con beca San Ignacio?</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_si" value="si">
+                                    <label class="form-check-label" for="beca_si">Sí</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_no" value="no">
+                                    <label class="form-check-label" for="beca_no">No</label>
+                                </div>
+                            </div>
+
+                            {{-- 6. Mensaje de Pago --}}
+                            <div class="col-md-12 text-center">
+                                <p id="mensaje_pago" class="text-primary fw-semibold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Paso 4: Pago --}}
+                    <div class="form-step" style="display:none;">
+                        <h5 class="text-secondary mb-3">Datos de Pago y Motivo</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Tipo de pago</label>
+                                <select class="form-select" id="tipo-pago" name="forma_pago" required>
+                                    <option value="" selected disabled>Seleccione...</option>
+                                    <option value="DeUna">DeUna</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12" id="comprobante-container" style="display:none;">
+                                <label>Subir comprobante</label>
+                                <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf">
+                                <input type="hidden" name="comprobante_base64" id="comprobante_base64">
+                            </div>
+
+                            <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
+                                Una vez finalizada la inscripción, acérquese 10 minutos antes al Centro Médico de Fundación PuceSalud.
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Motivo de consulta</label>
+                                <textarea class="form-control" name="motivo" rows="3" required></textarea>
+                            </div>
+                        </div>
+                    </div>
 
 
-                            {{-- Columna derecha: horarios disponibles --}}
 
-                            <div class="col-lg-6 col-md-5">
+                        {{-- Paso 5: Agendamiento --}}
+                        <div class="form-step" style="display:none;">
+                            <h5 class="text-primary mb-4 text-center">📅 Seleccione modalidad, fecha y horario disponible</h5>
+                            <div class="row justify-content-center g-4">
 
-                                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                {{-- Columna izquierda: calendario y modalidad --}}
+                                <div class="col-lg-6 col-md-7">
 
-                                    <h6 class="fw-bold text-secondary mb-3 text-center">Horarios disponibles</h6>
+                                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
 
-                                    <div id="turnosContainer" class="d-flex flex-wrap justify-content-center align-items-start gap-3">
-
-                                        <div class="text-muted text-center">
-
-                                            <em>Seleccione modalidad y fecha para ver los turnos disponibles...</em>
-
+                                        <h6 class="fw-bold text-secondary mb-3">Configuración de cita</h6>
+                                        <div class="mb-3">
+                                            <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
+                                            <select id="modalidadSelect" class="form-select shadow-sm" required>
+                                                <option value="" selected disabled>Seleccione...</option>
+                                                <option value="presencial">Presencial</option>
+                                                <option value="virtual">Virtual</option>
+                                            </select>
                                         </div>
 
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
+                                            <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
+                                                min="{{ date('Y-m-d') }}" required>
+                                        </div>
 
+                                        <div class="bg-light text-center p-4 rounded-3 border mt-3">
+                                            <i class="bi bi-calendar-date text-primary" style="font-size:2rem;"></i>
+                                            <p class="mt-2 text-muted small">Seleccione una fecha para mostrar los turnos</p>
+                                        </div>
+                                    </div>
                                 </div>
 
+                                {{-- Columna derecha: horarios disponibles --}}
+                                <div class="col-lg-6 col-md-5">
+                                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                        <h6 class="fw-bold text-secondary mb-3 text-center">Horarios disponibles</h6>
+                                        <div id="turnosContainer" class="d-flex flex-wrap justify-content-center align-items-start gap-3">
+                                            <div class="text-muted text-center">
+                                                <em>Seleccione modalidad y fecha para ver los turnos disponibles...</em>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
+                            {{-- Campos ocultos --}}
+                            <input type="hidden" name="turno_id" id="turno_id">
+                            <input type="hidden" name="date_shift" id="date_shift">
+                            <input type="hidden" name="shift_time" id="shift_time">
+                            <input type="hidden" name="modalidad_shift" id="modalidad_shift">
                         </div>
 
-
-
-                        {{-- Campos ocultos --}}
-
-                        <input type="hidden" name="turno_id" id="turno_id">
-
-                        <input type="hidden" name="date_shift" id="date_shift">
-
-                        <input type="hidden" name="shift_time" id="shift_time">
-
-                        <input type="hidden" name="modalidad_shift" id="modalidad_shift">
-
+                    {{-- Paso 6: Confirmación --}}
+                    <div class="form-step" style="display:none;">
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+                        <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
+                        <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
+                        <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
+                        <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
+                        <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
+                        <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
+                        <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>
+                        <div class="text-muted small">Al presionar *Confirmar y Guardar* se registrará su turno y se enviará un correo.</div>
                     </div>
 
-
-
-
-
-
-
-                {{-- Paso 6: Confirmación --}}
-
-                <div class="form-step" style="display:none;">
-
-                    @if (session('error'))
-
-                        <div class="alert alert-danger">
-
-                            {{ session('error') }}
-
-                        </div>
-
-                    @endif
-
-                    <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
-
-                    <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
-
-                    <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
-
-                    <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
-
-                    <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
-
-                    <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
-
-                    <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>
-
-                    <div class="text-muted small">Al presionar *Confirmar y Guardar* se registrará su turno y se enviará un correo.</div>
-
-                </div>
-
-
-
-                {{-- Navegación --}}
-
-                <div class="d-flex justify-content-between mt-4">
-
-                    <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
-
-                    <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
-
-                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
-
-                </div>
-
-            </form>
-
+                    {{-- Navegación --}}
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
+                        <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
+                        <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
     </div>
 
-</div>
-
-<div class="bg-light text-center py-3 mt-4 border-top">
-  <div class="container">
-    <small>Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador</small>
-  </div>
-</div>
-
-
-
-{{-- === Estilos personalizados === --}}
-
-<style>
-
-    .steps .step-item {
-
-        flex: 1;
-
-        position: relative;
-
-    }
-
-    .steps .step-number {
-
-        background-color: #dee2e6;
-
-        color: #495057;
-
-        border-radius: 50%;
-
-        width: 35px;
-
-        height: 35px;
-
-        display: inline-flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        margin-bottom: 6px;
-
-        font-weight: bold;
-
-    }
-
-    .steps .step-item.active .step-number {
-
-        background-color: #0d6efd;
-
-        color: #fff;
-
-    }
-
-    .steps .step-title {
-
-        font-size: 0.9rem;
-
-        color: #6c757d;
-
-    }
-
-    .steps .step-item.active .step-title {
-
-        color: #0d6efd;
-
-        font-weight: 600;
-
-    }
-
-    .progress {
-
-        border-radius: 10px;
-
-    }
-
-    #progressBar {
-
-        border-radius: 10px;
-
-        transition: width 0.4s ease;
-
-    }
-
-    .form-step {
-
-        animation: fadeIn 0.4s ease;
-
-    }
-
-    @keyframes fadeIn {
-
-        from {opacity: 0; transform: translateY(10px);}
-
-        to {opacity: 1; transform: translateY(0);}
-
-    }
-
-    .turno-card {
-
-        border: 1px solid #dee2e6;
-
-        border-radius: 12px;
-
-        padding: 16px;
-
-        background-color: #fff;
-
-        transition: all 0.2s ease;
-
-        cursor: pointer;
-
-    }
-
-    .turno-card:hover {
-
-        transform: translateY(-4px);
-
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-
-        border-color: #0d6efd;
-
-    }
-
-    .turno-card.selected {
-
-        border: 2px solid #0d6efd;
-
-        background-color: #e8f0fe;
-
-        box-shadow: 0 0 10px rgba(13,110,253,0.2);
-
-    }
-
-   
-
-</style>
-
-
-
-
-
-<style>
-
-    /* === Mejora visual de los combo box (selects) === */
-
-    .form-select {
-
-        appearance: none;
-
-        -webkit-appearance: none;
-
-        -moz-appearance: none;
-
-        background-color: #fff;
-
-        border: 1px solid #ced4da;
-
-        border-radius: 10px;
-
-        padding: 10px 38px 10px 14px;
-
-        font-size: 0.95rem;
-
-        color: #495057;
-
-        line-height: 1.5;
-
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-
-        transition: all 0.25s ease-in-out;
-
-        background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.354 10.354a.5.5 0 0 1-.708 0L4.646 7.354a.5.5 0 0 1 0-.708z'/></svg>");
-
-        background-repeat: no-repeat;
-
-        background-position: right 12px center;
-
-        background-size: 14px;
-
-    }
-
-
-
-    .form-select:hover {
-
-        border-color: #86b7fe;
-
-        box-shadow: 0 0 6px rgba(13,110,253,0.15);
-
-    }
-
-
-
-    .form-select:focus {
-
-        border-color: #0d6efd;
-
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
-
-        outline: none;
-
-    }
-
-
-
-    /* === Etiquetas y alineación === */
-
-    label {
-
-        font-weight: 500;
-
-        color: #495057;
-
-        margin-bottom: 6px;
-
-    }
-
-
-
-    /* === Efecto suave en inputs generales === */
-
-    .form-control, .form-select {
-
-        transition: all 0.3s ease;
-
-    }
-
-
-
-    /* === Sombras suaves al enfocar === */
-
-    .form-control:focus {
-
-        border-color: #0d6efd;
-
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.2);
-
-    }
-
-
-
-    /* === Versión centrada para selects del paso 5 === */
-
-    #modalidadSelect, #fechaSeleccionada {
-
-        border-radius: 12px;
-
-        max-width: 360px;
-
-        font-weight: 500;
-
-    }
-
-    /* Mejor apariencia del paso de agendamiento */
-
-    #turnosContainer .turno-card {
-
-        flex: 1 1 40%;
-
-        min-width: 160px;
-
-        max-width: 220px;
-
-    }
-
-
-
-    @media (max-width: 768px) {
-
-        #turnosContainer .turno-card {
-
-            flex: 1 1 100%;
-
+    {{-- === Estilos personalizados === --}}
+    <style>
+        .steps .step-item {
+            flex: 1;
+            position: relative;
+            /* Convertimos el 'paso' en un contenedor flex vertical */
+            display: flex;
+            flex-direction: column; /* Apila los hijos (número y título) */
+            align-items: center;    /* Centra los hijos horizontalmente */
         }
 
-    }
+        .steps .step-number {
+            background-color: #dee2e6;
+            color: #495057;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
 
+        .steps .step-item.active .step-number {
+            background-color: #0d6efd;
+            color: #fff;
+        }
 
+        .steps .step-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
 
-</style>
+        .steps .step-item.active .step-title {
+            color: #0d6efd;
+            font-weight: 600;
+        }
 
+        .progress {
+            border-radius: 10px;
+        }
 
+        #progressBar {
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
 
+        .form-step {
+            animation: fadeIn 0.4s ease;
+        }
 
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .turno-card {
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 16px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .turno-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-color: #0d6efd;
+        }
+
+        .turno-card.selected {
+            border: 2px solid #0d6efd;
+            background-color: #e8f0fe;
+            box-shadow: 0 0 10px rgba(13,110,253,0.2);
+        }
+    </style>
+
+    <style>
+        /* === Mejora visual de los combo box (selects) === */
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            padding: 10px 38px 10px 14px;
+            font-size: 0.95rem;
+            color: #495057;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.25s ease-in-out;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.354 10.354a.5.5 0 0 1-.708 0L4.646 7.354a.5.5 0 0 1 0-.708z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+
+        .form-select:hover {
+            border-color: #86b7fe;
+            box-shadow: 0 0 6px rgba(13,110,253,0.15);
+        }
+
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
+            outline: none;
+        }
+
+        /* === Etiquetas y alineación === */
+        label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        /* === Efecto suave en inputs generales === */
+        .form-control, .form-select {
+            transition: all 0.3s ease;
+        }
+
+        /* === Sombras suaves al enfocar === */
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.2);
+        }
+
+        /* === Versión centrada para selects del paso 5 === */
+        #modalidadSelect, #fechaSeleccionada {
+            border-radius: 12px;
+            max-width: 360px;
+            font-weight: 500;
+        }
+
+        /* Mejor apariencia del paso de agendamiento */
+        #turnosContainer .turno-card {
+            flex: 1 1 40%;
+            min-width: 160px;
+            max-width: 220px;
+        }
+
+        @media (max-width: 768px) {
+            #turnosContainer .turno-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
 
 {{-- === Script de funcionalidad === --}}
+    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const steps = document.querySelectorAll('.form-step');
+                const nextBtn = document.getElementById('nextBtn');
+                const prevBtn = document.getElementById('prevBtn');
+                const submitBtn = document.getElementById('submitBtn');
+                const aceptaTerminos = document.getElementById('acepta_terminos');
+                const stepIndicators = document.querySelectorAll('.step-item');
+                const inputTelefonoSuffix = document.getElementById('inputTelefonoSuffix');
+                const inputTelefonoFull = document.getElementById('inputTelefono');
 
+                let currentStep = 0;
 
-
-<script>
-
-    document.addEventListener('DOMContentLoaded', function() {
-
-        const steps = document.querySelectorAll('.form-step');
-
-        const nextBtn = document.getElementById('nextBtn');
-
-        const prevBtn = document.getElementById('prevBtn');
-
-        const submitBtn = document.getElementById('submitBtn');
-
-        const aceptaTerminos = document.getElementById('acepta_terminos');
-        const aceptaPoliticas = document.getElementById('acepta_politicas');
-
-
-        const stepIndicators = document.querySelectorAll('.step-item');
-
-        let currentStep = 0;
-
-
-
-        function updateStepIndicator() {
-
-            stepIndicators.forEach((s, i) => s.classList.toggle('active', i === currentStep));
-
-        }
-
-
-
-        function showStep(step) {
-
-            steps.forEach((s, i) => s.style.display = (i === step) ? 'block' : 'none');
-
-            prevBtn.style.display = step === 0 ? 'none' : 'inline-block';
-
-            nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
-
-            submitBtn.style.display = step === steps.length - 1 ? 'inline-block' : 'none';
-
-            document.getElementById('progressBar').style.width = ((step + 1) / steps.length) * 100 + '%';
-
-            updateStepIndicator();
-
-            if (step === steps.length - 1) populateConfirmation();
-
-        }
-
-        function validarChecks() {
-            nextBtn.disabled = !(aceptaTerminos.checked && aceptaPoliticas.checked);
-        }
-
-            // Eventos de ambos checks
-        aceptaTerminos.addEventListener('change', validarChecks);
-        aceptaPoliticas.addEventListener('change', validarChecks);
-
-// Botón desactivado al inicio
-nextBtn.disabled = true;
-
-        // ✅ MODIFICADO: validación AJAX en el paso 2
-
-       nextBtn.onclick = async () => {
-    // ✅ Caso especial: paso 2 (índice 1) -> NO valida aún, solo avanza
-    if (currentStep === 1) {
-        currentStep++;
-        showStep(currentStep);
-        return;
-    }
-
-    // En los demás pasos, sí validamos campos requeridos
-    if (!validateCurrentStep()) return;
-
-    // Validación AJAX solo en paso 1 (Términos)
-    if (currentStep === 0) {
-        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
-            alert("Debes aceptar ambos términos para continuar.");
-            return;
-        }
-    }
-
-    currentStep++;
-    showStep(currentStep);
-};
-
-
-
-
-    prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
-
-
-
-  function validateCurrentStep() {
-    const step = steps[currentStep];
-    const requireds = step.querySelectorAll('[required]');
-
-    // Validación normal de campos requeridos
-    for (let el of requireds) {
-        if (el.type === 'radio') {
-            const name = el.name;
-            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
-                el.focus(); 
-                return false; 
-            }
-        } else if (!el.value || el.value.trim() === '') { 
-            el.focus(); 
-            return false; 
-        }
-    }
-
-    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
-    if (currentStep === 0) {
-        const aceptaTerminos = document.getElementById('acepta_terminos');
-        const aceptaPoliticas = document.getElementById('acepta_politicas');
-
-        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-
-
-        // === LÓGICA NIVEL / BECA / PAGO ===
-
-        const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
-       
-        // Contenedores dinámicos
-        const becaPreguntaContainer = document.getElementById('beca_pregunta_container');
-        const nivelSemestreContainer = document.getElementById('nivel_semestre_container');
-        const nivelSemestreSelect = document.getElementById('nivel_semestre_select');
-        const becaRadios = document.querySelectorAll('input[name="beca_san_ignacio"]');
-        const mensajePago = document.getElementById('mensaje_pago');
-
-        // Selects dinámicos
-        const facultadSelect = document.getElementById('facultad_select');
-        const carreraSelect = document.getElementById('carrera_select');
-
-        // ---Helper para poblar selects ---
-        function populateSelect(selectElement, items, valueField, textField, defaultOptionText) {
-            selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
-            items.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item[valueField];
-                option.textContent = item[textField];
-                selectElement.appendChild(option);
-            });
-            selectElement.disabled = false;
-        }
-
-        // ---Helper para resetear selects ---
-        function resetSelect(selectElement, defaultOptionText) {
-            selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
-            selectElement.disabled = true;
-        }
-
-         // ---actualizarPago ---  
-        function actualizarPago() {
-            const nivelSeleccionado = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
-            const becaSeleccionada = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
-
-            if (!nivelSeleccionado) return;
-
-            // --- GRUPO 1: Grado y Tec (Muestran beca y nivel de semestre) ---
-            if (nivelSeleccionado === 'grado' || nivelSeleccionado === 'tec') {
-               
-                // Muestra Beca y Nivel(semestre)
-                if (becaPreguntaContainer) becaPreguntaContainer.style.display = "block";
-                if (nivelSemestreContainer) nivelSemestreContainer.style.display = "block";
-
-                // Añade 'required' a los campos visibles
-                nivelSemestreSelect.required = true;
-                document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = true);
-
-                // Lógica de pago (Asumiendo que 'Tec' cuesta igual que 'Grado')
-                if (becaSeleccionada === 'si') {
-                    mensajePago.textContent = "Pago de $0.50 (Atención Psicológica Única - APSU con beca)";
-                } else if (becaSeleccionada === 'no') {
-                    mensajePago.textContent = "Pago de $2.50 (Atención Psicológica Única - APSU)";
-                } else {
-                    mensajePago.textContent = "Seleccione si cuenta con beca para mostrar el valor a pagar.";
+                function updateStepIndicator() {
+                    stepIndicators.forEach((s, i) => s.classList.toggle('active', i === currentStep));
                 }
 
-            // --- GRUPO 2: Posgrado y Especialización (Ocultan todo) ---
-            } else if (nivelSeleccionado === 'posgrado' || nivelSeleccionado === 'especializacion') {
-               
-                // Oculta Beca y Nivel(semestre)
-                if (becaPreguntaContainer) becaPreguntaContainer.style.display = "none";
-                if (nivelSemestreContainer) nivelSemestreContainer.style.display = "none";
-               
-                // Quita 'required' de los campos ocultos
-                nivelSemestreSelect.required = false;
-                document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = false);
-
-                // Selecciona automáticamente "No" en la beca (lógica de backend)
-                if (document.getElementById('beca_no')) {
-                    document.getElementById('beca_no').checked = true;
+                function showStep(step) {
+                    steps.forEach((s, i) => s.style.display = (i === step) ? 'block' : 'none');
+                    prevBtn.style.display = step === 0 ? 'none' : 'inline-block';
+                    nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
+                    submitBtn.style.display = step === steps.length - 1 ? 'inline-block' : 'none';
+                    document.getElementById('progressBar').style.width = ((step + 1) / steps.length) * 100 + '%';
+                    updateStepIndicator();
+                    if (step === steps.length - 1) populateConfirmation();
                 }
 
-                // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
-                mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
-           
-            } else {
-                mensajePago.textContent = "";
-            }
-
-            mensajePago.classList.add("fs-5", "text-success", "mt-3");
-        }
+                aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
 
 
+                // ✅ MODIFICADO: validación AJAX en el paso 2
+                nextBtn.onclick = async () => {                    
+                    // 1. VALIDAMOS LOS CAMPOS REQUERIDOS PRIMERO
+                    // Esto ahora se ejecutará en TODOS los pasos, incluido el Paso 2 (Datos).
+                    if (!validateCurrentStep()) {
+                        return; // Si la validación (edad, teléfono, etc.) falla, no avanza.
+                    }
 
-        // --- NUEVOS EVENT LISTENERS (AJAX) ---
+                    // 2. SI LA VALIDACIÓN BÁSICA PASA, MANEJAMOS LA LÓGICA ESPECIAL DE CADA PASO
+                    // Lógica especial para Paso 1 (Términos)
+                    if (currentStep === 0) {
+                        if (!aceptaTerminos.checked) {
+                            alert("Debes aceptar los términos para continuar.");
+                            return;
+                        }
+                    }
 
-        // 1. Cuando cambia "Nivel de Instrucción" (Grado/Posgrado)
-        nivelRadios.forEach(radio => {
-            radio.addEventListener('change', async (e) => {
-                const nivelVal = e.target.value; // 'grado' o 'posgrado'
+                    // ✅ Caso especial: paso 2 (índice 1)
+                    // Este bloque ahora SÓLO se ejecuta si los campos del Paso 2 SON VÁLIDOS.
+                    if (currentStep === 1) {
+                        currentStep++;
+                        showStep(currentStep);
+                        return;
+                    }
 
-                // A) Ejecutar la lógica de visibilidad y pago
-                actualizarPago();
-               
-                // B) Resetear y deshabilitar los selects dependientes
-                resetSelect(facultadSelect, 'Cargando facultades...');
-                resetSelect(carreraSelect, 'Seleccione primero una facultad...');
-
-                // C) Buscar facultades vía AJAX
-                try {
-                    // Usamos la ruta que creamos en web.php
-                    const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
-                    if (!response.ok) throw new Error('Error al cargar facultades');
-                    const faculties = await response.json();
-                   
-                    // D) Poblar el select de facultades
-                    populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
-                } catch (error) {
-                    console.error(error);
-                    resetSelect(facultadSelect, 'Error al cargar facultades');
-                }
-            });
-        });
-
-        // 2. Cuando cambia "Facultad"
-        facultadSelect.addEventListener('change', async (e) => {
-            const facultadVal = e.target.value;
-            const nivelVal = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
-
-            if (!facultadVal || !nivelVal) return;
-
-            // A) Resetear y deshabilitar el select de carrera
-            resetSelect(carreraSelect, 'Cargando carreras...');
-
-            // B) Buscar carreras vía AJAX
-            try {
-                // Usamos la ruta que creamos en web.php
-                const response = await fetch(`{{ route('get.programs') }}?nivel_instruccion=${nivelVal}&facultad=${facultadVal}`);
-                if (!response.ok) throw new Error('Error al cargar carreras');
-                const programs = await response.json();
-
-                // C) Poblar el select de carreras
-                populateSelect(carreraSelect, programs, 'programa_desc', 'programa_desc', 'Seleccione una carrera...');
-            } catch (error) {
-                console.error(error);
-                resetSelect(carreraSelect, 'Error al cargar carreras');
-            }
-        });
-
-        becaRadios.forEach(r => r.addEventListener('change', actualizarPago));
-
-
-
-        // === PAGO Y COMPROBANTE ===
-
-        const tipoPagoSelect = document.getElementById('tipo-pago');
-
-        const comprobanteContainer = document.getElementById('comprobante-container');
-
-        const pagoEfectivoNote = document.getElementById('pago-efectivo-note');
-
-
-
-        tipoPagoSelect.addEventListener('change', () => {
-            const val = tipoPagoSelect.value;
-
-            // Debe coincidir EXACTO con los valores de tu enum
-            comprobanteContainer.style.display =
-                (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
-
-            pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
-        });
-
-
-
-        // === AGENDAMIENTO ===
-
-        const fechaInput = document.getElementById('fechaSeleccionada');
-
-        const modalidadSelect = document.getElementById('modalidadSelect');
-
-        const turnosContainer = document.getElementById('turnosContainer');
-
-        const turnoIdInput = document.getElementById('turno_id');
-
-        const dateShiftInput = document.getElementById('date_shift');
-
-        const shiftTimeInput = document.getElementById('shift_time');
-
-        const modalidadShiftInput = document.getElementById('modalidad_shift');
-
-
-
-      function cargarTurnos() {
-    const modalidad = modalidadSelect.value;
-    const fecha = fechaInput.value;
-
-    if (!modalidad || !fecha) return;
-
-    turnosContainer.innerHTML = '<p class="text-center text-muted">Cargando turnos...</p>';
-
-    fetch(`/shifts/${fecha}?modalidad=${modalidad}`)
-        .then(res => res.json())
-        .then(data => {
-            turnosContainer.innerHTML = '';
-
-            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-                turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
-                return;
-            }
-
-            data.data.forEach(turno => {
-                const div = document.createElement('div');
-                div.className = 'turno-card text-center';
-                div.innerHTML = `
-                    <strong>${turno.start_shift}</strong><br>
-                    <span class="text-muted small">${turno.end_shift}</span><br>
-                    <span class="badge bg-light text-dark mt-1">${turno.cubiculo}</span>
-                `;
-                div.onclick = () => {
-                    turnoIdInput.value = turno.id_shift;
-                    dateShiftInput.value = data.fecha_consulta; // viene del JSON principal
-                    shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
-                    modalidadShiftInput.value = turno.tipo_atencion;
-                    document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
-                    div.classList.add('selected');
+                    
+                    currentStep++;
+                    showStep(currentStep);
                 };
 
+                // === CONTROL DE TELÉFONO COMBINADO (Input Group) ===
+                if (inputTelefonoSuffix && inputTelefonoFull) {
+        
+                    // Función para actualizar el campo oculto
+                    function actualizarTelefonoCompleto() {
+                        inputTelefonoFull.value = '09' + inputTelefonoSuffix.value;
+                    }
 
-                turnosContainer.appendChild(div);
+                    // Actualizar al escribir
+                    inputTelefonoSuffix.addEventListener('input', actualizarTelefonoCompleto);
+
+                    // Actualizar por si la página se recarga con datos (old data)
+                    actualizarTelefonoCompleto(); 
+                }
+
+                prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
+                function validateCurrentStep() {
+                    const step = steps[currentStep];
+                    const requireds = step.querySelectorAll('[required]');
+                    for (let el of requireds) {
+                        if (el.type === 'radio') {
+                            const name = el.name;
+                            if (!step.querySelector(`input[name="${name}"]:checked`)) { el.focus(); return false; }
+                        } else if (!el.value || el.value.trim() === '') { el.focus(); return false; }
+
+                        // Validación ESPECÍFICA para la Edad
+                        if (el.name === 'edad') {
+                            const edadVal = parseInt(el.value);
+                            // Control estricto de rango
+                            if (isNaN(edadVal) || edadVal < 17 || edadVal > 80) {
+                                el.focus();
+                                el.classList.add('is-invalid');
+                                if(document.getElementById('errorEdad')) {
+                                    document.getElementById('errorEdad').style.display = 'block';
+                                }
+                                alert("La edad permitida es únicamente entre 17 y 80 años.");
+                                
+                                // Limpiar error al escribir
+                                el.addEventListener('input', () => {
+                                    el.classList.remove('is-invalid');
+                                    if(document.getElementById('errorEdad')) {
+                                        document.getElementById('errorEdad').style.display = 'none';
+                                    }
+                                }, {once: true});
+                                
+                                return false;
+                            }
+                        }
+                        
+                        // 2. Validación ESPECÍFICA para el Celular de Ecuador
+                        if (el.id === 'inputTelefonoSuffix') {
+                            
+                            // Regex: 8 dígitos numéricos exactos
+                            const suffixPattern = /^\d{8}$/;
+                            
+                            if (!suffixPattern.test(el.value)) {
+                                el.focus();
+                                el.classList.add('is-invalid');
+                                
+                                const errorTel = document.getElementById('errorTelefono');
+                                if(errorTel) {
+                                    errorTel.textContent = 'Debe ingresar los 8 dígitos restantes.';
+                                    errorTel.style.display = 'block';
+                                }
+                                
+                                alert("Por favor, ingrese los 8 dígitos de su celular.");
+                                
+                                // Limpiar error
+                                el.addEventListener('input', () => {
+                                    el.classList.remove('is-invalid');
+                                    if(errorTel) errorTel.style.display = 'none';
+                                }, {once: true});
+                                
+                                return false;
+                            }
+                        }
+
+                    }
+                    return true;
+                }
+
+
+                // === LÓGICA NIVEL / BECA / PAGO ===
+                const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
+            
+                // Contenedores dinámicos
+                const becaPreguntaContainer = document.getElementById('beca_pregunta_container');
+                const nivelSemestreContainer = document.getElementById('nivel_semestre_container');
+                const nivelSemestreSelect = document.getElementById('nivel_semestre_select');
+                const becaRadios = document.querySelectorAll('input[name="beca_san_ignacio"]');
+                const mensajePago = document.getElementById('mensaje_pago');
+
+                // Selects dinámicos
+                const facultadSelect = document.getElementById('facultad_select');
+                const carreraSelect = document.getElementById('carrera_select');
+
+                // ---Helper para poblar selects ---
+                function populateSelect(selectElement, items, valueField, textField, defaultOptionText) {
+                    selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
+                    items.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item[valueField];
+                        option.textContent = item[textField];
+                        selectElement.appendChild(option);
+                    });
+                    selectElement.disabled = false;
+                }
+
+                // ---Helper para resetear selects ---
+                function resetSelect(selectElement, defaultOptionText) {
+                    selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
+                    selectElement.disabled = true;
+                }
+
+                // ---actualizarPago ---  
+                function actualizarPago() {
+                    const nivelSeleccionado = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
+                    const becaSeleccionada = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
+
+                    if (!nivelSeleccionado) return;
+
+                    // --- GRUPO 1: Grado y Tec (Muestran beca y nivel de semestre) ---
+                    if (nivelSeleccionado === 'grado' || nivelSeleccionado === 'tec') {
+                    
+                        // Muestra Beca y Nivel(semestre)
+                        if (becaPreguntaContainer) becaPreguntaContainer.style.display = "block";
+                        if (nivelSemestreContainer) nivelSemestreContainer.style.display = "block";
+
+                        // Añade 'required' a los campos visibles
+                        nivelSemestreSelect.required = true;
+                        document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = true);
+
+                        // Lógica de pago (Asumiendo que 'Tec' cuesta igual que 'Grado')
+                        if (becaSeleccionada === 'si') {
+                            mensajePago.textContent = "Pago de $0.50 (Atención Psicológica Única - APSU con beca)";
+                        } else if (becaSeleccionada === 'no') {
+                            mensajePago.textContent = "Pago de $2.50 (Atención Psicológica Única - APSU)";
+                        } else {
+                            mensajePago.textContent = "Seleccione si cuenta con beca para mostrar el valor a pagar.";
+                        }
+
+                    // --- GRUPO 2: Posgrado y Especialización (Ocultan todo) ---
+                    } else if (nivelSeleccionado === 'posgrado' || nivelSeleccionado === 'especializacion') {
+                    
+                        // Oculta Beca y Nivel(semestre)
+                        if (becaPreguntaContainer) becaPreguntaContainer.style.display = "none";
+                        if (nivelSemestreContainer) nivelSemestreContainer.style.display = "none";
+                    
+                        // Quita 'required' de los campos ocultos
+                        nivelSemestreSelect.required = false;
+                        document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = false);
+
+                        // Selecciona automáticamente "No" en la beca (lógica de backend)
+                        if (document.getElementById('beca_no')) {
+                            document.getElementById('beca_no').checked = true;
+                        }
+
+                        // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
+                        mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
+                
+                    } else {
+                        mensajePago.textContent = "";
+                    }
+
+                    mensajePago.classList.add("fs-5", "text-success", "mt-3");
+                }
+
+
+
+                // --- NUEVOS EVENT LISTENERS (AJAX) ---
+
+                // 1. Cuando cambia "Nivel de Instrucción" (Grado/Posgrado)
+                nivelRadios.forEach(radio => {
+                    radio.addEventListener('change', async (e) => {
+                        const nivelVal = e.target.value; // 'grado' o 'posgrado'
+
+                        // A) Ejecutar la lógica de visibilidad y pago
+                        actualizarPago();
+                    
+                        // B) Resetear y deshabilitar los selects dependientes
+                        resetSelect(facultadSelect, 'Cargando facultades...');
+                        resetSelect(carreraSelect, 'Seleccione primero una facultad...');
+
+                        // C) Buscar facultades vía AJAX
+                        try {
+                            // Usamos la ruta que creamos en web.php
+                            const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
+                            if (!response.ok) throw new Error('Error al cargar facultades');
+                            const faculties = await response.json();
+                        
+                            // D) Poblar el select de facultades
+                            populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
+                        } catch (error) {
+                            console.error(error);
+                            resetSelect(facultadSelect, 'Error al cargar facultades');
+                        }
+                    });
+                });
+
+                // 2. Cuando cambia "Facultad"
+                facultadSelect.addEventListener('change', async (e) => {
+                    const facultadVal = e.target.value;
+                    const nivelVal = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
+
+                    if (!facultadVal || !nivelVal) return;
+
+                    // A) Resetear y deshabilitar el select de carrera
+                    resetSelect(carreraSelect, 'Cargando carreras...');
+
+                    // B) Buscar carreras vía AJAX
+                    try {
+                        // Usamos la ruta que creamos en web.php
+                        const response = await fetch(`{{ route('get.programs') }}?nivel_instruccion=${nivelVal}&facultad=${facultadVal}`);
+                        if (!response.ok) throw new Error('Error al cargar carreras');
+                        const programs = await response.json();
+
+                        // C) Poblar el select de carreras
+                        populateSelect(carreraSelect, programs, 'programa_desc', 'programa_desc', 'Seleccione una carrera...');
+                    } catch (error) {
+                        console.error(error);
+                        resetSelect(carreraSelect, 'Error al cargar carreras');
+                    }
+                });
+
+                becaRadios.forEach(r => r.addEventListener('change', actualizarPago));
+
+
+                // === PAGO Y COMPROBANTE ===
+                const tipoPagoSelect = document.getElementById('tipo-pago');
+                const comprobanteContainer = document.getElementById('comprobante-container');
+                const pagoEfectivoNote = document.getElementById('pago-efectivo-note');
+
+                tipoPagoSelect.addEventListener('change', () => {
+                    const val = tipoPagoSelect.value;
+
+                    // Debe coincidir EXACTO con los valores de tu enum
+                    comprobanteContainer.style.display =
+                        (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
+
+                    pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
+                });
+
+
+                // === AGENDAMIENTO ===
+                const fechaInput = document.getElementById('fechaSeleccionada');
+                const modalidadSelect = document.getElementById('modalidadSelect');
+                const turnosContainer = document.getElementById('turnosContainer');
+                const turnoIdInput = document.getElementById('turno_id');
+                const dateShiftInput = document.getElementById('date_shift');
+                const shiftTimeInput = document.getElementById('shift_time');
+                const modalidadShiftInput = document.getElementById('modalidad_shift');
+
+
+                function cargarTurnos() {
+                const modalidad = modalidadSelect.value;
+                const fecha = fechaInput.value;
+
+                if (!modalidad || !fecha) return;
+
+                turnosContainer.innerHTML = '<p class="text-center text-muted">Cargando turnos...</p>';
+
+                fetch(`/shifts/${fecha}?modalidad=${modalidad}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        turnosContainer.innerHTML = '';
+
+                        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                            turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
+                            return;
+                        }
+
+                        data.data.forEach(turno => {
+                            const div = document.createElement('div');
+                            div.className = 'turno-card text-center';
+                            div.innerHTML = `
+                                <strong>${turno.start_shift}</strong><br>
+                                <span class="text-muted small">${turno.end_shift}</span><br>
+                                <span class="badge bg-light text-dark mt-1">${turno.cubiculo}</span>
+                            `;
+                            div.onclick = () => {
+                                turnoIdInput.value = turno.id_shift;
+                                dateShiftInput.value = data.fecha_consulta; // viene del JSON principal
+                                shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
+                                modalidadShiftInput.value = turno.tipo_atencion;
+                                document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+                                div.classList.add('selected');
+                            };
+
+
+                            turnosContainer.appendChild(div);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar los turnos:", error);
+                        turnosContainer.innerHTML = '<p class="text-danger text-center">Error al cargar los turnos.</p>';
+                    });
+                }
+
+        
+                fechaInput.addEventListener('change', cargarTurnos);
+                modalidadSelect.addEventListener('change', cargarTurnos);
+
+                // === CONFIRMACIÓN FINAL ===
+                function populateConfirmation() {
+                    document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
+                    document.getElementById('namesConfirm').textContent = document.querySelector('[name="names"]').value;
+                    document.getElementById('correoConfirm').textContent = document.querySelector('[name="correo_puce"]').value;
+                    document.getElementById('telefonoConfirm').textContent = document.querySelector('[name="telefono"]').value;
+                    document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
+                    document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
+                }
+
+                showStep(currentStep);
+
+                // === CONTROL DE EDAD Y FECHA DE NACIMIENTO ===
+                const inputEdad = document.getElementById('inputEdad');
+                const inputFecha = document.getElementById('inputFechaNacimiento');
+                const errorEdad = document.getElementById('errorEdad');
+                const infoFecha = document.getElementById('infoFecha');
+
+                if (inputEdad && inputFecha) {
+                    inputEdad.addEventListener('input', function() {
+                        let edad = parseInt(this.value);
+                        
+                        // 1. Validación visual inmediata de rango (17 - 80)
+                        if (edad < 17 || edad > 80) {
+                            inputEdad.classList.add('is-invalid');
+                            if(errorEdad) errorEdad.style.display = 'block';
+                            
+                            // Si la edad es inválida, desbloqueamos la fecha o la limpiamos
+                            inputFecha.min = '';
+                            inputFecha.max = '';
+                            return; // Salimos, no calculamos fecha
+                        } else {
+                            inputEdad.classList.remove('is-invalid');
+                            if(errorEdad) errorEdad.style.display = 'none';
+                        }
+
+                        // 2. Calcular el año de nacimiento
+                        const anioActual = new Date().getFullYear();
+                        const anioNacimiento = anioActual - edad;
+
+                        // 3. Restringir el calendario SOLAMENTE a ese año
+                        // Esto hace que el selector de año del calendario se bloquee o limite
+                        const primerDia = `${anioNacimiento}-01-01`;
+                        const ultimoDia = `${anioNacimiento}-12-31`;
+
+                        inputFecha.min = primerDia;
+                        inputFecha.max = ultimoDia;
+
+                        // (Opcional) Si el campo estaba vacío, podemos sugerir el 1 de enero para que se vea el año
+                        // Si el usuario ya tenía una fecha, verificamos si coincide con el año, si no, la reseteamos
+                        if (inputFecha.value) {
+                            const fechaActualInput = new Date(inputFecha.value).getFullYear();
+                            if (fechaActualInput !== anioNacimiento) {
+                                inputFecha.value = primerDia; // Reseteamos al 1 de enero del año calculado
+                            }
+                        } 
+                        
+                        // Mostramos mensaje visual
+                        if(infoFecha) {
+                            infoFecha.textContent = `Calendario ajustado al año ${anioNacimiento}`;
+                            infoFecha.style.display = 'block';
+                        }
+                    });
+                }
+                
             });
-        })
-        .catch(error => {
-            console.error("Error al cargar los turnos:", error);
-            turnosContainer.innerHTML = '<p class="text-danger text-center">Error al cargar los turnos.</p>';
-        });
-}
 
-   
+            // === CONVERTIR ARCHIVO A BASE64 ===
+            document.addEventListener("DOMContentLoaded", function () {
 
+                const fileInput = document.getElementById("comprobante");
+                const base64Input = document.getElementById("comprobante_base64");
 
+                if (fileInput) {
+                    fileInput.addEventListener("change", function () {
 
+                        const file = this.files[0];
+                        if (!file) return;
 
-        fechaInput.addEventListener('change', cargarTurnos);
+                        const reader = new FileReader();
+                        reader.onloadend = function () {
+                            base64Input.value = reader.result; // Guarda base64 en el hidden
+                        };
 
-        modalidadSelect.addEventListener('change', cargarTurnos);
+                        reader.readAsDataURL(file); // Convierte a base64
+                    });
+                }
 
+            });
 
-
-        // === CONFIRMACIÓN FINAL ===
-
-        function populateConfirmation() {
-
-            document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
-
-            document.getElementById('namesConfirm').textContent = document.querySelector('[name="names"]').value;
-
-            document.getElementById('correoConfirm').textContent = document.querySelector('[name="correo_puce"]').value;
-
-            document.getElementById('telefonoConfirm').textContent = document.querySelector('[name="telefono"]').value;
-
-            document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
-
-            document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
-
-        }
-
-
-
-        showStep(currentStep);
-
-    });
-    // === CONVERTIR ARCHIVO A BASE64 ===
-document.addEventListener("DOMContentLoaded", function () {
-
-    const fileInput = document.getElementById("comprobante");
-    const base64Input = document.getElementById("comprobante_base64");
-
-    if (fileInput) {
-        fileInput.addEventListener("change", function () {
-
-            const file = this.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                base64Input.value = reader.result; // Guarda base64 en el hidden
-            };
-
-            reader.readAsDataURL(file); // Convierte a base64
-        });
-    }
-
-});
-
-</script>
-
-
-
-
+    </script>
 
 @stop

@@ -215,7 +215,7 @@ class StudentRegistrationController extends Controller
                     'acepta_terminos' => true,
                     'comprobante_base64' => $comprobanteBase64,
                     'comprobante_mime' => $comprobanteMime,
-                    'tomado' => 0,
+                    'tomado' => 1,
                 ]);
 
                 try {
@@ -316,7 +316,7 @@ class StudentRegistrationController extends Controller
                     'acepta_terminos' => true,
                     'comprobante_base64' => $comprobanteBase64,
                     'comprobante_mime' => $comprobanteMime,
-                    'tomado' => 0,
+                    'tomado' => 1,
                 ]);
 
                 try {
@@ -365,7 +365,7 @@ class StudentRegistrationController extends Controller
     $turno->status_shift = 0; // 0 = Ocupado
     $turno->save();
 
-    $student->tomado = 0;
+    $student->tomado = 1;
     $student->save();
     // Enviar correo
     try {

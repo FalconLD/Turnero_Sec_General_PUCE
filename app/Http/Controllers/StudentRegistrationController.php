@@ -370,7 +370,7 @@ class StudentRegistrationController extends Controller
     $turno->status_shift = 0; // 0 = Ocupado
     $turno->save();
 
-    $student->tomado = 1;
+    $student->tomado = 0;
     $student->save();
     // Enviar correo
     try {

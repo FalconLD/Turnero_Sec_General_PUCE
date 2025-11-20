@@ -373,19 +373,36 @@ class StudentRegistrationController extends Controller
     }
 
     // Registrar pago en pay_students
+    // Si el pago es en efectivo, no hay archivo
+    $isCash = $request->forma_pago === 'efectivo';
+
+    $file = $request->file('comprobante');
+
+    $comprobante64 = null;
+    $mime = null;
+
+    // Si NO es efectivo y sí hay archivo
+    if (!$isCash && $file) {
+        $comprobante64 = base64_encode(file_get_contents($file));
+        $mime = $file->getMimeType();
+    }
+
+    // Registrar pago en pay_students
     PayStudent::create([
         'cedula' => $student->cedula,
-        'valor_pagar' => $student->valor_pagar,
-        'forma_pago' => $request->forma_pago,
-        'comprobante' => $comprobante64,
+        'valor_pagar'   => $student->valor_pagar,
+        'forma_pago'    => $request->forma_pago,
+        'comprobante'   => $comprobante64, // puede ir null sin problema
         'student_registration_id' => $student->id,
     ]);
-        $student->payment()->create([
-        'amount' => $student->valor_pagar,
-        'payment_method' => $request->forma_pago,
+
+    // Registrar pago en payment (relación)
+    $student->payment()->create([
+        'amount'             => $student->valor_pagar,
+        'payment_method'     => $request->forma_pago,
         'comprobante_base64' => $comprobante64,
-        'comprobante_mime' => $request->file('comprobante')->getMimeType(),
-        'status' => 'pending',
+        'comprobante_mime'   => $mime, // null si es efectivo
+        'status'             => 'pending',
     ]);
 
     // Asignar turno

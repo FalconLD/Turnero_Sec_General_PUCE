@@ -28,7 +28,7 @@
                 <div class="alert alert-danger text-center">{{ $errors->first() }}</div>
             @endif
 
-            <form id="form-agendamiento" method="POST" action="{{ route('student.agendarTurno') }}">
+            <form id="form-agendamiento" method="POST" action="{{ route('student.agendarTurno') }}" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row justify-content-center g-4">
@@ -73,6 +73,41 @@
                     </div>
                 </div>
 
+                {{-- ============================= --}}
+                {{--         PASO 4: PAGO         --}}
+                {{-- ============================= --}}
+                <div class="card shadow-sm border-0 rounded-4 mt-5 p-4">
+                    <h5 class="fw-bold text-primary mb-3 text-center">💳 Formas de pago</h5>
+                    <p class="text-muted text-center mb-4">
+                        Complete esta sección para confirmar su agendamiento.
+                    </p>
+
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+
+                            {{-- Selección de forma de pago --}}
+                            <div class="mb-3">
+                                <label for="forma_pago" class="form-label fw-bold">Seleccione forma de pago:</label>
+                                <select name="forma_pago" id="forma_pago" class="form-select shadow-sm" required>
+                                    <option value="" disabled selected>Seleccione...</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="efectivo">Efectivo</option>
+                                </select>
+                            </div>
+
+                            {{-- Comprobante --}}
+                            <div class="mb-3" id="comprobante_container" style="display:none;">
+                                <label for="comprobante" class="form-label fw-bold">Suba su comprobante:</label>
+                                <input type="file" name="comprobante" id="comprobante"
+                                       class="form-control shadow-sm"
+                                       accept="image/*,.pdf">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Campos ocultos --}}
                 <input type="hidden" name="turno_id" id="turno_id">
                 <input type="hidden" name="cedula" value="{{ $student->cedula }}">
@@ -98,7 +133,6 @@
     font-size: 0.95rem;
     color: #495057;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.354 10.354a.5.5 0 0 1-.708 0L4.646 7.354a.5.5 0 0 1 0-.708z'/></svg>");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 14px;
@@ -148,13 +182,11 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 turnosContainer.innerHTML = '';
 
-                // ✅ Validar la estructura del JSON que devuelve el backend
                 if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
                     turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
                     return;
                 }
 
-                // ✅ Recorrer correctamente los turnos
                 data.data.forEach(turno => {
                     const div = document.createElement('div');
                     div.className = 'turno-card text-center';
@@ -179,6 +211,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     modalidadSelect.addEventListener('change', cargarTurnos);
     fechaInput.addEventListener('change', cargarTurnos);
+
+    // Mostrar/ocultar comprobante según forma de pago
+    const formaPago = document.getElementById('forma_pago');
+    const comprobanteContainer = document.getElementById('comprobante_container');
+
+    formaPago.addEventListener('change', function () {
+        if (this.value === 'efectivo') {
+            comprobanteContainer.style.display = 'none';
+        } else {
+            comprobanteContainer.style.display = 'block';
+        }
+    });
 });
 </script>
 

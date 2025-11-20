@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentRegistered;
 use App\Models\Schedule;
+use App\Models\PayStudent;
 use Carbon\Carbon;
 use App\Models\Faculty; // <-- AÑADIR ESTE
 use Illuminate\Validation\Rule; // <-- AÑADIR ESTE
@@ -364,6 +365,28 @@ class StudentRegistrationController extends Controller
     if ($turno->status_shift == 0) {
         return back()->with('error', 'El turno seleccionado ya fue ocupado.');
     }
+     // Convertir comprobante a base64
+    $comprobante64 = null;
+    if ($request->hasFile('comprobante')) {
+        $file = $request->file('comprobante');
+        $comprobante64 = base64_encode(file_get_contents($file));
+    }
+
+    // Registrar pago en pay_students
+    PayStudent::create([
+        'cedula' => $student->cedula,
+        'valor_pagar' => $student->valor_pagar,
+        'forma_pago' => $request->forma_pago,
+        'comprobante' => $comprobante64,
+        'student_registration_id' => $student->id,
+    ]);
+        $student->payment()->create([
+        'amount' => $student->valor_pagar,
+        'payment_method' => $request->forma_pago,
+        'comprobante_base64' => $comprobante64,
+        'comprobante_mime' => $request->file('comprobante')->getMimeType(),
+        'status' => 'pending',
+    ]);
 
     // Asignar turno
     $turno->person_shift = $student->cedula;

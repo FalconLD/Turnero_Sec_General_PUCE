@@ -39,5 +39,8 @@ class StudentRegistration extends Model
     {
         return $this->hasOne(Payment::class);
     }
-
+    public function payStudents()
+    {
+        return $this->hasMany(PayStudent::class, 'student_registration_id');
+    }
 }

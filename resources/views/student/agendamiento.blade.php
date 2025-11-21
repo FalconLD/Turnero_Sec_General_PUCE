@@ -90,9 +90,9 @@
                                 <label for="forma_pago" class="form-label fw-bold">Seleccione forma de pago:</label>
                                 <select name="forma_pago" id="forma_pago" class="form-select shadow-sm" required>
                                     <option value="" disabled selected>Seleccione...</option>
-                                    <option value="transferencia">Transferencia</option>
-                                    <option value="tarjeta">Tarjeta</option>
-                                    <option value="efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="DeUna">DeUna</option>
+                                    <option value="Efectivo">Efectivo</option>
                                 </select>
                             </div>
 
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const comprobanteContainer = document.getElementById('comprobante_container');
 
     formaPago.addEventListener('change', function () {
-        if (this.value === 'efectivo') {
+        if (this.value === 'Efectivo') {
             comprobanteContainer.style.display = 'none';
         } else {
             comprobanteContainer.style.display = 'block';

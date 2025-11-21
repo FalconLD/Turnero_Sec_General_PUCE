@@ -388,6 +388,7 @@ class StudentRegistrationController extends Controller
     }
 
     // Registrar pago en pay_students
+    // Registrar pago en pay_students
     PayStudent::create([
         'cedula' => $student->cedula,
         'valor_pagar'   => $student->valor_pagar,

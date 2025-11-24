@@ -340,8 +340,8 @@ return [
             'icon' => 'fa fa-unlock',
         ],
         [
-            'text' => 'Permisos de Usuario',
-            'url'  => '/user-permissions', // apunta a la ruta real
+            'text' => 'Roles y Permisos',
+            'route'  => 'roles.index', // apunta a la ruta real
             'icon' => 'fas fa-user-shield',
         ],
         [

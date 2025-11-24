@@ -20,6 +20,7 @@
     use App\Http\Controllers\Auth\TokenLoginController;
     use App\Http\Controllers\DashboardController;
     use App\Http\Controllers\Admin\PaymentController;
+    use App\Http\Controllers\RoleController;
  
  
 // --- Rutas de Autenticación ---
@@ -92,8 +93,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
 
-    // Obtener facultades y programas para el formulario de registro de estudiantes
-   
+    //Roles de edicion
+    Route::resource('roles', RoleController::class);
 
     //Ruta para el registro de la hora y fecha de estudiantes. 
    // Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');

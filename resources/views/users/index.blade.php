@@ -8,8 +8,8 @@
 
 @section('content')
     <div class="container-fluid">
-        <div class="row justify-content-center"> {{-- Fila para centrar el contenido --}}
-            <div class="col-md-11"> {{-- Define el ancho (11 de 12 columnas) --}}
+        <div class="row justify-content-center"> 
+            <div class="col-md-11"> 
 
                 <div class="card">
                     <div class="card-header d-flex justify-content-end align-items-center">
@@ -22,12 +22,15 @@
                         <div class="table-responsive">
                             <table id="usuarios" class="table">
                                 <thead>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>DNI</th>
-                                    <th>Cubículos Asignados</th>
-                                    <th>Acciones</th>
+                                    <tr> {{-- Agregué <tr> que faltaba por buenas prácticas --}}
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>DNI</th>                                    
+                                        <th>Cubículos Asignados</th>
+                                        <th>Roles</th>
+                                        <th>Acciones</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($users as $usuario)
@@ -35,25 +38,49 @@
                                             <td>{{ $usuario->id }}</td>
                                             <td>{{ $usuario->name }}</td>
                                             <td>{{ $usuario->email }}</td>
-                                            <td>{{ $usuario->DNI ?? 'N/A' }}</td>
+                                            <td>{{ $usuario->DNI ?? 'N/A' }}</td>                                            
                                             <td>
                                                 @if ($usuario->cubiculos->count() > 0)
-                                                    <ul class="mb-0">
+                                                    <ul class="mb-0 pl-3"> {{-- pl-3 para mejor indentación --}}
                                                         @foreach ($usuario->cubiculos as $cub)
                                                             <li>{{ $cub->nombre }} ({{ ucfirst($cub->tipo_atencion) }})</li>
                                                         @endforeach
                                                     </ul>
                                                 @else
-                                                    <span class="badge bg-secondary">Sin cubículos</span>
+                                                    <span class="badge badge-light border text-muted">Sin cubículos</span>
                                                 @endif
                                             </td>
-                                            <td class="text-nowrap"> <a href="{{ route('users.edit', $usuario) }}" class="btn btn-link text-primary btn-sm me-1">
+
+                                            {{-- LÓGICA DE ROLES --}}
+                                            <td>
+                                                @if($usuario->roles->isNotEmpty())
+                                                    @foreach($usuario->roles as $rol)
+                                                        @php
+                                                            // Lógica de colores para los badges
+                                                            $badgeClass = 'secondary';
+                                                            $rolName = strtolower($rol->name);
+
+                                                            if(str_contains($rolName, 'admin')) $badgeClass = 'danger';     // Rojo
+                                                            elseif(str_contains($rolName, 'recepcion')) $badgeClass = 'warning'; // Amarillo
+                                                            elseif(str_contains($rolName, 'psicologo')) $badgeClass = 'info';    // Azul
+                                                        @endphp
+                                                        <span class="badge badge-{{ $badgeClass }}" style="font-size: 0.9rem;">
+                                                            {{ $rol->name }}
+                                                        </span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="badge badge-light border text-muted">Sin Rol</span>
+                                                @endif
+                                            </td>
+
+                                            <td class="text-nowrap"> 
+                                                <a href="{{ route('users.edit', $usuario) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="{{ route('users.destroy', $usuario) }}" method="POST" style="display:inline;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Seguro de eliminar este usuario?')">
+                                                    <button class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Seguro de eliminar este usuario?')" title="Eliminar">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -66,43 +93,33 @@
                     </div>
                 </div>
 
-            </div> {{-- Cierre de col-md-11 --}}
-        </div> {{-- Cierre de row justify-content-center --}}
-    </div> {{-- Cierre de container-fluid --}}
+            </div> 
+        </div> 
+    </div> 
 @stop
 
 @section('css')
-    {{-- Estilos DataTables y botones --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
-    {{-- CÓDIGO CORREGIDO PARA FORZAR LA SEPARACIÓN --}}
     <style>
         .dt-buttons .btn:not(:first-child) {
             margin-left: 5px !important;
         }
-
-        /* --- 1. ESTILOS PARA REDONDEAR (Como la imagen de 'posventav2') --- */
         .card {
-            border-radius: 1rem !important; /* (16px) !important para sobreescribir AdminLTE */
+            border-radius: 1rem !important;
             border: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.07); /* Sombra suave para efecto flotante */
+            box-shadow: 0 8px 24px rgba(0,0,0,0.07);
         }
-
-        /* Redondear la cabecera del card también */
         .card-header {
             border-top-left-radius: 1rem !important;
             border-top-right-radius: 1rem !important;
-            background-color: #fff; /* Fondo blanco como en el ejemplo */
-            border-bottom: 1px solid #f0f0f0; /* Línea sutil */
+            background-color: #fff;
+            border-bottom: 1px solid #f0f0f0;
         }
-
-
-        /* Cabecera de la tabla (después de quitar 'thead-primary') */
         #usuarios thead {
             background-color: #f8f9fa; 
         }
-
         #usuarios thead th {
             color: #495057; 
             font-weight: 600; 
@@ -110,34 +127,26 @@
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
-
-        /* Quitar bordes verticales de la tabla (como en el ejemplo) */
         #usuarios td, #usuarios th {
             border-left: none;
             border-right: none;
-
+            vertical-align: middle; /* Alineación vertical centrada se ve mejor */
         }
-        
-        /* Redondear los botones de exportar */
         .dt-buttons .btn {
             border-radius: 0.5rem; 
+            min-width: 105px;
+            text-align: center;
         }
-        /* --- 3. AUMENTAR ANCHO DEL CAMPO DE BÚSQUEDA --- */
         .dataTables_filter input[type="search"] {
-            width: 400px !important; /* Puedes cambiar este valor (ej: 400px) */
-        }
-        .dt-buttons .btn {
-            min-width: 105px; /* Ancho mínimo para todos los botones */
-            text-align: center; /* Centra el icono y texto */
+            width: 400px !important; 
         }
         #usuarios tbody .btn .fas {
-            font-size: 1.4rem; /* '1rem' es el normal. Ajusta este valor si te gusta */
+            font-size: 1.2rem; /* Ajusté un poco el tamaño para que no se vea gigante */
         }
     </style>
 @stop
 
 @section('js')
-    {{-- Librerías DataTables y exportación --}}
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
@@ -163,12 +172,12 @@
                     {
                         extend: 'excelHtml5',
                         text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm' // Primer botón, sin margen
+                        className: 'btn btn-success btn-sm'
                     },
                     {
                         extend: 'pdfHtml5',
                         text: '<i class="fas fa-file-pdf"></i> PDF',
-                        className: 'btn btn-danger btn-sm ms-2', // << AÑADIDO ms-2
+                        className: 'btn btn-danger btn-sm ms-2',
                         orientation: 'landscape',
                         pageSize: 'A4',
                         title: 'Listado de Usuarios'
@@ -176,14 +185,9 @@
                     {
                         extend: 'print',
                         text: '<i class="fas fa-print"></i> Imprimir',
-                        className: 'btn btn-secondary btn-sm ms-2' // << AÑADIDO ms-2
+                        className: 'btn btn-secondary btn-sm ms-2'
                     }
                 ]
-            });
-
-            // Filtro por nombre de usuario
-            $('#filtro_nombre').on('keyup', function () {
-                table.column(1).search(this.value).draw();
             });
         });
     </script>

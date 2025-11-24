@@ -24,150 +24,127 @@
  
  
 // --- Rutas de Autenticación ---
-// Esta única línea registra todas las rutas necesarias para la autenticación:
-// login, logout, registro, olvido de contraseña, etc.
-Auth::routes();
+Auth::routes(['register' => false]); //quitar el registro de nuevos usuarios
 
+// ==================================
+//  ZONA PÚBLICA (ESTUDIANTES Y API)
+// ==================================
+// Estas rutas NO requieren estar logueado como administrativo
 
-// --- RUTAS PÚBLICAS (acceso con token PUCE para estudiantes) ---
-// --- RUTAS PÚBLICAS ---
 Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])
-    ->name('api.shifts')
-    ->withoutMiddleware(['auth']);
-    Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])
-    ->name('api.shifts.modalidad')
-    ->withoutMiddleware(['auth']);
-Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])
-    ->name('student.agendar.turno');
-Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])
-    ->name('student.finish');
-// Login automático desde token
-// Login automático desde token
-Route::get('/registro/{token}', [TokenLoginController::class, 'loginWithToken'])
-    ->name('student.registro.token');
+    ->name('api.shifts')->withoutMiddleware(['auth']);
+Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])
+    ->name('api.shifts.modalidad')->withoutMiddleware(['auth']);
 
-// Página de error si el token no es válido o expiró
-Route::get('/registro/error', fn() => view('student.token_error'))
-    ->name('student.token.error');
-
-// Formulario de registro personal del estudiante
-Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])
-    ->name('student.personal');
-
-// ✅ Nueva vista de agendamiento (paso 5)
-Route::get('/student/agendamiento', [StudentRegistrationController::class, 'agendamiento'])
-    ->name('student.agendamiento');
-
-// Guardar los datos personales
-Route::post('/student/store', [StudentRegistrationController::class, 'store'])
-    ->name('student.store');
-
-// Finalizar registro (acepta términos y guarda turno)
-Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])
-    ->name('student.finish');
-
-// Página de éxito
-Route::get('/student/success', [StudentRegistrationController::class, 'success'])
-    ->name('student.success');
-
-Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])
-    ->name('student.agendarTurno');
-
-    Route::post('/student/turno/eliminar', [StudentRegistrationController::class, 'eliminarTurno'])
-    ->name('student.turno.eliminar');
+// Login y Registro de Estudiantes (Flow Token)
+Route::get('/registro/{token}', [TokenLoginController::class, 'loginWithToken'])->name('student.registro.token');
+Route::get('/registro/error', fn() => view('student.token_error'))->name('student.token.error');
+Route::get('/student/personal', [StudentRegistrationController::class, 'showPersonalForm'])->name('student.personal');
+Route::get('/student/agendamiento', [StudentRegistrationController::class, 'agendamiento'])->name('student.agendamiento');
+Route::post('/student/store', [StudentRegistrationController::class, 'store'])->name('student.store');
+Route::post('/student/finish', [StudentRegistrationController::class, 'finish'])->name('student.finish');
+Route::get('/student/success', [StudentRegistrationController::class, 'success'])->name('student.success');
+Route::post('/student/agendar-turno', [StudentRegistrationController::class, 'agendarTurno'])->name('student.agendarTurno');
+Route::post('/student/turno/eliminar', [StudentRegistrationController::class, 'eliminarTurno'])->name('student.turno.eliminar');
 Route::get('/student/logout', [StudentRegistrationController::class, 'studentLogout'])->name('student.logout');
- Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
-    Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
+Route::get('/get-faculties', [StudentRegistrationController::class, 'getFaculties'])->name('get.faculties');
+Route::get('/get-programs', [StudentRegistrationController::class, 'getPrograms'])->name('get.programs');
+Route::post('/validar-datos', [StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
 
-// --- RUTAS PROTEGIDAS (requieren login normal) ---
+
+
+// ==============================================
+//  ZONA PROTEGIDA (ADMINISTRATIVOS y PSICOLOGOS)
+// ===============================================
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard principal
+    // --- ACCESO BÁSICO (Para todos los logueados) ---
     Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::get('/home', [HomeController::class, 'index']); // Redirección para compatibilidad
-    // Esta ruta mostrará la página de edición del perfil
-    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/home', [HomeController::class, 'index']);
     
-    // Esta ruta recibirá los datos del formulario y los guardará
+    // Perfil de Usuario
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
 
-    //Roles de edicion
-    Route::resource('roles', RoleController::class);
+    // --- 1. MÓDULO DE SEGURIDAD (Roles y Usuarios) ---
+    // Protegido con: roles.ver y usuarios.ver
+    Route::group(['middleware' => ['can:roles.ver']], function () {
+        Route::resource('roles', RoleController::class);
+    });
 
-    //Ruta para el registro de la hora y fecha de estudiantes. 
-   // Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
-
-    
-    Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])
-     ->name('payments.index');
-     
-    // La ruta ahora recibe el ID del {payment}
-    Route::post('payments/{payment}/verify', [App\Http\Controllers\Admin\PaymentController::class, 'verify'])
-        ->name('payments.verify');
-
-    Route::post('payments/{payment}/reject', [App\Http\Controllers\Admin\PaymentController::class, 'reject'])
-        ->name('payments.reject');
-    Route::get('/admin/payments/{payment}/ver', [PaymentController::class, 'verComprobante'])->name('payments.verComprobante');
-    Route::get('/admin/payments/{payment}/descargar', [PaymentController::class, 'descargarComprobante'])->name('payments.descargarComprobante');
-
-    // --- Rutas de Recursos (CRUD) ---
-    // Laravel genera automáticamente las rutas para Crear, Leer, Actualizar y Eliminar.
-    // Por ejemplo, para 'cubiculos', crea: cubiculos.index, cubiculos.create, cubiculos.store, etc.
-    Route::resource('asignacion', AsignacionController::class);
-    Route::resource('cubiculos', CubiculoController::class);
-    Route::resource('users', UserController::class);
-    Route::resource('forms', FormController::class);
-    Route::resource('schedules', ScheduleController::class);
-    Route::resource('parameters', ParameterController::class);
-    Route::resource('shifts', ShiftController::class);
+    Route::group(['middleware' => ['can:usuarios.ver']], function () {
+        Route::resource('users', UserController::class);
+        Route::resource('asignacion', AsignacionController::class); // Asumo que va con usuarios
+    });
 
 
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
-    Route::get('/days/{schedule}/edit', [DayController::class, 'edit'])->name('days.edit');
-    Route::post('/days', [DayController::class, 'store'])->name('days.store');
-});
- 
- 
-    // --- Rutas Específicas para Horarios (Schedules) ---
-    // Estas son rutas adicionales para el controlador de horarios que no forman parte del CRUD estándar.
-    // Se utilizan para el flujo de creación de horarios en varios pasos.
-    Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
-    Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
- 
-    // --- Rutas Estáticas (solo muestran una vista) ---
-    // Aunque es mejor usar controladores, si solo necesitas mostrar una vista, esta es una forma limpia.
-    // Se recomienda crear controladores para estas secciones si su lógica crece en el futuro.
-    Route::get('/encuesta', function () {
-        return view('encuesta.index');
-    })->name('encuesta.index');
- 
-    Route::get('/auditorias', function () {
-        return view('auditoria.index');
-    })->name('auditoria.index');
- 
-  /* Antiguo */
-      
-   
-    
-    Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
-    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts']);
-    //Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('shifts.getAvailable');
-
-    
+    // --- 2. MÓDULO DE ATENCIÓN (Psicólogos) ---
+    // Protegido con: atencion.ver_calendario
+    Route::group(['middleware' => ['can:atencion.ver_calendario']], function () {
+        Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
+        Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
+    });
 
 
+    // --- 3. MÓDULO DE PAGOS (Recepción) ---
+    // Protegido con: pagos.ver
+    Route::group(['middleware' => ['can:pagos.ver']], function () {
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::post('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+        Route::post('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+        Route::get('/admin/payments/{payment}/ver', [PaymentController::class, 'verComprobante'])->name('payments.verComprobante');
+        Route::get('/admin/payments/{payment}/descargar', [PaymentController::class, 'descargarComprobante'])->name('payments.descargarComprobante');
+    });
+
+
+    // --- 4. MÓDULO DE DESBLOQUEO DE USUARIO ---
+    // Protegido con: desbloqueo.acceder
+    Route::group(['middleware' => ['can:desbloqueo.acceder']], function () {
+        Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
+        Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
+        Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
+    });
+
+
+    // --- 5. MÓDULO DE CONFIGURACIÓN Y HORARIOS (Admin) ---
+    // Protegido con: horarios.ver
+    Route::group(['middleware' => ['can:horarios.ver']], function () {
+        Route::resource('schedules', ScheduleController::class);
+        Route::resource('shifts', ShiftController::class); // Gestión manual de turnos
         
+        // Rutas específicas de horarios
+        Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
+        Route::get('/days/{schedule}/edit', [DayController::class, 'edit'])->name('days.edit');
+        Route::post('/days', [DayController::class, 'store'])->name('days.store');
+        Route::get('schedules/{schedule}/select-days', [ScheduleController::class, 'selectDays'])->name('schedules.selectDays');
+        Route::post('schedules/{schedule}/store-days', [ScheduleController::class, 'storeDays'])->name('schedules.storeDays');
+    });
 
-    Route::get('/shift-unlock', [ShiftUnlockController::class, 'index'])->name('shift_unlock.search');
-    Route::post('/shift-unlock', [ShiftUnlockController::class, 'search'])->name('shift_unlock.search.post');
-    Route::get('/shift-unlock/unlock/{cedula}', [ShiftUnlockController::class, 'unlock'])->name('shift_unlock.unlock');
 
-    Route::post('/validar-datos', [App\Http\Controllers\StudentRegistrationController::class, 'validarDatos'])->name('validar.datos');
+    // --- 6. MÓDULO DE INFRAESTRUCTURA (Cubículos) ---
+    // Protegido con: cubiculos.ver
+    Route::group(['middleware' => ['can:cubiculos.ver']], function () {
+        Route::resource('cubiculos', CubiculoController::class);
+    });
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
- 
+
+    // --- 7. MÓDULO DE PARÁMETROS (Configuración Global) ---
+    // Protegido con: parametros.ver
+    Route::group(['middleware' => ['can:parametros.ver']], function () {
+        Route::resource('parameters', ParameterController::class);
+        Route::resource('forms', FormController::class); // Formularios dinámicos
+    });
+
+
+    // --- 8. MÓDULO DE REPORTES (Dashboard) ---
+    // Protegido con: reportes.ver
+    Route::group(['middleware' => ['can:reportes.ver']], function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        
+        // Vistas estáticas de reportes/auditoría
+        Route::get('/encuesta', function () { return view('encuesta.index'); })->name('encuesta.index');
+        Route::get('/auditorias', function () { return view('auditoria.index'); })->name('auditoria.index');
+    });
+
 });

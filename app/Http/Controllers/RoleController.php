@@ -11,7 +11,7 @@
         // 1. Listar los roles existentes
         public function index()
         {
-            $roles = Role::all();
+            $roles = Role::withCount('users')->get();
             return view('roles.index', compact('roles'));
         }
 

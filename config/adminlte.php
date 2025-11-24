@@ -282,7 +282,7 @@ return [
     'dashboard_url' => 'home',
     'logout_url' => 'logout',
     'login_url' => 'login',
-    'register_url' => 'register',
+    'register_url' => 'null',
     'password_reset_url' => 'password/reset',
     'password_email_url' => 'password/email',
     'profile_url' => false,
@@ -323,90 +323,89 @@ return [
 
     'menu' => [
         
-        [
-            'text' => 'blog',
-            'url' => 'admin/blog',
-            'can' => 'manage-blog',
-        ],
+        // Encabezado principal
         ['header' => 'CONFIGURACIONES'],
+
+        // 1. MÓDULO ATENCIÓN
         [
-            'text' => 'Atención',
-            'route' => 'attention.index', //  usar la ruta directamente
-            'icon' => 'fas fa-fw fa-user',
+            'text'        => 'Atención',
+            'route'       => 'attention.index',
+            'icon'        => 'fas fa-fw fa-calendar-check', // Icono mejorado
+            'can'         => 'atencion.ver_calendario',     // <--- FILTRO DE PERMISO
         ],
+
+        // 2. MÓDULO DESBLOQUEO
         [
-            'text' => 'Desbloquear usuario',
-            'url'  => '/shift-unlock', // apunta a la ruta real
-            'icon' => 'fa fa-unlock',
+            'text'        => 'Desbloquear usuario',
+            'route'       => 'shift_unlock.search', // Cambiado a route para consistencia
+            'icon'        => 'fas fa-fw fa-lock-open',
+            'active'      => ['shift-unlock*'],     // Se ilumina si estás dentro
+            'can'         => 'desbloqueo.acceder',  // <--- FILTRO DE PERMISO
         ],
+
+        // 3. MÓDULO ROLES Y PERMISOS
         [
-            'text' => 'Roles y Permisos',
-            'route'  => 'roles.index', // apunta a la ruta real
-            'icon' => 'fas fa-user-shield',
+            'text'        => 'Roles y Permisos',
+            'route'       => 'roles.index',
+            'icon'        => 'fas fa-fw fa-user-shield',
+            'active'      => ['roles*'],
+            'can'         => 'roles.ver',           // <--- FILTRO DE PERMISO
         ],
+
+        // 4. MÓDULO PAGOS
         [
-            'text' => 'Revisión de Pagos',
-            'route'  => 'payments.index', // La ruta que crearemos
-            'icon' => 'fas fa-fw fa-cash-register',            
+            'text'        => 'Revisión de Pagos',
+            'route'       => 'payments.index',
+            'icon'        => 'fas fa-fw fa-cash-register',
+            'active'      => ['payments*'],
+            'can'         => 'pagos.ver',           // <--- FILTRO DE PERMISO
         ],
+
+        // 5. MENÚ DESPLEGABLE DE ADMINISTRACIÓN
         [
-            'text' => 'Administración',
-            'icon' => 'fa fa-list',
+            'text'    => 'Administración',
+            'icon'    => 'fas fa-fw fa-cogs',
+            // AdminLTE ocultará este padre automáticamente si el usuario no tiene permiso para ver ningún hijo
             'submenu' => [
                 [
                     'text' => 'Usuarios',
-                    'route' => 'users.index',
-                    'icon' => 'fa fa-user-circle',
+                    'route'  => 'users.index',
+                    'icon' => 'fas fa-fw fa-user-circle',
+                    'active' => ['users*'],
+                    'can'  => 'usuarios.ver',      // <--- FILTRO DE PERMISO
                 ],
                 [
                     'text' => 'Cubículos',
-                    'route' => 'cubiculos.index',
-                    'icon' => 'fa fa-braille',
-                        
+                    'route'  => 'cubiculos.index',
+                    'icon' => 'fas fa-fw fa-door-open',
+                    'can'  => 'cubiculos.ver',     // <--- FILTRO DE PERMISO
                 ],
                 [
                     'text' => 'Horarios',
-                    'route' => 'schedules.index',
-                    'icon' => 'fa fa-clock',
-                ],
-                /* Secomenta en caso de necesitar mas funcionalidades o mas departamenteos para terminos y condiciones
-                [
-                    'text' => 'Asignación',
-                    'route' => 'asignacion.index',
-                    'icon' => 'fa fa-check',
-                ],                
-                [
-                    'text' => 'Formularios',
-                    'route' => 'forms.index',
-                    'icon' => 'fa fa-indent',
-                ],*/
-                [
-                    'text' => 'Parametros',
-                    'route' => 'parameters.index',
-                    'icon' => 'fa fa-cogs',
-                ],                
-                /*[
-                    'text' => 'Encuestas',
-                    'route' => 'encuesta.index',
-                    'icon' => 'fa fa-pencil-alt',
+                    'route'  => 'schedules.index',
+                    'icon' => 'fas fa-fw fa-clock',
+                    'active' => ['schedules*', 'days*', 'shifts*'], // Mantiene activo en sub-vistas
+                    'can'  => 'horarios.ver',      // <--- FILTRO DE PERMISO
                 ],
                 [
-                    'text' => 'Auditorías',
-                    'route' => 'auditoria.index',
-                    'icon' => 'fa fa-thumbs-up',
-                ],*/
-                
+                    'text' => 'Parámetros',
+                    'route'  => 'parameters.index',
+                    'icon' => 'fas fa-fw fa-sliders-h',
+                    'can'  => 'parametros.ver',    // <--- FILTRO DE PERMISO
+                ],
             ],
         ],
+
+        // 6. MÓDULO REPORTES
         [
-            'text' => 'Reportes',
-            'route' => 'dashboard.index',
-            'icon' => 'fa fa-file',
-            
+            'text'       => 'Reportes',
+            'route'      => 'dashboard.index',
+            'icon'       => 'fas fa-fw fa-chart-line',
+            'active'     => ['dashboard*', 'auditorias*', 'encuesta*'],
+            'can'        => 'reportes.ver',        // <--- FILTRO DE PERMISO
         ],
         
     ],
-
     /*
     |--------------------------------------------------------------------------
     | Menu Filters

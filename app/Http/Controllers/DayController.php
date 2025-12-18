@@ -115,11 +115,6 @@ class DayController extends Controller
             }
             \App\Models\Day::insert($insertDays);
 
-            // =================================================================
-            // [FIX 2: CORRECCIÓN DE BORRADO DE TURNOS]
-            // Borrar turnos anteriores DE ESTE HORARIO, pero SOLAMENTE
-            // los que no están reservados (person_shift IS NULL).
-            // =================================================================
             DB::table('shifts')
                 ->where('schedule_shift', $scheduleId)
                 ->whereNull('person_shift') // <-- SÓLO BORRA TURNOS DISPONIBLES

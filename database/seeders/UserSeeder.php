@@ -19,11 +19,15 @@ class UserSeeder extends Seeder
         // Usamos create() directamente, es más limpio.
         // Laravel se encargará de encriptar la contraseña si el modelo User está bien configurado.
         
-        User::create([
+        $admin = User::create([
             'name' => 'Darling Arroyo',
             'email' => 'darroyo686@puce.edu.ec',
             'password' => Hash::make('12345678'), // Usar Hash::make()
         ]);
+        
+        // 2. Le asignamos el rol inmediatamente
+        // Es vital que el RoleSeeder se haya ejecutado ANTES que este
+        $admin->assignRole('Super Admin');
 
         User::create([
             'name' => 'Cristian Freire',

@@ -24,7 +24,7 @@ class StudentRegistered extends Mailable
         // Obtener el usuario dueño del cubículo
         $user = \App\Models\User::find($this->shift->cubicle->user_id);
 
-        return $this->subject('Confirmación de cita - Psicología Aplicada APsU')
+        return $this->subject('Confirmación de cita - Secretaria General APsU')
                     ->cc(optional($user)->email)  // ← COPIA AL USUARIO DEL CUBÍCULO
                     ->markdown('emails.student.registered')
                     ->with([

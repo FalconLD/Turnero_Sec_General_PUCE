@@ -16,7 +16,7 @@
                 {{-- Wizard de pasos visual --}}
                 <div class="steps mb-4">
                     <ul class="step-list d-flex justify-content-between text-center list-unstyled">
-                        
+
                         <li class="step-item active" data-step="0">
                             <span class="step-number">1</span>
                             <span class="step-title">Términos</span>
@@ -101,12 +101,12 @@
 
                             <div class="col-md-3">
                                 <label>Edad</label>
-                                <input type="number" 
-                                    class="form-control" 
-                                    name="edad" 
-                                    id="inputEdad" 
-                                    min="17" 
-                                    max="80" 
+                                <input type="number"
+                                    class="form-control"
+                                    name="edad"
+                                    id="inputEdad"
+                                    min="17"
+                                    max="80"
                                     required
                                     oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
                                 <div id="errorEdad" class="text-danger small mt-1" style="display:none;">
@@ -121,28 +121,28 @@
 
                             <div class="col-md-6">
                                 <label>Celular</label>
-                                
+
                                 {{-- 1. Usamos un "input-group" de Bootstrap --}}
                                 <div class="input-group">
-                                    
+
                                     {{-- 2. El prefijo "09" fijo --}}
                                     <span class="input-group-text">09</span>
-                                    
+
                                     {{-- 3. El input (solo para los 8 dígitos restantes) --}}
-                                    <input type="text" 
-                                        class="form-control" 
+                                    <input type="text"
+                                        class="form-control"
                                         id="inputTelefonoSuffix" {{-- ID cambiado --}}
                                         maxlength="8"           {{-- Longitud cambiada a 8 --}}
                                         inputmode="numeric"
                                         placeholder="XXXXXXXX"  {{-- El placeholder ahora sí se verá --}}
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
-                                        required 
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                        required
                                     >
                                 </div>
-                                
+
                                 {{-- 4. Un campo oculto para enviar el número completo (09 + sufijo) --}}
-                                <input type="hidden" name="telefono" id="inputTelefono"> 
-                                
+                                <input type="hidden" name="telefono" id="inputTelefono">
+
                                 <div id="errorTelefono" class="text-danger small mt-1" style="display:none;">
                                     Debe ingresar los 8 dígitos restantes.
                                 </div>
@@ -155,10 +155,10 @@
 
                             <div class="col-md-6">
                                 <label>Fecha de nacimiento</label>
-                                <input type="date" 
-                                    class="form-control" 
-                                    name="fecha_nacimiento" 
-                                    id="inputFechaNacimiento" 
+                                <input type="date"
+                                    class="form-control"
+                                    name="fecha_nacimiento"
+                                    id="inputFechaNacimiento"
                                     required>
                                 <small class="text-muted" id="infoFecha" style="display:none;">Año bloqueado por edad.</small>
                             </div>
@@ -176,7 +176,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="nivel_instruccion" id="tec" value="tec" required>
                                     <label class="form-check-label" for="tec">Tec</label>
-                                </div>                            
+                                </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="nivel_instruccion" id="grado" value="grado" required>
                                     <label class="form-check-label" for="grado">Grado</label>
@@ -564,7 +564,7 @@
 
 
                 // ✅ MODIFICADO: validación AJAX en el paso 2
-                nextBtn.onclick = async () => {                    
+                nextBtn.onclick = async () => {
                     // 1. VALIDAMOS LOS CAMPOS REQUERIDOS PRIMERO
                     // Esto ahora se ejecutará en TODOS los pasos, incluido el Paso 2 (Datos).
                     if (!validateCurrentStep()) {
@@ -588,14 +588,14 @@
                         return;
                     }
 
-                    
+
                     currentStep++;
                     showStep(currentStep);
                 };
 
                 // === CONTROL DE TELÉFONO COMBINADO (Input Group) ===
                 if (inputTelefonoSuffix && inputTelefonoFull) {
-        
+
                     // Función para actualizar el campo oculto
                     function actualizarTelefonoCompleto() {
                         inputTelefonoFull.value = '09' + inputTelefonoSuffix.value;
@@ -605,7 +605,7 @@
                     inputTelefonoSuffix.addEventListener('input', actualizarTelefonoCompleto);
 
                     // Actualizar por si la página se recarga con datos (old data)
-                    actualizarTelefonoCompleto(); 
+                    actualizarTelefonoCompleto();
                 }
 
                     prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
@@ -620,13 +620,13 @@
                     for (let el of requireds) {
                         if (el.type === 'radio') {
                             const name = el.name;
-                            if (!step.querySelector(`input[name="${name}"]:checked`)) { 
-                                el.focus(); 
-                                return false; 
+                            if (!step.querySelector(`input[name="${name}"]:checked`)) {
+                                el.focus();
+                                return false;
                             }
-                        } else if (!el.value || el.value.trim() === '') { 
-                            el.focus(); 
-                            return false; 
+                        } else if (!el.value || el.value.trim() === '') {
+                            el.focus();
+                            return false;
                         }
                     }
 
@@ -646,7 +646,7 @@
 
                 // === LÓGICA NIVEL / BECA / PAGO ===
                 const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
-            
+
                 // Contenedores dinámicos
                 const becaPreguntaContainer = document.getElementById('beca_pregunta_container');
                 const nivelSemestreContainer = document.getElementById('nivel_semestre_container');
@@ -676,7 +676,7 @@
                     selectElement.disabled = true;
                 }
 
-                // ---actualizarPago ---  
+                // ---actualizarPago ---
                 function actualizarPago() {
                     const nivelSeleccionado = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
                     const becaSeleccionada = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
@@ -685,7 +685,7 @@
 
                     // --- GRUPO 1: Grado y Tec (Muestran beca y nivel de semestre) ---
                     if (nivelSeleccionado === 'grado' || nivelSeleccionado === 'tec') {
-                    
+
                         // Muestra Beca y Nivel(semestre)
                         if (becaPreguntaContainer) becaPreguntaContainer.style.display = "block";
                         if (nivelSemestreContainer) nivelSemestreContainer.style.display = "block";
@@ -696,20 +696,20 @@
 
                         // Lógica de pago (Asumiendo que 'Tec' cuesta igual que 'Grado')
                         if (becaSeleccionada === 'si') {
-                            mensajePago.textContent = "Pago de $0.50 (Atención Psicológica Única - APSU con beca)";
+                            mensajePago.textContent = "Pago de $0.50 (Atención Secretaria Única - APSU con beca)";
                         } else if (becaSeleccionada === 'no') {
-                            mensajePago.textContent = "Pago de $2.50 (Atención Psicológica Única - APSU)";
+                            mensajePago.textContent = "Pago de $2.50 (Atención Secretaria Única - APSU)";
                         } else {
                             mensajePago.textContent = "Seleccione si cuenta con beca para mostrar el valor a pagar.";
                         }
 
                     // --- GRUPO 2: Posgrado y Especialización (Ocultan todo) ---
                     } else if (nivelSeleccionado === 'posgrado' || nivelSeleccionado === 'especializacion') {
-                    
+
                         // Oculta Beca y Nivel(semestre)
                         if (becaPreguntaContainer) becaPreguntaContainer.style.display = "none";
                         if (nivelSemestreContainer) nivelSemestreContainer.style.display = "none";
-                    
+
                         // Quita 'required' de los campos ocultos
                         nivelSemestreSelect.required = false;
                         document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = false);
@@ -720,8 +720,8 @@
                         }
 
                         // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
-                        mensajePago.textContent = "Pago de $7.50 (Atención Psicológica Única - APSU)";
-                
+                        mensajePago.textContent = "Pago de $7.50 (Atención Secretaria Única - APSU)";
+
                     } else {
                         mensajePago.textContent = "";
                     }
@@ -739,7 +739,7 @@
 
                         // A) Ejecutar la lógica de visibilidad y pago
                         actualizarPago();
-                    
+
                         // B) Resetear y deshabilitar los selects dependientes
                         resetSelect(facultadSelect, 'Cargando facultades...');
                         resetSelect(carreraSelect, 'Seleccione primero una facultad...');
@@ -750,7 +750,7 @@
                             const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
                             if (!response.ok) throw new Error('Error al cargar facultades');
                             const faculties = await response.json();
-                        
+
                             // D) Poblar el select de facultades
                             populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
                         } catch (error) {
@@ -859,7 +859,7 @@
                     });
                 }
 
-        
+
                 fechaInput.addEventListener('change', cargarTurnos);
                 modalidadSelect.addEventListener('change', cargarTurnos);
 
@@ -884,12 +884,12 @@
                 if (inputEdad && inputFecha) {
                     inputEdad.addEventListener('input', function() {
                         let edad = parseInt(this.value);
-                        
+
                         // 1. Validación visual inmediata de rango (17 - 80)
                         if (edad < 17 || edad > 80) {
                             inputEdad.classList.add('is-invalid');
                             if(errorEdad) errorEdad.style.display = 'block';
-                            
+
                             // Si la edad es inválida, desbloqueamos la fecha o la limpiamos
                             inputFecha.min = '';
                             inputFecha.max = '';
@@ -918,8 +918,8 @@
                             if (fechaActualInput !== anioNacimiento) {
                                 inputFecha.value = primerDia; // Reseteamos al 1 de enero del año calculado
                             }
-                        } 
-                        
+                        }
+
                         // Mostramos mensaje visual
                         if(infoFecha) {
                             infoFecha.textContent = `Calendario ajustado al año ${anioNacimiento}`;
@@ -927,7 +927,7 @@
                         }
                     });
                 }
-                
+
             });
 
             // === CONVERTIR ARCHIVO A BASE64 ===

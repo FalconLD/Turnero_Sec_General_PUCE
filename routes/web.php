@@ -21,8 +21,8 @@
     use App\Http\Controllers\DashboardController;
     use App\Http\Controllers\Admin\PaymentController;
     use App\Http\Controllers\RoleController;
- 
- 
+
+
 // --- Rutas de Autenticación ---
 Auth::routes(['register' => false]); //quitar el registro de nuevos usuarios
 
@@ -61,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // --- ACCESO BÁSICO (Para todos los logueados) ---
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/home', [HomeController::class, 'index']);
-    
+
     // Perfil de Usuario
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
@@ -79,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    // --- 2. MÓDULO DE ATENCIÓN (Psicólogos) ---
+    // --- 2. MÓDULO DE ATENCIÓN ---
     // Protegido con: atencion.ver_calendario
     Route::group(['middleware' => ['can:atencion.ver_calendario']], function () {
         Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
@@ -112,7 +112,7 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['can:horarios.ver']], function () {
         Route::resource('schedules', ScheduleController::class);
         Route::resource('shifts', ShiftController::class); // Gestión manual de turnos
-        
+
         // Rutas específicas de horarios
         Route::get('/days/create/{schedule}', [DayController::class, 'create'])->name('days.create');
         Route::get('/days/{schedule}/edit', [DayController::class, 'edit'])->name('days.edit');
@@ -141,7 +141,7 @@ Route::middleware(['auth'])->group(function () {
     // Protegido con: reportes.ver
     Route::group(['middleware' => ['can:reportes.ver']], function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-        
+
         // Vistas estáticas de reportes/auditoría
         Route::get('/encuesta', function () { return view('encuesta.index'); })->name('encuesta.index');
         Route::get('/auditorias', function () { return view('auditoria.index'); })->name('auditoria.index');

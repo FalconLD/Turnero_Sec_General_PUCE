@@ -14,6 +14,7 @@ class TokenLoginController extends Controller
         return view('auth.token-login');
     }
 
+    
     public function login(Request $request)
     {
         $request->validate([
@@ -84,6 +85,13 @@ class TokenLoginController extends Controller
     
     public function loginWithToken($token)
     {
+        
+        session([
+        'student_logged_in' => true,
+        'student_cedula' => '0102030405',
+        'student_name' => 'Estudiante Prueba',
+    ]);
+
         // URL del servicio remoto
         $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";
 

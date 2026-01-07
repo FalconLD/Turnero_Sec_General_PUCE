@@ -86,11 +86,15 @@ class TokenLoginController extends Controller
     public function loginWithToken($token)
     {
         
-        session([
+    // 🔧 MODO PRUEBA
+    session([
         'student_logged_in' => true,
+        'student_id' => 1,
         'student_cedula' => '0102030405',
         'student_name' => 'Estudiante Prueba',
     ]);
+
+    return redirect()->route('student.personal');
 
         // URL del servicio remoto
         $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";

@@ -297,7 +297,7 @@
                                             <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
                                             <select id="modalidadSelect" class="form-select shadow-sm" required>
                                                 <option value="" selected disabled>Seleccione...</option>
-                                                <option value="presencial">Presencial</option>
+                                                <!-- <option value="presencial">Presencial</option> -->
                                                 <option value="virtual">Virtual</option>
                                             </select>
                                         </div>

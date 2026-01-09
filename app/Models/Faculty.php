@@ -19,4 +19,9 @@ class Faculty extends Model
         'programa_desc',
         'nivel',
     ];
+    // Una facultad tiene muchas áreas operativas
+    public function operatingAreas()
+    {
+        return $this->hasMany(OperatingArea::class);
+    }
 }

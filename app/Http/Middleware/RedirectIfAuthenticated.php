@@ -13,7 +13,7 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect('/home'); // o la ruta donde rediriges si ya está autenticado
+                return redirect('/admin/dashboard'); // o la ruta donde rediriges si ya está autenticado
             }
         }
 

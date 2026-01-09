@@ -279,7 +279,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'home',
+    'dashboard_url' => 'admin/dashboard',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'null',
@@ -361,37 +361,84 @@ return [
             'can'         => 'pagos.ver',           // <--- FILTRO DE PERMISO
         ],
 
-        // 5. MENÚ DESPLEGABLE DE ADMINISTRACIÓN
+        // 5. MÓDULO CONFIGURACIÓN TURNERO
         [
-            'text'    => 'Administración',
-            'icon'    => 'fas fa-fw fa-cogs',
-            // AdminLTE ocultará este padre automáticamente si el usuario no tiene permiso para ver ningún hijo
+            'text'    => 'Configuración',
+            'icon'    => 'fas fa-cogs',
+            // El padre solo se muestra si el usuario tiene al menos un permiso administrativo
+            'can'     => ['usuarios.ver', 'configuracion.avanzada', 'horarios.ver'],
             'submenu' => [
+
+                // BLOQUE 1: LÓGICA ACADÉMICA
                 [
-                    'text' => 'Usuarios',
-                    'route'  => 'users.index',
-                    'icon' => 'fas fa-fw fa-user-circle',
-                    'active' => ['users*'],
-                    'can'  => 'usuarios.ver',      // <--- FILTRO DE PERMISO
+                    'text' => 'Estructura Académica',
+                    'icon' => 'fas fa-university',
+                    'active' => ['admin/faculties*', 'admin/operating-areas*', 'admin/careers*'],
+                    'submenu' => [
+                        [
+                            'text' => 'Facultades',
+                            'url'  => 'admin/faculties',
+                            'icon' => 'fas fa-graduation-cap',
+                            'active' => ['admin/faculties*'],
+                        ],
+                        [
+                            'text' => 'Áreas de Atención',
+                            'url'  => 'admin/operating-areas',
+                            'icon' => 'fas fa-map-signs',
+                            'active' => ['admin/operating-areas*'],
+                        ],
+                        [
+                            'text' => 'Carreras',
+                            'url'  => 'admin/careers',
+                            'icon' => 'fas fa-book',
+                            'active' => ['admin/careers*'],
+                        ],
+                    ],
                 ],
+
+                // BLOQUE 2: PERSONAL Y ASIGNACIÓN
                 [
-                    'text' => 'Cubículos',
-                    'route'  => 'cubiculos.index',
-                    'icon' => 'fas fa-fw fa-door-open',
-                    'can'  => 'cubiculos.ver',     // <--- FILTRO DE PERMISO
+                    'text' => 'Gestión de Operadores',
+                    'icon' => 'fas fa-users-cog',
+                    'active' => ['admin/users*', 'admin/assignments*'],
+                    'submenu' => [
+                        [
+                            'text' => 'Usuarios',
+                            'url'  => 'admin/users',
+                            'icon' => 'fas fa-user',
+                            'can'  => 'usuarios.ver', // Filtro de permiso
+                            'active' => ['admin/users*'],
+                        ],
+                        [
+                            'text' => 'Asignar Atención',
+                            'url'  => 'admin/assignments',
+                            'icon' => 'fas fa-user-tag',
+                            'active' => ['admin/assignments*'],
+                        ],
+                    ],
                 ],
+
+                // BLOQUE 3: INFRAESTRUCTURA
                 [
-                    'text' => 'Horarios',
-                    'route'  => 'schedules.index',
-                    'icon' => 'fas fa-fw fa-clock',
-                    'active' => ['schedules*', 'days*', 'shifts*'], // Mantiene activo en sub-vistas
-                    'can'  => 'horarios.ver',      // <--- FILTRO DE PERMISO
-                ],
-                [
-                    'text' => 'Parámetros',
-                    'route'  => 'parameters.index',
-                    'icon' => 'fas fa-fw fa-sliders-h',
-                    'can'  => 'parametros.ver',    // <--- FILTRO DE PERMISO
+                    'text' => 'Puntos de Atención',
+                    'icon' => 'fas fa-door-open',
+                    'active' => ['admin/modulos*', 'admin/schedules*'],
+                    'submenu' => [
+                        [
+                            'text' => 'Cubículos / Módulos',
+                            'url'  => 'admin/modulos',
+                            'icon' => 'fas fa-desktop',
+                            'can'  => 'cubiculos.ver', // Filtro de permiso
+                            'active' => ['admin/modulos*'],
+                        ],
+                        [
+                            'text' => 'Horarios',
+                            'url'  => 'admin/schedules',
+                            'icon' => 'fas fa-clock',
+                            'can'  => 'horarios.ver', // Filtro de permiso
+                            'active' => ['admin/schedules*'],
+                        ],
+                    ],
                 ],
             ],
         ],

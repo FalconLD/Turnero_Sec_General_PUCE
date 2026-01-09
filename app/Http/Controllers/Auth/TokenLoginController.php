@@ -86,15 +86,37 @@ class TokenLoginController extends Controller
     public function loginWithToken($token)
     {
         
-    // 🔧 MODO PRUEBA
+    // // 🔧 MODO PRUEBA
     session([
         'student_logged_in' => true,
         'student_id' => 1,
         'student_cedula' => '0102030405',
         'student_name' => 'Estudiante Prueba',
+        'correo_puce' => 'estudiantePrueba@puce.edu.ec',
     ]);
 
     return redirect()->route('student.personal');
+
+    //=======//
+    // 🔧 MODO PRUEBA: Crea el registro real 
+    // $student = \App\Models\StudentRegistration::updateOrCreate(
+    //     ['cedula' => '0102030405'], // Si ya existe esta cédula, no crea otro
+    //     [
+    //         'names' => 'Estudiante Prueba',
+    //         'correo_puce' => 'prueba@puce.edu.ec',
+    //         'acepta_terminos' => true,
+    //     ]
+    // );
+
+    // session([
+    //     'student_logged_in' => true,
+    //     'student_id' => $student->id, // Ahora este ID es REAL y existe en DBeaver
+    //     'student_cedula' => $student->cedula,
+    //     'student_name' => $student->names,
+    // ]);
+
+    // return redirect()->route('student.personal');
+    //====================//
 
         // URL del servicio remoto
         $url = "https://www.puce.edu.ec/intranet/servicios/datos/turneros/token/{$token}";

@@ -27,23 +27,23 @@
                             <span class="step-title">Datos</span>
                         </li>
 
-                        <li class="step-item" data-step="2">
+                        <!-- <li class="step-item" data-step="2">
                             <span class="step-number">3</span>
                             <span class="step-title">Académicos</span>
-                        </li>
+                        </li> -->
 
-                        <li class="step-item" data-step="3">
+                        <!-- <li class="step-item" data-step="3">
                             <span class="step-number">4</span>
                             <span class="step-title">Pago</span>
-                        </li>
+                        </li> -->
 
                         <li class="step-item" data-step="4">
-                            <span class="step-number">5</span>
+                            <span class="step-number">3</span>
                             <span class="step-title">Agendamiento</span>
                         </li>
 
                         <li class="step-item" data-step="5">
-                            <span class="step-number">6</span>
+                            <span class="step-number">4</span>
                             <span class="step-title">Confirmación</span>
                         </li>
                     </ul>
@@ -166,7 +166,7 @@
                     </div>
 
                     {{-- Paso 3: Académicos --}}
-                    <div class="form-step" style="display:none;">
+                    <!-- <div class="form-step" style="display:none;">
                         <h5 class="text-secondary mb-3">Datos Académicos</h5>
                         <div class="row g-3">
 
@@ -248,8 +248,8 @@
                                 <p id="mensaje_pago" class="text-primary fw-semibold"></p>
                             </div>
                         </div>
-                    </div>
-
+                    </div> -->
+<!-- 
                     {{-- Paso 4: Pago --}}
                     <div class="form-step" style="display:none;">
                         <h5 class="text-secondary mb-3">Datos de Pago y Motivo</h5>
@@ -278,7 +278,7 @@
                                 <textarea class="form-control" name="motivo" rows="3" required></textarea>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
 
 
@@ -519,7 +519,29 @@
         }
     </style>
 
+
 {{-- === Script de funcionalidad === --}}
+    
+    <script> // Script para calcular fecha de nacimiento según edad
+    document.addEventListener('DOMContentLoaded', function () {
+        const edadInput = document.getElementById('inputEdad');
+        const fechaInput = document.getElementById('inputFechaNacimiento');
+
+        if (!edadInput || !fechaInput) return;
+
+        edadInput.addEventListener('change', function () {
+            const edad = parseInt(this.value);
+            if (!edad) return;
+
+            const today = new Date();
+            const birthYear = today.getFullYear() - edad;
+
+            const fecha = new Date(birthYear, 0, 1);
+            fechaInput.value = fecha.toISOString().split('T')[0];
+        });
+    });
+    </script>
+    
     <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const steps = document.querySelectorAll('.form-step');
@@ -759,7 +781,7 @@
                         }
                     });
                 });
-
+/*
                 // 2. Cuando cambia "Facultad"
                 facultadSelect.addEventListener('change', async (e) => {
                     const facultadVal = e.target.value;
@@ -803,7 +825,7 @@
                     pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
                 });
 
-
+*/
                 // === AGENDAMIENTO ===
                 const fechaInput = document.getElementById('fechaSeleccionada');
                 const modalidadSelect = document.getElementById('modalidadSelect');

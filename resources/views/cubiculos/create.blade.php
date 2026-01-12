@@ -92,7 +92,6 @@
                                             <select name="tipo_atencion" id="tipo_atencion" class="form-control @error('tipo_atencion') is-invalid @enderror" required>
                                                 <option value="">-- Seleccionar tipo --</option>
                                                 <option value="virtual" {{ old('tipo_atencion') == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                                                <!-- <option value="presencial" {{ old('tipo_atencion') == 'presencial' ? 'selected' : '' }}>Presencial</option> -->
                                             </select>
                                         </div>
                                         @error('tipo_atencion')

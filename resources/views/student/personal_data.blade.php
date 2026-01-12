@@ -27,23 +27,14 @@
                             <span class="step-title">Datos</span>
                         </li>
 
-                        <li class="step-item" data-step="2">
-                            <span class="step-number">3</span>
-                            <span class="step-title">Académicos</span>
-                        </li>
-
-                        <li class="step-item" data-step="3">
-                            <span class="step-number">4</span>
-                            <span class="step-title">Pago</span>
-                        </li>
 
                         <li class="step-item" data-step="4">
-                            <span class="step-number">5</span>
+                            <span class="step-number">3</span>
                             <span class="step-title">Agendamiento</span>
                         </li>
 
                         <li class="step-item" data-step="5">
-                            <span class="step-number">6</span>
+                            <span class="step-number">4</span>
                             <span class="step-title">Confirmación</span>
                         </li>
                     </ul>
@@ -165,124 +156,7 @@
                         </div>
                     </div>
 
-                    {{-- Paso 3: Académicos --}}
-                    <div class="form-step" style="display:none;">
-                        <h5 class="text-secondary mb-3">Datos Académicos</h5>
-                        <div class="row g-3">
-
-                            {{-- 1. Nivel de Instrucción (EL TRIGGER) --}}
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-semibold">Nivel de instrucción</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="tec" value="tec" required>
-                                    <label class="form-check-label" for="tec">Tec</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="grado" value="grado" required>
-                                    <label class="form-check-label" for="grado">Grado</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="posgrado" value="posgrado" required>
-                                    <label class="form-check-label" for="posgrado">Posgrado</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="nivel_instruccion" id="especializacion" value="especializacion" required>
-                                    <label class="form-check-label" for="especializacion">Especialización</label>
-                                </div>
-                            </div>
-
-                            {{-- 2. Facultad (Se llenará con AJAX) --}}
-                            <div class="col-md-6">
-                                <label>Facultad</label>
-                                <select class="form-select" name="facultad" id="facultad_select" required disabled>
-                                    <option value="" selected disabled>Seleccione primero un nivel...</option>
-                                    {{-- Opciones se agregarán con JS --}}
-                                </select>
-                            </div>
-
-                            {{-- 3. Carrera (Se llenará con AJAX) --}}
-                            <div class="col-md-12">
-                                <label>Carrera</label>
-                                {{-- CAMBIADO DE INPUT A SELECT --}}
-                                <select class="form-select" name="carrera" id="carrera_select" required disabled>
-                                    <option value="" selected disabled>Seleccione primero una facultad...</option>
-                                    {{-- Opciones se agregarán con JS --}}
-                                </select>
-                            </div>
-
-                            {{-- 4. Nivel (Semestre) (Se oculta/muestra) --}}
-                            <div class="col-md-12" id="nivel_semestre_container" style="display:none;">
-                                <label>Nivel (Semestre)</label>
-                                {{-- El name="nivel" original. ID 'nivel_semestre_select' es nuevo --}}
-                                <select class="form-select" name="nivel" id="nivel_semestre_select" required>
-                                    <option value="" selected disabled>Seleccione...</option>
-                                    <option>Primero</option>
-                                    <option>Segundo</option>
-                                    <option>Tercero</option>
-                                    <option>Cuarto</option>
-                                    <option>Quinto</option>
-                                    <option>Sexto</option>
-                                    <option>Séptimo</option>
-                                    <option>Octavo</option>
-                                    <option>Noveno</option>
-                                    <option>Décimo</option>
-                                </select>
-                            </div>
-
-                            {{-- 5. Beca (Se oculta/muestra) --}}
-                            {{-- El ID 'beca_pregunta_container' es nuevo --}}
-                            <div class="col-md-12 mb-3" id="beca_pregunta_container" style="display:none;">
-                                <label class="form-label fw-semibold">¿Cuenta con beca San Ignacio?</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_si" value="si">
-                                    <label class="form-check-label" for="beca_si">Sí</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="beca_san_ignacio" id="beca_no" value="no">
-                                    <label class="form-check-label" for="beca_no">No</label>
-                                </div>
-                            </div>
-
-                            {{-- 6. Mensaje de Pago --}}
-                            <div class="col-md-12 text-center">
-                                <p id="mensaje_pago" class="text-primary fw-semibold"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Paso 4: Pago --}}
-                    <div class="form-step" style="display:none;">
-                        <h5 class="text-secondary mb-3">Datos de Pago y Motivo</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label>Tipo de pago</label>
-                                <select class="form-select" id="tipo-pago" name="forma_pago" required>
-                                    <option value="" selected disabled>Seleccione...</option>
-                                    <option value="DeUna">DeUna</option>
-                                    <option value="Transferencia">Transferencia</option>
-                                    <option value="Efectivo">Efectivo</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12" id="comprobante-container" style="display:none;">
-                                <label>Subir comprobante</label>
-                                <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf">
-                                <input type="hidden" name="comprobante_base64" id="comprobante_base64">
-                            </div>
-
-                            <div class="alert alert-info" id="pago-efectivo-note" style="display:none;">
-                                Una vez finalizada la inscripción, acérquese 10 minutos antes al Centro Médico de Fundación PuceSalud.
-                            </div>
-
-                            <div class="col-md-12">
-                                <label>Motivo de consulta</label>
-                                <textarea class="form-control" name="motivo" rows="3" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                        {{-- Paso 5: Agendamiento --}}
+                        {{-- Paso 3: Agendamiento --}}
                         <div class="form-step" style="display:none;">
                             <h5 class="text-primary mb-4 text-center">📅 Seleccione modalidad, fecha y horario disponible</h5>
                             <div class="row justify-content-center g-4">
@@ -297,7 +171,6 @@
                                             <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
                                             <select id="modalidadSelect" class="form-select shadow-sm" required>
                                                 <option value="" selected disabled>Seleccione...</option>
-                                                <option value="presencial">Presencial</option>
                                                 <option value="virtual">Virtual</option>
                                             </select>
                                         </div>
@@ -335,7 +208,7 @@
                             <input type="hidden" name="modalidad_shift" id="modalidad_shift">
                         </div>
 
-                    {{-- Paso 6: Confirmación --}}
+                    {{-- Paso 4: Confirmación --}}
                     <div class="form-step" style="display:none;">
                         @if (session('error'))
                             <div class="alert alert-danger">
@@ -519,7 +392,29 @@
         }
     </style>
 
+
 {{-- === Script de funcionalidad === --}}
+    
+    <script> // Script para calcular fecha de nacimiento según edad
+    document.addEventListener('DOMContentLoaded', function () {
+        const edadInput = document.getElementById('inputEdad');
+        const fechaInput = document.getElementById('inputFechaNacimiento');
+
+        if (!edadInput || !fechaInput) return;
+
+        edadInput.addEventListener('change', function () {
+            const edad = parseInt(this.value);
+            if (!edad) return;
+
+            const today = new Date();
+            const birthYear = today.getFullYear() - edad;
+
+            const fecha = new Date(birthYear, 0, 1);
+            fechaInput.value = fecha.toISOString().split('T')[0];
+        });
+    });
+    </script>
+    
     <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const steps = document.querySelectorAll('.form-step');
@@ -759,7 +654,7 @@
                         }
                     });
                 });
-
+/*
                 // 2. Cuando cambia "Facultad"
                 facultadSelect.addEventListener('change', async (e) => {
                     const facultadVal = e.target.value;
@@ -803,7 +698,7 @@
                     pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
                 });
 
-
+*/
                 // === AGENDAMIENTO ===
                 const fechaInput = document.getElementById('fechaSeleccionada');
                 const modalidadSelect = document.getElementById('modalidadSelect');

@@ -42,6 +42,7 @@ class StudentRegistrationController extends Controller
     $usuario = $data['usuario'] ?? null;
     $facultad = $data['facultad'] ?? null;
     $carrera = $data['carrera'] ?? null;
+    $plan = $data['plan'] ?? 'N/A'; // Ajusta 'plan' según el nombre exacto que devuelva el servicio
 
     if (!$cedula) {
         return redirect()->route('student.token.error')
@@ -58,6 +59,7 @@ class StudentRegistrationController extends Controller
             'student_id' => $student->id,
             'student_cedula' => $student->cedula,
             'student_name' => $student->names,
+            'student_plan' => $student->plan, // nuevo dato
         ]);
 
         return redirect()
@@ -74,6 +76,7 @@ class StudentRegistrationController extends Controller
         'student_facultad' => $facultad,
         'student_carrera' => $carrera,
         'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+        'student_plan' => $plan, // Guardamos el plan aquí para estudiantes nuevos
     ]);
 
     // Redirigir al formulario de datos personales (paso 1)
@@ -315,6 +318,7 @@ class StudentRegistrationController extends Controller
                     'carrera' => $request->carrera,
                     'nivel_instruccion' => $request->nivel_instruccion,
                     'nivel' => $isGradoOrTec ? $request->nivel : 'N/A',
+                    'plan' => $request->plan, // <-- Guardar el plan enviado desde el formulario
                     'beca_san_ignacio' => $isGradoOrTec ? $request->beca_san_ignacio : 'no',
                     'motivo' => $request->motivo,
                     'forma_pago' => $request->forma_pago,

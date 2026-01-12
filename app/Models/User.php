@@ -13,9 +13,9 @@ use Spatie\Permission\Traits\HasRoles; // El Trait de Spatie
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     // Este Trait habilita los métodos como getRoleNames(), hasRole(), etc.
-    use HasRoles; 
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -65,7 +65,7 @@ class User extends Authenticatable
         if ($roles->isNotEmpty()) {
             // Tomamos el primer rol y ponemos la primera letra mayúscula
             // Si quieres mostrar todos separados por coma usa: $roles->implode(', ')
-            $roleName = ucfirst($roles->first()); 
+            $roleName = ucfirst($roles->first());
         } else {
             $roleName = 'Sin Rol Asignado';
         }
@@ -76,7 +76,7 @@ class User extends Authenticatable
 
         return new HtmlString($description);
     }
-    
+
     public function adminlte_profile_url()
     {
         // Asegúrate de que esta ruta exista en tu web.php
@@ -87,5 +87,11 @@ class User extends Authenticatable
     {
         // Genera un avatar con las iniciales del usuario
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
+
+    // Relación Muchos a Muchos con Áreas Operativas
+    public function operatingAreas()
+    {
+        return $this->belongsToMany(OperatingArea::class, 'area_user');
     }
 }

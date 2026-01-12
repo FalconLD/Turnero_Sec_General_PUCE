@@ -14,7 +14,7 @@ class DashboardController extends Controller
 
         // Años disponibles
         $aniosDisponibles = DB::table('shifts')
-            ->select(DB::raw('EXTRACT(YEAR FROM date_shift) as anio'))
+            ->select(DB::raw('YEAR(date_shift) as anio'))
             ->groupBy('anio')
             ->pluck('anio');
 

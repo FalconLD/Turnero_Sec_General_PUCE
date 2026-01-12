@@ -25,92 +25,78 @@
                         @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
-                        
+
                         {{-- 4. Wrapper 'table-responsive' y ID 'horarios' para DataTables --}}
                         <div class="table-responsive">
-                            <table id="horarios" class="table"> {{-- ID 'horarios' y clase 'table' simple --}}
+                            <table id="horarios" class="table table-hover">
                                 <thead>
                                     <tr>
-                                       <th>Acciones</th>
+                                        <th>Acciones</th>
                                         <th>Inicio</th>
                                         <th>Fin</th>
-                                        <th>Atención (Min)</th>
-                                        <th>Descanso (Min)</th>
+                                        <th>Atención</th>
+                                        <th>Descanso</th>
                                         <th>Días</th>
-                                        <th>Fecha de Vigencia</th>  
-                                        <th># de turnos</th>
+                                        <th>Vigencia</th>
+                                        <th>Turnos</th>
                                         <th>Ocupados</th>
-                                        <th># de Días</th>
+                                        <th># Días</th>
                                         <th>Cubículos</th>
                                         <th>Descansos</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($schedules as $schedule)
+                                    @foreach($schedules as $schedule)
                                     <tr>
-                                        {{-- 5. Clases de botones adaptadas para mejor estilo --}}
                                         <td class="text-nowrap">
-                                            <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
+                                            <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-link text-primary btn-sm" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form action="{{ route('schedules.destroy', $schedule->id_hor) }}" method="POST" style="display:inline-block">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-link text-danger btn-sm"
-                                                    onclick="return confirm('¿Está seguro de eliminar este horario?')" title="Eliminar">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Eliminar horario?')" title="Eliminar">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                            
-                                            @if($schedule->cubicles->count() > 1)
+
+                                            @if($schedule->cubicles->count() > 0)
                                                 <div class="btn-group">
-                                                    <button type="button" class="btn btn-link text-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Ver Turnos">
+                                                    <button type="button" class="btn btn-link text-info btn-sm dropdown-toggle" data-toggle="dropdown">
                                                         <i class="fas fa-wrench"></i>
                                                     </button>
                                                     <div class="dropdown-menu">
                                                         @foreach($schedule->cubicles as $cubiculo)
-                                                            <a class="dropdown-item" href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_id' => $cubiculo->id]) }}">{{ $cubiculo->nombre }}</a>
+                                                            <a class="dropdown-item" href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_id' => $cubiculo->id]) }}">
+                                                                {{ $cubiculo->nombre }}
+                                                            </a>
                                                         @endforeach
-                                                        <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_ids' => $schedule->cubicles->pluck('id')->all()]) }}">Todos los cubículos</a>
                                                     </div>
                                                 </div>
-                                            @elseif($schedule->cubicles->count() == 1)
-                                                <a href="{{ route('shifts.index', ['horario_id' => $schedule->id_hor, 'cubiculo_id' => $schedule->cubicles->first()->id]) }}" class="btn btn-link text-info btn-sm" title="Ver Turnos">
-                                                    <i class="fas fa-wrench"></i>
-                                                </a>
                                             @endif
                                         </td>
                                         <td>{{ $schedule->start_time }}</td>
                                         <td>{{ $schedule->end_time }}</td>
-                                        <td>{{ $schedule->attention_minutes }}</td>
-                                        <td>{{ $schedule->break_minutes }}</td>
+                                        <td>{{ $schedule->attention_minutes }}'</td>
+                                        <td>{{ $schedule->break_minutes }}'</td>
                                         <td>
                                             @foreach($schedule->days as $day)
-                                                {{ $day->date_day->format('d/m/Y') }}<br>
+                                                <small class="badge badge-light">{{ $day->date_day->format('d/m') }}</small>
                                             @endforeach
                                         </td>
                                         <td>{{ $schedule->valid_from ? \Carbon\Carbon::parse($schedule->valid_from)->format('d/m/Y') : 'N/A' }}</td>
                                         <td>{{ $schedule->shifts_count }}</td>
                                         <td>{{ $schedule->occupied_shifts_count }}</td>
                                         <td>{{ $schedule->days_count }}</td>
-                                        <td>{{ $schedule->cubicles->pluck('nombre')->join(', ') }}</td>
+                                        <td><small>{{ $schedule->cubicles->pluck('nombre')->join(', ') }}</small></td>
                                         <td>
                                             @foreach($schedule->breaks as $b)
-                                                {{ \Carbon\Carbon::parse($b->start_break)->format('H:i') }} - {{ \Carbon\Carbon::parse($b->end_break)->format('H:i') }}<br>
+                                                <small class="d-block">{{ \Carbon\Carbon::parse($b->start_break)->format('H:i') }}-{{ \Carbon\Carbon::parse($b->end_break)->format('H:i') }}</small>
                                             @endforeach
                                         </td>
                                     </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="12" class="text-center">No se encontraron horarios.</td>
-                                    </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
-                            
-                            {{-- 6. Paginador de Laravel ELIMINADO. DataTables lo manejará --}}
-                            
                         </div>
                     </div>
                 </div>
@@ -143,11 +129,11 @@
 
         /* 8. Estilos adaptados para #horarios (en lugar de #usuarios) */
         #horarios thead {
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
         #horarios thead th {
-            color: #495057; 
-            font-weight: 600; 
+            color: #495057;
+            font-weight: 600;
             border: none;
             padding-top: 1rem;
             padding-bottom: 1rem;
@@ -155,11 +141,11 @@
         #horarios td, #horarios th {
             border-left: none;
             border-right: none;
-            text-align: center;     
-            vertical-align: middle; 
+            text-align: center;
+            vertical-align: middle;
         }
         .dt-buttons .btn {
-            border-radius: 0.5rem; 
+            border-radius: 0.5rem;
         }
         .dataTables_filter input[type="search"] {
             width: 400px !important;
@@ -189,8 +175,7 @@
 @stop
 
 @section('js')
-    {{-- 9. Todos los JS de DataTables copiados de Usuarios --}}
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    {{-- Solo cargamos los plugins necesarios. jQuery ya viene con AdminLTE --}}
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -202,16 +187,15 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
     <script>
-        $(function () {
-            // 10. Script inicializado para #horarios y título de PDF actualizado
-            var table = $('#horarios').DataTable({
-                responsive: true,
-                autoWidth: false,
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+        $(document).ready(function () {
+            $('#horarios').DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
-                dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
-                buttons: [
+                "dom": '<"d-flex justify-content-between mb-3"Bf>rtip',
+                "buttons": [
                     {
                         extend: 'excelHtml5',
                         text: '<i class="fas fa-file-excel"></i> Excel',
@@ -222,8 +206,7 @@
                         text: '<i class="fas fa-file-pdf"></i> PDF',
                         className: 'btn btn-danger btn-sm ms-2',
                         orientation: 'landscape',
-                        pageSize: 'A4',
-                        title: 'Listado de Horarios' // <-- Título actualizado
+                        title: 'Listado de Horarios'
                     },
                     {
                         extend: 'print',

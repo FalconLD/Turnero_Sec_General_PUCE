@@ -25,7 +25,7 @@ class OperatingAreaController extends Controller
     public function create()
     {
         // Necesitamos todas las facultades para el select del formulario
-        $faculties = Faculty::orderBy('name', 'asc')->get();
+        $faculties = Faculty::orderBy('facultad', 'asc')->get();
         return view('admin.operating_areas.create', compact('faculties'));
     }
 
@@ -51,7 +51,7 @@ class OperatingAreaController extends Controller
      */
     public function edit(OperatingArea $operatingArea)
     {
-        $faculties = Faculty::orderBy('name', 'asc')->get();
+        $faculties = Faculty::orderBy('facultad', 'asc')->get();
         return view('admin.operating_areas.edit', compact('operatingArea', 'faculties'));
     }
 

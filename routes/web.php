@@ -129,8 +129,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::middleware(['can:desbloqueo.acceder'])->group(function () {
         Route::controller(ShiftUnlockController::class)->group(function () {
             Route::get('/shift-unlock', 'index')->name('shift_unlock.search');
-            Route::post('/shift-unlock', 'search');
-            Route::get('/shift-unlock/unlock/{cedula}', 'unlock');
+            Route::post('/shift-unlock', 'search')->name('shift_unlock.search.post');
+            Route::get('/shift-unlock/unlock/{cedula}', 'unlock')->name('shift_unlock.unlock');
         });
     });
 

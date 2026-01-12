@@ -13,7 +13,7 @@ class RoleAndPermissionSeeder extends Seeder
         // Limpiar caché
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 1. Definición de Permisos (Mantenemos los que me pasaste)
+        // 1. Definición de Permisos
         $permissions = [
             'atencion.ver_calendario', 'desbloqueo.acceder', 'desbloqueo.ejecutar',
             'roles.ver', 'roles.crear', 'roles.editar', 'roles.eliminar',
@@ -43,7 +43,7 @@ class RoleAndPermissionSeeder extends Seeder
             'desbloqueo.acceder', 'desbloqueo.ejecutar', 'horarios.gestionar_turnos'
         ]);
 
-        // OPERADOR (Usuarios del Excel)
+        // OPERADOR
         $roleOperador = Role::firstOrCreate(['name' => 'Operador']);
         $roleOperador->syncPermissions([
             'atencion.ver_calendario',

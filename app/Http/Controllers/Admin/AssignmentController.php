@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class AssignmentController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:asignaciones.ver')->only('index');
+        $this->middleware('can:asignaciones.crear')->only(['create', 'store']);
+        $this->middleware('can:asignaciones.editar')->only(['edit', 'update']);
+        $this->middleware('can:asignaciones.eliminar')->only('destroy');
+    }
+    // Muestra el listado de usuarios con sus áreas asignadas
     public function index()
     {
         // Cargamos los usuarios con sus áreas y la facultad de cada área

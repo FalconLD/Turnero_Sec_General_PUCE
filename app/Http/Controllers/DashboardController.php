@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:reportes.ver')->only('index');
+    }
+    // Mostrar el dashboard con estadísticas
     public function index(Request $request)
     {
         $mes = $request->get('mes');

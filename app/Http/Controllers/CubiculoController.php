@@ -10,6 +10,14 @@ use Illuminate\Http\Request; // <-- Agregada por si acaso, aunque no la usemos m
 
 class CubiculoController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:cubiculos.ver')->only('index');
+        $this->middleware('can:cubiculos.crear')->only(['create', 'store']);
+        $this->middleware('can:cubiculos.editar')->only(['edit', 'update']);
+        $this->middleware('can:cubiculos.eliminar')->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -35,13 +43,13 @@ class CubiculoController extends Controller
     {
         // 1. Obtenemos los datos ya validados por el StoreCubiculoRequest
         $datosValidados = $request->validated();
-        
+
         // 2. Combinamos para crear el nombre final
         $nombreFinal = $datosValidados['prefijo'] . $datosValidados['numero'];
 
         // 3. VALIDACIÓN DE DUPLICADOS (IMPORTANTE)
         $yaExiste = Cubiculo::where('nombre', $nombreFinal)->exists();
-        
+
         if ($yaExiste) {
             // Volvemos atrás con un mensaje de error específico
             return back()->withErrors(['numero' => "El cubículo '$nombreFinal' ya existe. Verifique el número."])
@@ -56,7 +64,7 @@ class CubiculoController extends Controller
             'user_id' => $datosValidados['user_id'],
             'enlace_o_ubicacion' => $datosValidados['enlace_o_ubicacion'] ?? null,
         ]);
-        
+
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');
     }
 
@@ -90,7 +98,7 @@ class CubiculoController extends Controller
             // Si el nombre es antiguo o no tiene el formato (ej. "CRISTOFER")
             // Dejamos el prefijo vacío y ponemos el nombre raro en 'numero'
             // para que el usuario lo vea y corrija.
-            $prefijo = ''; 
+            $prefijo = '';
             $numero = $cubiculo->nombre;
         }
         // --- FIN LÓGICA NUEVA ---
@@ -105,7 +113,7 @@ class CubiculoController extends Controller
     {
         // 1. Obtenemos los datos validados
         $datosValidados = $request->validated();
-        
+
         // 2. Combinamos para crear el nombre final
         $nombreFinal = $datosValidados['prefijo'] . $datosValidados['numero'];
 
@@ -113,7 +121,7 @@ class CubiculoController extends Controller
         $yaExiste = Cubiculo::where('nombre', $nombreFinal)
                             ->where('id', '!=', $cubiculo->id) // <- Ignoramos el cubículo actual
                             ->exists();
-        
+
         if ($yaExiste) {
             return back()->withErrors(['numero' => "El cubículo '$nombreFinal' ya existe."])->withInput();
         }
@@ -125,10 +133,10 @@ class CubiculoController extends Controller
             'user_id' => $datosValidados['user_id'],
             'enlace_o_ubicacion' => $datosValidados['enlace_o_ubicacion'] ?? null,
         ]);
-        
+
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo actualizado exitosamente.');
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */

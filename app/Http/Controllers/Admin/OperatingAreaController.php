@@ -9,9 +9,15 @@ use Illuminate\Http\Request;
 
 class OperatingAreaController extends Controller
 {
-    /**
-     * Muestra el listado de áreas de atención.
-     */
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:areas.ver')->only('index');
+        $this->middleware('can:areas.crear')->only(['create', 'store']);
+        $this->middleware('can:areas.editar')->only(['edit', 'update']);
+        $this->middleware('can:areas.eliminar')->only('destroy');
+    }
+    //Muestra el listado de áreas de atención.
     public function index()
     {
         // Cargamos la relación 'faculty' para mostrar el nombre de la facultad en la tabla

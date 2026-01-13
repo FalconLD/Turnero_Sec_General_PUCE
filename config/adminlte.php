@@ -422,13 +422,14 @@ return [
                 [
                     'text' => 'Puntos de Atención',
                     'icon' => 'fas fa-door-open',
-                    'active' => ['admin/modulos*', 'admin/schedules*'],
+                    'can'     => ['horarios.ver', 'usuarios.ver'], 
+                    'active'  => ['admin/modulos*', 'admin/schedules*', 'cubiculos*'],
                     'submenu' => [
                         [
                             'text' => 'Cubículos / Módulos',
                             'url'  => 'admin/modulos',
                             'icon' => 'fas fa-desktop',
-                            'can'  => 'cubiculos.ver', // Filtro de permiso
+                            'can'  => ['cubiculos.ver',], // Filtro de permiso
                             'active' => ['admin/modulos*'],
                         ],
                         [

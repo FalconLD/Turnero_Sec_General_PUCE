@@ -36,18 +36,19 @@ class RoleAndPermissionSeeder extends Seeder
         $roleAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
         $roleAdmin->syncPermissions(Permission::all());
 
-        // RECEPCIÓN
-        $roleRecepcion = Role::firstOrCreate(['name' => 'Recepcion']);
-        $roleRecepcion->syncPermissions([
-            'atencion.ver_calendario', 'pagos.ver', 'pagos.validar', 'pagos.rechazar',
-            'desbloqueo.acceder', 'desbloqueo.ejecutar', 'horarios.gestionar_turnos'
-        ]);
-
-        // OPERADOR
-        $roleOperador = Role::firstOrCreate(['name' => 'Operador']);
+        // Operador 
+$roleOperador = Role::firstOrCreate(['name' => 'Operador']);
         $roleOperador->syncPermissions([
-            'atencion.ver_calendario',
-            'horarios.ver' // Permiso básico para ver sus horarios asignados
+            'atencion.ver_calendario', 
+            'pagos.ver', 
+            'pagos.validar', 
+            'pagos.rechazar',
+            'desbloqueo.acceder', 
+            'desbloqueo.ejecutar', 
+            'horarios.gestionar_turnos',
+            'horarios.ver',
+            'cubiculos.ver',   
+            'cubiculos.crear'  
         ]);
     }
 }

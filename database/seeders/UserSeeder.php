@@ -16,13 +16,20 @@ class UserSeeder extends Seeder {
         ]);
         $admin->assignRole('Super Admin');
 
-        // 2. Recepción
-        $recep = User::create([
-            'name' => 'Recepción Turnero',
-            'email' => 'recepcion@puce.edu.ec',
-            'password' => Hash::make('password'),
+        $admin = User::create([
+            'name' => 'Fabian',
+            'email' => 'fabian@puce.edu.ec',
+            'password' => Hash::make('fabian'),
         ]);
-        $recep->assignRole('Recepcion');
+        $admin->assignRole('Super Admin');
+
+        // 2. Operador
+        $recep = User::create([
+            'name' => 'Operador',
+            'email' => 'operador@puce.edu.ec',
+            'password' => Hash::make('operador'),
+        ]);
+        $recep->assignRole('Operador');
 
         // 3. Lista Combinada (Operadores reales + adicionales del compañero)
         $csvUsers = [
@@ -44,7 +51,6 @@ class UserSeeder extends Seeder {
             ['name' => 'Verónica Carrillo', 'email' => 'vgcarrillo@puce.edu.ec', 'dni' => '603881145'],
             ['name' => 'Israel Chavez', 'email' => 'hichavez@puce.edu.ec', 'dni' => null],
             ['name' => 'Ker Viera', 'email' => 'kviera@puce.edu.ec', 'dni' => null],
-            ['name' => 'Fabian Vega', 'email' => 'fabian@puce.edu.ec', 'dni' => null],
         ];
 
         foreach ($csvUsers as $u) {

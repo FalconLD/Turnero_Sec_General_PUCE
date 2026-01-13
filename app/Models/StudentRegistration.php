@@ -20,6 +20,7 @@ class StudentRegistration extends Model
         'facultad',
         'carrera',
         'nivel',
+        'plan_estudio',
         'motivo',
         'nivel_instruccion',
         'beca_san_ignacio',

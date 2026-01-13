@@ -14,6 +14,44 @@
                     <div class="card-body">
                         <form action="{{ route('cubiculos.store') }}" method="POST" id="create-cubiculo-form">
                             @csrf
+                                                        {{-- Fila para Usuario Asignado y Campo Dinámico --}}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                                            </div>
+                                            <select name="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
+                                                <option value="">-- Seleccionar Usuario --</option>
+                                                @foreach ($users as $user)
+                                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @error('user_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                {{-- Campo dinámico --}}
+                                <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
+                                    <div class="form-group">
+                                        <label id="campo_extra_label"></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="campo_extra_icon"></span>
+                                            </div>
+                                            <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
+                                        </div>
+                                        @error('enlace_o_ubicacion')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
 
                             {{-- Fila para Nombre y Tipo de Atención --}}
                             <div class="row">
@@ -24,6 +62,15 @@
                                             <h6 class="font-weight-bold text-center" style="margin-bottom: 0.9rem;">Nombre del Cubículo</h6>
                                             {{-- Fila interna para los dos campos (esta ya la tienes) --}}
                                             <div class="row">
+
+                                            <div class="form-group">
+                                                <label>Área de Atención / Facultad</label>
+                                                <select name="operating_area_id" class="form-control">
+                                                    @foreach($areas as $area)
+                                                        <option value="{{ $area->id }}">{{ $area->name }} ({{ $area->faculty->name }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                                 
                                                 {{-- Columna para el Prefijo --}}
                                                 <div class="col-md-6">
@@ -101,44 +148,7 @@
                                 </div>
                             </div>
 
-                            {{-- Fila para Usuario Asignado y Campo Dinámico --}}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-user-check"></i></span>
-                                            </div>
-                                            <select name="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
-                                                <option value="">-- Seleccionar Usuario --</option>
-                                                @foreach ($users as $user)
-                                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @error('user_id')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                
-                                {{-- Campo dinámico --}}
-                                <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
-                                    <div class="form-group">
-                                        <label id="campo_extra_label"></label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="campo_extra_icon"></span>
-                                            </div>
-                                            <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
-                                        </div>
-                                        @error('enlace_o_ubicacion')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
+
 
                             {{-- Botones de Acción --}}
                             <div class="text-right">

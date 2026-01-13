@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Http\Requests\StoreCubiculoRequest; // <-- Lo usaremos
 use App\Http\Requests\UpdateCubiculoRequest; // <-- Lo usaremos
 use Illuminate\Http\Request; // <-- Agregada por si acaso, aunque no la usemos mucho
+use Illuminate\Support\Facades\Auth;
+use App\Models\OperatingArea;
 
 class CubiculoController extends Controller
 {
@@ -14,19 +16,44 @@ class CubiculoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $cubiculos = Cubiculo::with('users')->get();
-        return view('cubiculos.index', compact('cubiculos'));
+{
+    // Obtenemos el usuario autenticado
+    $user = Auth::user();
+
+    // Verificamos si existe un usuario logueado para evitar errores
+    if (!$user) {
+        return redirect()->route('login');
     }
+
+    // Cambiamos 'Super Admin' por el nombre exacto de tu rol
+    if ($user->roles->pluck('name')->contains('Super Admin')) {
+        $cubiculos = Cubiculo::all();
+    } else {
+        // Obtenemos las áreas del operador. 
+        // Si la relación no existe, devolvemos un array vacío para que no explote
+        $misAreasIds = $user->operatingAreas ? $user->operatingAreas->pluck('id')->toArray() : [];
+
+        // Filtramos por la columna exacta de tu base de datos (id_area u operating_area_id)
+        $cubiculos = Cubiculo::whereIn('operating_area_id', $misAreasIds)->get();
+    }
+
+    return view('cubiculos.index', compact('cubiculos'));
+}
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        $users = User::all();
-        return view('cubiculos.create', compact('users'));
-    }
+        public function create()
+        {
+            // 1. Cargamos los usuarios para el select de responsables
+            $users = User::all();
+
+            // 2. Cargamos las áreas con sus facultades
+            $areas = OperatingArea::with('faculty')->get();
+
+            // 3. Enviamos AMBAS variables en un solo compact
+            return view('cubiculos.create', compact('users', 'areas'));
+        }
 
     /**
      * Store a newly created resource in storage.
@@ -60,7 +87,7 @@ class CubiculoController extends Controller
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');
     }
 
-
+    
     /**
      * Display the specified resource.
      */

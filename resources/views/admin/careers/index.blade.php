@@ -5,9 +5,11 @@
 @section('content_header')
     <div class="d-flex justify-content-between">
         <h1>Gestión de Carreras</h1>
-        <a href="{{ route('careers.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nueva Carrera
-        </a>
+        @can('carreras.crear')
+            <a href="{{ route('careers.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Carrera
+            </a>
+        @endcan
     </div>
 @stop
 
@@ -39,16 +41,20 @@
                             <td>{{ $career->name }}</td>
                             <td>{{ $career->operatingArea->name ?? 'Sin área' }}</td>
                             <td>
-                                <a href="{{ route('careers.edit', $career) }}" class="btn btn-xs btn-info">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('careers.destroy', $career) }}" method="POST" style="display:inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('¿Eliminar carrera?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                @can('carreras.editar')
+                                    <a href="{{ route('careers.edit', $career) }}" class="btn btn-xs btn-info">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                @endcan
+                                @can('carreras.eliminar')
+                                    <form action="{{ route('careers.destroy', $career) }}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('¿Eliminar carrera?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach

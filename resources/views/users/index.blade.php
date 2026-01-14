@@ -8,14 +8,18 @@
 
 @section('content')
     <div class="container-fluid">
-        <div class="row justify-content-center"> 
-            <div class="col-md-11"> 
+        <div class="row justify-content-center">
+            <div class="col-md-11">
 
                 <div class="card">
-                    <div class="card-header d-flex justify-content-end align-items-center">
-                        <a href="{{ route('users.create') }}" class="btn btn-primary rounded-pill px-5">
-                            <i class="fas fa-user-plus"></i> Nuevo
-                        </a>
+                    <div class="card-header">
+                        <h3 class="card-title">Listado de Usuarios</h3>
+                        <div class="card-tools">
+                            {{-- Solo quien puede crear ve el botón --}}
+                            @can('usuarios.crear')
+                                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">Nuevo Usuario</a>
+                            @endcan
+                        </div>
                     </div>
 
                     <div class="card-body">
@@ -26,7 +30,7 @@
                                         <th>ID</th>
                                         <th>Nombre</th>
                                         <th>Email</th>
-                                        <th>DNI</th>                                    
+                                        <th>DNI</th>
                                         <th>Cubículos Asignados</th>
                                         <th>Roles</th>
                                         <th>Acciones</th>
@@ -38,7 +42,7 @@
                                             <td>{{ $usuario->id }}</td>
                                             <td>{{ $usuario->name }}</td>
                                             <td>{{ $usuario->email }}</td>
-                                            <td>{{ $usuario->DNI ?? 'N/A' }}</td>                                            
+                                            <td>{{ $usuario->DNI ?? 'N/A' }}</td>
                                             <td>
                                                 @if ($usuario->cubiculos->count() > 0)
                                                     <ul class="mb-0 pl-3"> {{-- pl-3 para mejor indentación --}}
@@ -73,17 +77,21 @@
                                                 @endif
                                             </td>
 
-                                            <td class="text-nowrap"> 
-                                                <a href="{{ route('users.edit', $usuario) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('users.destroy', $usuario) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Seguro de eliminar este usuario?')" title="Eliminar">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                            <td>
+                                                @can('usuarios.editar')
+                                                    <a href="{{ route('users.edit', $usuario) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                    </a>
+                                                @endcan
+
+                                                @can('usuarios.eliminar')
+                                                    <form action="{{ route('users.destroy', $usuario) }}" method="POST" style="display:inline">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach
@@ -93,9 +101,9 @@
                     </div>
                 </div>
 
-            </div> 
-        </div> 
-    </div> 
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('css')
@@ -118,11 +126,11 @@
             border-bottom: 1px solid #f0f0f0;
         }
         #usuarios thead {
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
         #usuarios thead th {
-            color: #495057; 
-            font-weight: 600; 
+            color: #495057;
+            font-weight: 600;
             border: none;
             padding-top: 1rem;
             padding-bottom: 1rem;
@@ -133,12 +141,12 @@
             vertical-align: middle; /* Alineación vertical centrada se ve mejor */
         }
         .dt-buttons .btn {
-            border-radius: 0.5rem; 
+            border-radius: 0.5rem;
             min-width: 105px;
             text-align: center;
         }
         .dataTables_filter input[type="search"] {
-            width: 400px !important; 
+            width: 400px !important;
         }
         #usuarios tbody .btn .fas {
             font-size: 1.2rem; /* Ajusté un poco el tamaño para que no se vea gigante */

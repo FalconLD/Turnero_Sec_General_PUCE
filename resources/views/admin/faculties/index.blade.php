@@ -5,9 +5,12 @@
 @section('content_header')
     <div class="d-flex justify-content-between">
         <h1>Listado de Facultades</h1>
-        <a href="{{ route('faculties.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nueva Facultad
-        </a>
+        {{-- Botón de creación protegido --}}
+        @can('facultades.crear')
+            <a href="{{ route('faculties.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Facultad
+            </a>
+        @endcan
     </div>
 @stop
 
@@ -42,16 +45,19 @@
                             <td>{{ $faculty->nivel }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta facultad?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    @can('facultades.editar')
+                                        <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('facultades.eliminar')
+                                        <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar esta facultad?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

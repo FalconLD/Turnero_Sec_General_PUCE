@@ -11,11 +11,13 @@
                 <i class="fas fa-users-cog text-primary mr-2"></i>Roles del Sistema
             </h1>
             <p class="text-muted">Administra los niveles de acceso y permisos de los usuarios</p>
-            
+
             <div class="mt-3">
-                <a href="{{ route('roles.create') }}" class="btn btn-primary btn-lg shadow-sm rounded-pill px-4">
-                    <i class="fas fa-plus mr-1"></i> Crear Nuevo Rol
-                </a>
+                @can('roles.crear')
+                    <a href="{{ route('roles.create') }}" class="btn btn-primary btn-lg shadow-sm rounded-pill px-4">
+                        <i class="fas fa-plus mr-1"></i> Crear Nuevo Rol
+                    </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -46,19 +48,19 @@
                         $btnClass = 'btn-outline-info';
                         break;
                 }
-                
+
                 // Truco para colores hexadecimales si AdminLTE no reconoce 'purple' en bordes
-                $borderClass = ($role->name == 'Super Admin') ? 'border-danger' : 'border-'.$color; 
+                $borderClass = ($role->name == 'Super Admin') ? 'border-danger' : 'border-'.$color;
             @endphp
 
             <div class="col-lg-3 col-md-6 col-sm-12 mb-4">
                 {{-- CARD: Usamos h-100 para que todas tengan la misma altura --}}
                 <div class="card card-outline card-{{ $color == 'purple' ? 'primary' : $color }} h-100 shadow-sm hover-effect">
                     <div class="card-body box-profile d-flex flex-column">
-                        
+
                         {{-- Icono Centrado y Grande --}}
                         <div class="text-center mb-3">
-                            <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light" 
+                            <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-light"
                                  style="width: 80px; height: 80px; border: 3px solid #f4f6f9;">
                                 <i class="{{ $icon }} fa-3x text-{{ $color == 'purple' ? 'indigo' : $color }}"></i>
                             </div>
@@ -88,14 +90,14 @@
                                     <i class="fas fa-edit"></i> Permisos
                                 </a>
                             </div>
-                            
+
                             {{-- Botón Borrar (Solo si NO es Super Admin) --}}
                             @if($role->name !== 'Super Admin')
                                 <div class="col-6"> {{-- FALTABA ESTA COLUMNA ENVOLVENTE --}}
                                     <form action="{{ route('roles.destroy', $role) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        
+
                                         {{-- Corrección: Quitamos 'mt-2' y usamos 'btn-danger' sólido --}}
                                         <button type="submit" class="btn btn-danger btn-block btn-sm shadow-sm btn-delete">
                                             <i class="fas fa-trash mr-1"></i> Borrar

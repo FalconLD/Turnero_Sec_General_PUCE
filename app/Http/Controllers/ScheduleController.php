@@ -13,6 +13,14 @@ use Carbon\Carbon;
 use App\Models\Cubiculo;
 class ScheduleController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:horarios.ver')->only('index');
+        $this->middleware('can:horarios.crear')->only(['create', 'store']);
+        $this->middleware('can:horarios.editar')->only(['edit', 'update']);
+        $this->middleware('can:horarios.eliminar')->only('destroy');
+    }
     /**
      * Display a listing of schedules.
      */
@@ -211,14 +219,14 @@ class ScheduleController extends Controller
         try {
             // Eliminar manualmente los días relacionados, ya que no hay eliminación en cascada.
             $schedule->days()->delete();
-    
+
             // Los cubiculos_schedules, schedule_breaks y shifts relacionados
             // se eliminarán automáticamente debido a la restricción onDelete('cascade')
             // en sus respectivas migraciones.
-    
+
             // Ahora, elimina el horario en sí.
             $schedule->delete();
-    
+
             DB::commit();
             return redirect()->route('schedules.index')->with('success', 'Horario eliminado con éxito.');
         } catch (\Exception $e) {
@@ -302,7 +310,7 @@ class ScheduleController extends Controller
         // Si no hay días o cubículos, no podemos generar nada.
         if ($schedule->days->isEmpty() || $schedule->cubicles->isEmpty()) {
             // Puedes loggear un error aquí si lo deseas
-            return; 
+            return;
         }
 
         $turnosParaInsertar = [];
@@ -318,15 +326,15 @@ class ScheduleController extends Controller
         // 3. Loop 1: Iterar por cada DÍA asignado al horario
         // Asumimos que tu modelo 'Day' tiene una columna 'date_day'
         foreach ($schedule->days as $day) {
-            
+
             // 4. Loop 2: Iterar por cada CUBÍCULO asignado al horario
             foreach ($schedule->cubicles as $cubicle) {
-                
+
                 // 5. Loop 3: Iterar por el TIEMPO (desde inicio hasta fin)
                 $horaInicioSlot = $inicioHorario->copy();
 
                 while ($horaInicioSlot->copy()->addMinutes($duracionTurno) <= $finHorario) {
-                    
+
                     $horaFinSlot = $horaInicioSlot->copy()->addMinutes($duracionTurno);
 
                     // 6. Comprobar si este slot cae en un DESCANSO (Break)
@@ -368,7 +376,7 @@ class ScheduleController extends Controller
             }
         }
 
-        
+
     }*/
 
     }

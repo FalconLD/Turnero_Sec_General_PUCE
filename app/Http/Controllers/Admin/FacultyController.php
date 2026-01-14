@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 
 class FacultyController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:facultades.ver')->only('index');
+        $this->middleware('can:facultades.crear')->only(['create', 'store']);
+        $this->middleware('can:facultades.editar')->only(['edit', 'update']);
+        $this->middleware('can:facultades.eliminar')->only('destroy');
+    }
+
     public function index()
     {
         $faculties = Faculty::all();

@@ -162,46 +162,45 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
     <script>
-        $(function() {
-            var table = $('#cubiculos').DataTable({
-                responsive: true,
-                autoWidth: false,
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+    $(function() {
+        var table = $('#cubiculos').DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            },
+            dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
+            buttons: [
+                //9. Bototnes de exportación con estilo unificado 
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm'
                 },
-                dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
-                buttons: [
-                    {{-- 9. Botones de exportación con estilo unificado --}}
-                    {
-                        extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm'
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: '<i class="fas fa-file-pdf"></i> PDF',
-                        className: 'btn btn-danger btn-sm ms-2', // ms-2 para margen
-                        orientation: 'landscape',
-                        pageSize: 'A4',
-                        title: 'Listado de Cubículos'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i> Imprimir',
-                        className: 'btn btn-secondary btn-sm ms-2' // ms-2 para margen
-                    }
-                ]
-            });
-
-            // Se mantiene tu filtro personalizado
-            $('#filtro_tipo').on('change', function() {
-                var tipo = $(this).val();
-                if (tipo) {
-                    table.column(2).search(tipo, true, false).draw();
-                } else {
-                    table.column(2).search('').draw();
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger btn-sm ms-2',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    title: 'Listado de Cubículos'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn btn-secondary btn-sm ms-2'
                 }
-            });
+            ]
         });
-    </script>
-@stop
+
+        // Se mantiene tu filtro personalizado
+        $('#filtro_tipo').on('change', function() {
+            var tipo = $(this).val();
+            if (tipo) {
+                table.column(2).search(tipo, true, false).draw();
+            } else {
+                table.column(2).search('').draw();
+            }
+        }); 
+    }); // <--- AQUÍ ESTABA EL ERROR: Faltaba cerrar esta llave y el paréntesis del $(function()
+</script>

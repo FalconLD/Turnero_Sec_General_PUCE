@@ -16,13 +16,6 @@ class UserSeeder extends Seeder {
         ]);
         $admin->assignRole('Super Admin');
 
-        $admin = User::create([
-            'name' => 'Fabian',
-            'email' => 'fabian@puce.edu.ec',
-            'password' => Hash::make('fabian'),
-        ]);
-        $admin->assignRole('Super Admin');
-
         // 2. Operador
         $recep = User::create([
             'name' => 'Operador',

@@ -14,7 +14,7 @@
                     <div class="card-body">
                         <form action="{{ route('cubiculos.store') }}" method="POST" id="create-cubiculo-form">
                             @csrf
-                                                        {{-- Fila para Usuario Asignado y Campo Dinámico --}}
+                            {{-- Fila para Usuario Asignado y Campo Dinámico --}}
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">

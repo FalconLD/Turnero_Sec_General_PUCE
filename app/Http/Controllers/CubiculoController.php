@@ -82,6 +82,7 @@ class CubiculoController extends Controller
             'tipo_atencion' => $datosValidados['tipo_atencion'],
             'user_id' => $datosValidados['user_id'],
             'enlace_o_ubicacion' => $datosValidados['enlace_o_ubicacion'] ?? null,
+            'operating_area_id' => $request->operating_area_id, // Area operativa agregadada 
         ]);
         
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');

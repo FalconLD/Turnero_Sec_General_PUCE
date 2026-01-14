@@ -24,25 +24,19 @@ class CubiculoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    // Obtenemos el usuario autenticado
+    {
     $user = Auth::user();
 
-    // Verificamos si existe un usuario logueado para evitar errores
-    if (!$user) {
-        return redirect()->route('login');
-    }
-
-    // Cambiamos 'Super Admin' por el nombre exacto de tu rol
     if ($user->roles->pluck('name')->contains('Super Admin')) {
-        $cubiculos = Cubiculo::all();
+        $cubiculos = Cubiculo::with('users')->get();
     } else {
-        // Obtenemos las áreas del operador. 
-        // Si la relación no existe, devolvemos un array vacío para que no explote
-        $misAreasIds = $user->operatingAreas ? $user->operatingAreas->pluck('id')->toArray() : [];
+        // Obtenemos los IDs de las áreas de Belén (Medicina)
+        $misAreasIds = $user->operatingAreas->pluck('id')->toArray();
 
-        // Filtramos por la columna exacta de tu base de datos (id_area u operating_area_id)
-        $cubiculos = Cubiculo::whereIn('operating_area_id', $misAreasIds)->get();
+        // FILTRO CRÍTICO: Solo cubículos que pertenezcan a esas áreas
+        $cubiculos = Cubiculo::with('users')
+            ->whereIn('operating_area_id', $misAreasIds) 
+            ->get();
     }
 
     return view('cubiculos.index', compact('cubiculos'));
@@ -51,21 +45,16 @@ class CubiculoController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-        public function create()
-        {
-            // 1. Cargamos los usuarios para el select de responsables
-            $users = User::all();
+    public function create()
+    {
+        // Cargamos usuarios con sus áreas asignadas para el filtro dinámico
+        $users = User::with('operatingAreas')->get();
+        
+        // El Super Usuario necesita ver esto inicialmente vacío o con todas las áreas
+        $areas = OperatingArea::all();
 
-            // 2. Cargamos las áreas con sus facultades
-            $areas = OperatingArea::with('faculty')->get();
-
-            // 3. Enviamos AMBAS variables en un solo compact
-            return view('cubiculos.create', compact('users', 'areas'));
-        }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+        return view('cubiculos.create', compact('users', 'areas'));
+    }
     public function store(StoreCubiculoRequest $request)
     {
         // 1. Obtenemos los datos ya validados por el StoreCubiculoRequest
@@ -108,21 +97,33 @@ class CubiculoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-public function edit($id) // Cambiamos a $id para mayor seguridad con el nombre del parámetro
+public function edit($id)
 {
-    // Buscamos el cubículo manualmente para asegurar que el ID llegue
+    // 1. Buscamos el cubículo por ID
     $cubiculo = Cubiculo::findOrFail($id);
+    $user = Auth::user();
+
+    // 2. SEGURIDAD: Si no es Super Admin, verificamos que el área le pertenezca
+    if (!$user->roles->pluck('name')->contains('Super Admin')) {
+        // Obtenemos los IDs de las áreas asignadas al usuario en la tabla pivote
+        $misAreasIds = $user->operatingAreas->pluck('id')->toArray();
+
+        // Si el cubículo que intenta editar no es de su área, bloqueamos el acceso
+        if (!in_array($cubiculo->operating_area_id, $misAreasIds)) {
+            abort(403, 'No tienes permiso para editar cubículos de otras facultades.');
+        }
+    }
+
+    // 3. Cargamos los datos necesarios para los selects del formulario
     $users = User::all();
-    
-    // Impportante, para la seleccion de facultades 
     $areas = OperatingArea::with('faculty')->get();
 
-    // Lógica de separar nombre (se mantiene la tuya)
+    // 4. Lógica para separar el nombre (Prefijo y Número)
     $partes = explode('-', $cubiculo->nombre, 2);
-    $prefijo = (count($partes) === 2 && ctype_digit($partes[1])) ? $partes[0] . '-' : '';
-    $numero  = (count($partes) === 2 && ctype_digit($partes[1])) ? $partes[1] : $cubiculo->nombre;
+    $prefijo = (count($partes) === 2) ? $partes[0] . '-' : '';
+    $numero  = (count($partes) === 2) ? $partes[1] : $cubiculo->nombre;
 
-    // Pasamos 'areas' a la vista
+    // 5. Retornamos la vista con todas las variables necesarias
     return view('cubiculos.edit', compact('cubiculo', 'users', 'areas', 'prefijo', 'numero'));
 }
     /**

@@ -23,10 +23,12 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-user-check"></i></span>
                                             </div>
-                                            <select name="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
+                                            <select name="user_id" id="user_id" class="form-control" required>
                                                 <option value="">-- Seleccionar Usuario --</option>
                                                 @foreach ($users as $user)
-                                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                    <option value="{{ $user->id }}" data-areas='{{ $user->operatingAreas->map(function($a){ return ["id" => $a->id, "name" => $a->name]; })->toJson() }}'>
+                                                        {{ $user->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -34,24 +36,7 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
-                                
-                                {{-- Campo dinámico --}}
-                                <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
-                                    <div class="form-group">
-                                        <label id="campo_extra_label"></label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="campo_extra_icon"></span>
-                                            </div>
-                                            <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
-                                        </div>
-                                        @error('enlace_o_ubicacion')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
+                                </div> {{-- Aquí se cierra correctamente la columna del usuario --}}
 
                             {{-- Fila para Nombre y Tipo de Atención --}}
                             <div class="row">
@@ -124,6 +109,23 @@
                                                     </div>
                                                 </div>
 
+                                                    {{-- Campo dinámico --}}
+                                                    <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
+                                                        <div class="form-group">
+                                                            <label id="campo_extra_label"></label>
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text" id="campo_extra_icon"></span>
+                                                                </div>
+                                                                <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
+                                                            </div>
+                                                            @error('enlace_o_ubicacion')
+                                                                <span class="text-danger">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -179,6 +181,32 @@
 @endpush
 
 @push('js')
+    <script>
+        $(document).ready(function() {
+            const userSelect = $('#user_id');
+            const areaSelect = $('select[name="operating_area_id"]'); // Verifica que el name sea correcto
+
+            userSelect.on('change', function() {
+                // 1. Obtener la opción seleccionada
+                const selectedOption = $(this).find('option:selected');
+                
+                // 2. Extraer el JSON de áreas que guardamos en el Paso 2
+                const areasData = selectedOption.data('areas');
+
+                // 3. Limpiar el selector de áreas
+                areaSelect.empty().append('<option value="">-- Seleccionar Área --</option>');
+
+                // 4. Si hay áreas, llenar el selector
+                if (areasData && areasData.length > 0) {
+                    areasData.forEach(function(area) {
+                        areaSelect.append(`<option value="${area.id}">${area.name}</option>`);
+                    });
+                } else if ($(this).val() !== "") {
+                    areaSelect.append('<option value="" disabled>Este usuario no tiene áreas asignadas en la DB</option>');
+                }
+            });
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             

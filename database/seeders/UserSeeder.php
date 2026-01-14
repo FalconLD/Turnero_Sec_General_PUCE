@@ -16,15 +16,15 @@ class UserSeeder extends Seeder {
         ]);
         $admin->assignRole('Super Admin');
 
-        // 2. Recepción
-        $recep = User::create([
-            'name' => 'Recepción Turnero',
-            'email' => 'recepcion@puce.edu.ec',
+        // 2. Super Administrador de Apoyo
+        $admin2 = User::create([
+            'name'     => 'Soporte DSW',
+            'email'    => 'didesarrollo@puce.edu.ec',
             'password' => Hash::make('password'),
         ]);
-        $recep->assignRole('Recepcion');
+        $admin2->assignRole('Super Admin');
 
-        // 3. Lista Combinada (Operadores reales + adicionales del compañero)
+        // 3. Lista Combinada (Operadores reales)
         $csvUsers = [
             ['name' => 'Belén Salazar', 'email' => 'jbsalazare@puce.edu.ec', 'dni' => '1724990922'],
             ['name' => 'Daniel Vinueza', 'email' => 'devinueza@puce.edu.ec', 'dni' => '1725080673'],
@@ -42,9 +42,6 @@ class UserSeeder extends Seeder {
             ['name' => 'Javier Romero', 'email' => 'fjromero@puce.edu.ec', 'dni' => '1714065164'],
             ['name' => 'Santiago Garcia', 'email' => 'sgarcia738@puce.edu.ec', 'dni' => '1722223862'],
             ['name' => 'Verónica Carrillo', 'email' => 'vgcarrillo@puce.edu.ec', 'dni' => '603881145'],
-            ['name' => 'Israel Chavez', 'email' => 'hichavez@puce.edu.ec', 'dni' => null],
-            ['name' => 'Ker Viera', 'email' => 'kviera@puce.edu.ec', 'dni' => null],
-            ['name' => 'Fabian Vega', 'email' => 'fabian@puce.edu.ec', 'dni' => null],
         ];
 
         foreach ($csvUsers as $u) {
@@ -53,7 +50,7 @@ class UserSeeder extends Seeder {
             $user = User::create([
                 'name'     => $u['name'],
                 'email'    => $u['email'],
-                'DNI'      => $u['dni'], // DNI en mayúsculas según tu migración
+                'DNI'      => $u['dni'],
                 'password' => Hash::make($pass),
             ]);
 

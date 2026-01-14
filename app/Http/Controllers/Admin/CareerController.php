@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 
 class CareerController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:carreras.ver')->only('index');
+        $this->middleware('can:carreras.crear')->only(['create', 'store']);
+        $this->middleware('can:carreras.editar')->only(['edit', 'update']);
+        $this->middleware('can:carreras.eliminar')->only('destroy');
+    }
     public function index()
     {
         // Cargamos la relación para mostrar el nombre del área en la tabla

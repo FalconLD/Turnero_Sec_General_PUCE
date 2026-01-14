@@ -9,6 +9,14 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:usuarios.ver')->only('index');
+        $this->middleware('can:usuarios.crear')->only(['create', 'store']);
+        $this->middleware('can:usuarios.editar')->only(['edit', 'update']);
+        $this->middleware('can:usuarios.eliminar')->only('destroy');
+    }
     public function index()
     {
         $users = User::with('cubiculos', 'roles')->get();

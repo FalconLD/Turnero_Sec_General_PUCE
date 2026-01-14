@@ -26,10 +26,9 @@ use App\Http\Controllers\ShiftUnlockController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StudentRegistrationController;
 
-// 4. Controladores en Sub-Namespace "Admin" (Estructura Académica y Pagos)
+// 4. Controladores en Sub-Namespace "Admin" (Estructura Académica y Asignaciones)
 use App\Http\Controllers\Admin\OperatingAreaController;
 use App\Http\Controllers\Admin\AssignmentController;
-use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\CareerController;
 
@@ -48,12 +47,12 @@ Route::get('/', function () {
     return Auth::check() ? redirect('/home') : redirect('/login');
 });
 
-// 2. Ruta de Bienvenida (Ventana Neutra): IMPORTANTE para evitar 404 tras Login
+// 2. Ruta de Bienvenida (Ventana Neutra)
 Route::get('/home', [HomeController::class, 'index'])
     ->middleware('auth')
     ->name('home');
 
-// 3. Rutas de Auth estándar (Login/Logout)
+// 3. Rutas de Auth estándar (Registro desactivado)
 Auth::routes(['register' => false]);
 
 // ==============================================================================
@@ -103,15 +102,25 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     });
 
     // --- 2. CONFIGURACIÓN TURNERO (Estructura Académica) ---
-    Route::resource('faculties', FacultyController::class)->names('faculties');
-    Route::resource('operating-areas', OperatingAreaController::class)->names('operating-areas');
-    Route::resource('careers', CareerController::class)->names('careers');
+    Route::middleware(['can:facultades.ver'])->group(function () {
+        Route::resource('faculties', FacultyController::class)->names('faculties');
+    });
+
+    Route::middleware(['can:areas.ver'])->group(function () {
+        Route::resource('operating-areas', OperatingAreaController::class)->names('operating-areas');
+    });
+
+    Route::middleware(['can:carreras.ver'])->group(function () {
+        Route::resource('careers', CareerController::class)->names('careers');
+    });
 
     // --- 3. GESTIÓN DE OPERADORES (Asignaciones) ---
-    Route::controller(AssignmentController::class)->group(function () {
-        Route::get('/assignments', 'index')->name('assignments.index');
-        Route::get('/assignments/{user}/edit', 'edit')->name('assignments.edit');
-        Route::put('/assignments/{user}', 'update')->name('assignments.update');
+    Route::middleware(['can:asignaciones.ver'])->group(function () {
+        Route::controller(AssignmentController::class)->group(function () {
+            Route::get('/assignments', 'index')->name('assignments.index');
+            Route::get('/assignments/{user}/edit', 'edit')->name('assignments.edit');
+            Route::put('/assignments/{user}', 'update')->name('assignments.update');
+        });
     });
 
     // --- 4. MÓDULO DE ATENCIÓN Y TURNOS ---
@@ -120,19 +129,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     });
 
-    // --- 5. MÓDULO DE PAGOS (Recepción) ---
-    Route::middleware(['can:pagos.ver'])->group(function () {
-        Route::controller(PaymentController::class)->group(function () {
-            Route::get('/payments', 'index')->name('payments.index');
-            Route::post('/payments/{payment}/verify', 'verify');
-            Route::post('/payments/{payment}/reject', 'reject');
-            Route::get('/payments/{payment}/ver', 'verComprobante')->name('payments.verComprobante');
-            Route::get('/payments/{payment}/descargar', 'descargarComprobante')->name('payments.descargarComprobante');
-        });
-    });
-
     // --- 6. MÓDULO DE DESBLOQUEO DE USUARIO ---
-    Route::middleware(['can:desbloqueo.acceder'])->group(function () {
+    Route::middleware(['can:desbloqueo.ver'])->group(function () {
         Route::controller(ShiftUnlockController::class)->group(function () {
             Route::get('/shift-unlock', 'index')->name('shift_unlock.search');
             Route::post('/shift-unlock', 'search')->name('shift_unlock.search.post');
@@ -148,11 +146,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::middleware(['can:horarios.ver'])->group(function () {
         Route::resource('schedules', ScheduleController::class);
         Route::resource('shifts', ShiftController::class);
+
         Route::controller(DayController::class)->group(function () {
             Route::get('/days/create/{schedule}', 'create')->name('days.create');
             Route::get('/days/{schedule}/edit', 'edit')->name('days.edit');
             Route::post('/days', 'store')->name('days.store');
         });
+
         Route::controller(ScheduleController::class)->group(function () {
             Route::get('schedules/{schedule}/select-days', 'selectDays')->name('schedules.selectDays');
             Route::post('schedules/{schedule}/store-days', 'storeDays')->name('schedules.storeDays');
@@ -160,7 +160,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     });
 
     // --- 8. PARÁMETROS Y REPORTES ---
-    Route::middleware(['can:parametros.ver'])->group(function () {
+    Route::middleware(['can:usuarios.ver'])->group(function () { // Protegido por permiso de admin general
         Route::resource('parameters', ParameterController::class);
         Route::resource('forms', FormController::class);
     });

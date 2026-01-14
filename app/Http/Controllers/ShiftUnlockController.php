@@ -8,6 +8,12 @@ use App\Models\StudentRegistration;
 
 class ShiftUnlockController extends Controller
 {
+    // Middleware de permisos
+    public function __construct()
+    {
+        $this->middleware('can:desbloqueo.ver')->only('search');
+        $this->middleware('can:desbloqueo.ejecutar')->only('unlock');
+    }
     // Mostrar formulario de búsqueda
     public function index()
     {
@@ -47,7 +53,7 @@ class ShiftUnlockController extends Controller
             return redirect()->back()->with('error', 'No se encontró el estudiante.');
         }
 
-        $student->tomado = 1; // esta parte depende 
+        $student->tomado = 1; // esta parte depende
         $student->save();
 
         return redirect()->route('shift_unlock.search')->with('success', 'Estudiante desbloqueado correctamente.');

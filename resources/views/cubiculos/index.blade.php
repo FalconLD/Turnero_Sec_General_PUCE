@@ -63,14 +63,14 @@
                                                 <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-link text-danger btn-sm"
-                                                        onclick="return confirm('¿Seguro de eliminar este cubículo?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                    {{-- Botón Eliminar --}}
+                                                    <form action="{{ route('cubiculos.destroy', ['modulo' => $cubiculo->id]) }}" method="POST" class="d-inline form-eliminar">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button" class="btn btn-link text-danger btn-sm" title="Eliminar" onclick="confirmarEliminacion(this)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -162,6 +162,13 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
     <script>
+        // Función para confirmar eliminación
+    function confirmarEliminacion(boton) {
+    if (confirm('¿Estás seguro de que deseas eliminar este cubículo? Esta acción no se puede deshacer.')) {
+        $(boton).closest('form').submit();
+    }
+    }
+    
     $(function() {
         var table = $('#cubiculos').DataTable({
             responsive: true,

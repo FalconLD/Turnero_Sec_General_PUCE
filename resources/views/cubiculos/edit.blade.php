@@ -19,7 +19,7 @@
                           2. id: cambiado a 'cubiculo-form' (para JS).
                           3. @method('PUT'): requerido para la actualización.
                         --}}
-                        <form action="{{ route('cubiculos.update', $cubiculo) }}" method="POST" id="cubiculo-form">
+                        <form action="{{ route('cubiculos.update', ['modulo' => $cubiculo->id]) }}" method="POST" id="cubiculo-form">
                             @csrf
                             @method('PUT')
 
@@ -91,6 +91,18 @@
                                         </div>
                                     </div>
                                 </div>
+                            {{-- NUEVA FILA: Usuario Asignado y Área Operativa --}}
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
+                                        <select name="user_id" class="form-control" required>
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->id }}" {{ old('user_id', $cubiculo->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
 
                                 {{-- Columna para Tipo de Atención --}}
                                 <div class="col-md-6">
@@ -153,6 +165,20 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
+                                </div>
+                            </div>
+
+                            {{-- INTEGRACIÓN DEL ÁREA OPERATIVA EN EDICIÓN --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="operating_area_id">Área de Atención / Facultad <span class="text-danger">*</span></label>
+                                    <select name="operating_area_id" class="form-control" required>
+                                        @foreach($areas as $area)
+                                            <option value="{{ $area->id }}" {{ old('operating_area_id', $cubiculo->operating_area_id) == $area->id ? 'selected' : '' }}>
+                                                {{ $area->name }} ({{ $area->faculty->name }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 

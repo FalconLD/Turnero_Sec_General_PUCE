@@ -32,6 +32,12 @@ use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\CareerController;
 
+// Ruta para activar la generación de turnos desde un Schedule (Horario)
+Route::post('/schedules/{id}/generate', [App\Http\Controllers\ScheduleController::class, 'generate'])->name('schedules.generate');
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
+
 // ==============================================================================
 //  RUTAS DE INICIO Y AUTENTICACIÓN
 // ==============================================================================
@@ -163,4 +169,19 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/encuesta', fn() => view('encuesta.index'))->name('encuesta.index');
         Route::get('/auditorias', fn() => view('auditoria.index'))->name('auditoria.index');
     });
+});
+
+
+Route::get('/fix-permissions', function () {
+    // 1. Aseguramos que los permisos existan en la tabla 'permissions'
+    Permission::firstOrCreate(['name' => 'cubiculos.ver']);
+    Permission::firstOrCreate(['name' => 'horarios.ver']);
+
+    // 2. Buscamos el rol Operador (si no existe, lo crea)
+    $role = Role::firstOrCreate(['name' => 'Operador']);
+
+    // 3. Le asignamos los permisos
+    $role->givePermissionTo(['cubiculos.ver', 'horarios.ver']);
+
+    return "Permisos asignados correctamente al rol Operador.";
 });

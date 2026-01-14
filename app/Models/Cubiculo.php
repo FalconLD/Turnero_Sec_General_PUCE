@@ -15,6 +15,7 @@ class Cubiculo extends Model
         'tipo_atencion',
         'user_id',
         'enlace_o_ubicacion', // <-- nuevo campo
+        'operating_area_id', // <-- nuevo campo
     ];
 
     // Relación con usuario

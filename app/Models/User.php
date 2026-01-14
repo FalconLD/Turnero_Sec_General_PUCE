@@ -92,6 +92,7 @@ class User extends Authenticatable
     // Relación Muchos a Muchos con Áreas Operativas
     public function operatingAreas()
     {
-        return $this->belongsToMany(OperatingArea::class, 'area_user');
+        return $this->belongsToMany(OperatingArea::class, 'area_user', 'user_id', 'operating_area_id');
     }
+
 }

@@ -234,7 +234,64 @@ class ScheduleController extends Controller
             return back()->withErrors(['error' => 'Error al eliminar el horario: ' . $e->getMessage()]);
         }
     }
+    
+    public function generate($id)
+    {
+        $schedule = Schedule::with(['days', 'cubicles', 'breaks'])->findOrFail($id);
+        $ahora = now();
+        $turnosParaInsertar = [];
 
+        foreach ($schedule->days as $day) {
+            foreach ($schedule->cubicles as $cubicle) {
+                $horaInicioSlot = Carbon::parse($day->date_day . ' ' . $schedule->start_time);
+                $horaFinJornada = Carbon::parse($day->date_day . ' ' . $schedule->end_time);
+                $duracionTurno = $schedule->duration; // minutos
+
+                while ($horaInicioSlot->copy()->addMinutes($duracionTurno) <= $horaFinJornada) {
+                    $horaFinSlot = $horaInicioSlot->copy()->addMinutes($duracionTurno);
+
+                    // 1. Verificar si este slot choca con algún descanso
+                    $enDescanso = false;
+                    foreach ($schedule->breaks as $break) {
+                        $inicioBreak = Carbon::parse($day->date_day . ' ' . $break->start_time);
+                        $finBreak = Carbon::parse($day->date_day . ' ' . $break->end_time);
+
+                        // Si el turno se solapa con el descanso
+                        if ($horaInicioSlot->lt($finBreak) && $horaFinSlot->gt($inicioBreak)) {
+                            $enDescanso = true;
+                            // IMPORTANTE: Saltamos al final del descanso para continuar
+                            $horaInicioSlot = $finBreak->copy();
+                            break; 
+                        }
+                    }
+
+                    // 2. Si NO está en descanso, lo agregamos al array
+                    if (!$enDescanso) {
+                        $turnosParaInsertar[] = [
+                            'id_shift' => (string) \Illuminate\Support\Str::uuid(), // Corregida la barra invertida
+                            'cubicle_shift' => $cubicle->id,
+                            'date_shift' => $day->date_day,
+                            'start_shift' => $horaInicioSlot->format('H:i:s'),
+                            'end_shift' => $horaFinSlot->format('H:i:s'),
+                            'status_shift' => 1,
+                            'created_at' => $ahora,
+                            'updated_at' => $ahora,
+                        ];
+
+                        // Avanzamos el tiempo para el siguiente turno
+                        $horaInicioSlot->addMinutes($duracionTurno);
+                    }
+                    
+                    // Si estaba en descanso, el tiempo ya se actualizó arriba con el $finBreak
+                    // por lo que el bucle continuará correctamente sin quedarse trabado.
+                }
+
+        // Inserción masiva para mayor velocidad
+        \App\Models\Shift::insert($turnosParaInsertar);
+
+            return redirect()->back()->with('success', '¡Turnos generados exitosamente!');
+            }
+    }
     /**
      * ===================================================================
      * FUNCIÓN DE GENERACIÓN DE TURNOS
@@ -322,4 +379,5 @@ class ScheduleController extends Controller
 
     }*/
 
+    }
 }

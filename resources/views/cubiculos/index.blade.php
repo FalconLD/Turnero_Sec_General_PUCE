@@ -16,9 +16,11 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-end align-items-center">
                         {{-- 3. Botón "Nuevo" redondeado (pill) --}}
-                        <a href="{{ route('cubiculos.create') }}" class="btn btn-primary rounded-pill px-5">
-                            <i class="fas fa-plus"></i> Nuevo
-                        </a>
+                        @can('cubiculos.crear')
+                            <a href="{{ route('cubiculos.create') }}" class="btn btn-primary rounded-pill px-5">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </a>
+                        @endcan
                     </div>
 
                     <div class="card-body">
@@ -56,21 +58,25 @@
                                                 @endif
                                             </td>
                                             {{-- Corregido: 'users' es una relación, accede a 'name' --}}
-                                            <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td> 
-                                            
+                                            <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td>
+
                                             {{-- 5. Botones de acción como links (sin fondo) --}}
                                             <td class="text-nowrap">
-                                                <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-link text-danger btn-sm"
-                                                        onclick="return confirm('¿Seguro de eliminar este cubículo?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                @can('cubiculos.editar')
+                                                    <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @endcan
+                                                @can('cubiculos.eliminar')
+                                                    <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-link text-danger btn-sm"
+                                                            onclick="return confirm('¿Seguro de eliminar este cubículo?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach
@@ -89,7 +95,7 @@
     {{-- 6. Estilos de DataTables --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
-    
+
     {{-- 7. Bloque de estilos completo (tarjeta, tabla, botones) --}}
     <style>
         .dt-buttons .btn:not(:first-child) {
@@ -109,11 +115,11 @@
 
         /* Estilos adaptados para #cubiculos */
         #cubiculos thead {
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
         #cubiculos thead th {
-            color: #495057; 
-            font-weight: 600; 
+            color: #495057;
+            font-weight: 600;
             border: none;
             padding-top: 1rem;
             padding-bottom: 1rem;
@@ -121,11 +127,11 @@
         #cubiculos td, #cubiculos th {
             border-left: none;
             border-right: none;
-            text-align: center;     
-            vertical-align: middle; 
+            text-align: center;
+            vertical-align: middle;
         }
         .dt-buttons .btn {
-            border-radius: 0.5rem; 
+            border-radius: 0.5rem;
         }
         .dataTables_filter input[type="search"] {
             width: 400px !important;

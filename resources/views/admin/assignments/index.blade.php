@@ -41,9 +41,11 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ route('assignments.edit', $usuario->id) }}" class="btn btn-primary rounded-pill px-4 btn-sm shadow-sm" title="Gestionar Áreas">
-                                                    <i class="fas fa-tasks mr-1"></i> Gestionar
-                                                </a>
+                                                @can('asignaciones.editar')
+                                                    <a href="{{ route('assignments.edit', $usuario->id) }}" class="btn btn-primary rounded-pill px-4 btn-sm shadow-sm" title="Gestionar Áreas">
+                                                        <i class="fas fa-tasks mr-1"></i> Gestionar
+                                                    </a>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach

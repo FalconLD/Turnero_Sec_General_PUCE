@@ -16,9 +16,11 @@
                 <div class="card">
                     {{-- 3. Botón "Nuevo" movido al card-header (como en Usuarios) --}}
                     <div class="card-header d-flex justify-content-end align-items-center">
-                        <a href="{{ route('schedules.create') }}" class="btn btn-primary rounded-pill px-5">
-                            <i class="fas fa-plus"></i>  Nuevo
-                        </a>
+                        @can('horarios.crear')
+                            <a href="{{ route('schedules.create') }}" class="btn btn-primary rounded-pill px-5">
+                                <i class="fas fa-plus"></i>  Nuevo
+                            </a>
+                        @endcan
                     </div>
 
                     <div class="card-body">
@@ -49,16 +51,19 @@
                                     @foreach($schedules as $schedule)
                                     <tr>
                                         <td class="text-nowrap">
-                                            <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-link text-primary btn-sm" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('schedules.destroy', $schedule->id_hor) }}" method="POST" style="display:inline-block">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Eliminar horario?')" title="Eliminar">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-
+                                            @can('horarios.crear')
+                                                <a href="{{ route('schedules.edit', $schedule->id_hor) }}" class="btn btn-link text-primary btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                            @can('horarios.eliminar')
+                                                <form action="{{ route('schedules.destroy', $schedule->id_hor) }}" method="POST" style="display:inline-block">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-link text-danger btn-sm" onclick="return confirm('¿Eliminar horario?')" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endcan
                                             @if($schedule->cubicles->count() > 0)
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-link text-info btn-sm dropdown-toggle" data-toggle="dropdown">

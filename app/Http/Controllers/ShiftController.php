@@ -194,23 +194,26 @@ public function getShifts(Request $request, $fecha)
 
 public function getShifts(Request $request, $fecha)
 {
-    $modalidad = $request->query('modalidad'); // 'presencial' o 'virtual'
+    $modalidad = $request->query('modalidad');
 
     try {
-        // Normaliza la fecha
-        try {
-            $fechaFormateada = Carbon::parse($fecha)->format('Y-m-d');
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Formato de fecha inválido',
-                'message' => $e->getMessage(),
-                'fecha_recibida' => $fecha
-            ], 400);
-        }
+        // 1. Obtener el plan de estudio del estudiante desde la sesión
+        $planEstudiante = session('student_plan_estudio');
 
-        // Construye la consulta
+        // 2. Encontrar el operating_area_id que corresponde a esa carrera
+        // Usamos la tabla 'careers' según tu diagrama
+        $areaId = DB::table('careers')
+                    ->where('career_code', $planEstudiante) 
+                    ->value('operating_area_id');
+
+        // Normaliza la fecha (esto ya lo tienes)
+        $fechaFormateada = Carbon::parse($fecha)->format('Y-m-d');
+
+        // 3. Construye la consulta filtrada
         $query = DB::table('shifts')
             ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
+            // FILTRO CRÍTICO: Solo cubículos que pertenecen al área del estudiante
+            ->where('cubiculos.operating_area_id', $areaId) 
             ->whereDate('shifts.date_shift', $fechaFormateada)
             ->where('shifts.status_shift', 1)
             ->select(
@@ -229,20 +232,12 @@ public function getShifts(Request $request, $fecha)
 
         return response()->json([
             'success' => true,
-            'fecha_consulta' => $fechaFormateada,
-            'total_turnos' => $turnos->count(),
             'data' => $turnos
         ]);
 
     } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Error interno al procesar la solicitud.',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
+        return response()->json(['error' => 'Error al filtrar por facultad'], 500);
     }
 }
-
-
 
 }

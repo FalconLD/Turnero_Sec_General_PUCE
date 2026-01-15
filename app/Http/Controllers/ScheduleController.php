@@ -26,13 +26,20 @@ class ScheduleController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10);
+        $user = auth()->user(); 
+        $misAreasIds = $user->operatingAreas->pluck('id');
+
         $sortBy = $request->get('sortBy', 'valid_from');
         $sortDesc = $request->get('sortDesc', 'false') === 'true';
 
         $query = Schedule::query();
 
-        // Filtros opcionales
+        // 1. FILTRO DE SEGURIDAD (Cambiado de 'cubiculos' a 'cubicles')
+        $query->whereHas('cubicles', function($q) use ($misAreasIds) {
+            $q->whereIn('operating_area_id', $misAreasIds);
+        });
+
+        // 2. Filtros de búsqueda opcionales
         if ($request->filled('start_time')) {
             $query->where('start_time', $request->input('start_time'));
         }
@@ -40,17 +47,17 @@ class ScheduleController extends Controller
             $query->where('end_time', $request->input('end_time'));
         }
 
-        // Orden dinámico
+        // 3. Orden dinámico
         if ($sortBy && Schema::hasColumn('schedules', $sortBy)) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         } else {
             $query->latest('valid_from');
         }
 
-        // Relaciones y conteo
+        // 4. Carga de relaciones y ejecución final
+        // Importante: Usamos 'cubicles' y 'cubicles.users' (o user según tu modelo)
         $schedules = $query->withCount(['occupiedShifts', 'shifts', 'days', 'cubicles', 'breaks'])
-            ->with(['cubicles', 'days', 'breaks'])
-            ->orderBy('valid_from', 'desc')
+            ->with(['cubicles.users', 'days', 'breaks']) 
             ->get();
 
         return view('schedules.index', compact('schedules'));

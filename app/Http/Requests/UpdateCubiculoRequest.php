@@ -3,73 +3,51 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule; // <-- 1. IMPORTANTE: Añadir la importación de Rule
 
 class UpdateCubiculoRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
+     * Determina si el usuario está autorizado para realizar esta solicitud.
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        // Cámbialo a true para permitir que la validación se ejecute
-        return true; 
+        // Se permite la validación; el control de acceso real se maneja vía Roles/Permisos
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
+     * Obtiene las reglas de validación que se aplican a la solicitud de actualización.
      */
-    public function rules()
+    public function rules(): array
     {
-        // 2. REEMPLAZAMOS LA LÓGICA DE REGLAS ANTERIOR
         return [
-            // Reglas para el nuevo formato de nombre
-            'prefijo' => 'required|string|max:10',
-            'numero' => 'required|digits:3',
-            
-            // Reglas estándar
-            'tipo_atencion'   => 'required|in:virtual,presencial',
-            'user_id'         => 'required|exists:users,id',
+            // Identificación del cubículo
+            'prefijo'            => 'required|string|max:10',
+            'numero'             => 'required|digits:3',
 
-            // Lógica condicional completa para enlace_o_ubicacion
-            'enlace_o_ubicacion' => [
-                // Es obligatorio SÓLO SI el tipo es 'virtual'
-                Rule::requiredIf($this->input('tipo_atencion') == 'virtual'),
+            // Relaciones con las tablas maestras
+            'user_id'           => 'required|exists:users,id',
+            'operating_area_id' => 'required|exists:operating_areas,id',
 
-                // Permite que el campo esté vacío (para 'presencial')
-                'nullable', 
-                'string',
-                'max:255',
-
-                // DEBE ser una URL válida SI el tipo es 'virtual'
-                Rule::when($this->input('tipo_atencion') == 'virtual', [
-                    'url'
-                ]),
-
-                // NO DEBE ser una URL SI el tipo es 'presencial'
-                Rule::when($this->input('tipo_atencion') == 'presencial', [
-                    'not_regex:/^(https|http):\/\//'
-                ]),
-            ],
+            // Restricción de modalidad virtual
+            'tipo_atencion'     => 'required|in:virtual',
+            'enlace_o_ubicacion' => 'required|url|max:255',
         ];
     }
 
     /**
-     * Opcional: Personaliza los mensajes de error.
-     *
-     * @return array
+     * Mensajes de error personalizados para la actualización.
      */
-    public function messages()
+    public function messages(): array
     {
         return [
-            'enlace_o_ubicacion.url' => 'Para atención virtual, el campo debe ser un enlace válido (ej: https://zoom.us/...).',
-            
-            // 3. AÑADIMOS EL NUEVO MENSAJE
-            'enlace_o_ubicacion.not_regex' => 'Para atención presencial, la ubicación no puede ser un enlace (URL).'
+            'prefijo.required'            => 'El prefijo es necesario para identificar el cubículo.',
+            'numero.digits'               => 'El número debe ser un código de 3 dígitos.',
+            'user_id.exists'              => 'El usuario responsable asignado no es válido.',
+            'operating_area_id.exists'    => 'El área operativa seleccionada no existe en los registros.',
+            'tipo_atencion.in'            => 'Solo se permite actualizar a modalidad virtual.',
+            'enlace_o_ubicacion.required' => 'El enlace de la reunión virtual no puede quedar vacío.',
+            'enlace_o_ubicacion.url'      => 'Debe proporcionar una URL de reunión válida (ej. Teams o Zoom).',
         ];
     }
 }

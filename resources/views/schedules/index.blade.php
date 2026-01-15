@@ -6,7 +6,6 @@
     {{-- 1. Título centrado (como en Usuarios) --}}
     <h1 class="text-center">Gestión de Horarios</h1>
 @stop
-
 @section('content')
     {{-- 2. Estructura de contenedor centrada (como en Usuarios) --}}
     <div class="container-fluid">

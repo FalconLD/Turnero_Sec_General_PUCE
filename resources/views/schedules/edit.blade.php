@@ -7,6 +7,27 @@
 @stop
 
 @section('content')
+
+<td class="text-nowrap">
+    @can('horarios.editar')
+        @php
+            // Verificamos si el usuario actual es el asignado a alguno de los cubículos de este horario
+            $esDuenio = $schedule->cubicles->contains('user_id', auth()->id());
+            // Opcional: permitir si pertenece a su misma facultad/área
+            $misAreas = auth()->user()->operatingAreas->pluck('id')->toArray();
+            $esMismaArea = $schedule->cubicles->whereIn('operating_area_id', $misAreas)->count() > 0;
+        @endphp
+
+        @if($esDuenio || $esMismaArea)
+            <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-link text-primary btn-sm" title="Editar">
+                <i class="fas fa-edit"></i>
+            </a>
+        @else
+            <span class="text-muted small"><i class="fas fa-lock"></i> No asignado</span>
+        @endif
+    @endcan
+</td>
+
 <div class="container">
     <div class="card shadow w-75 mx-auto">
         <div class="card-body">

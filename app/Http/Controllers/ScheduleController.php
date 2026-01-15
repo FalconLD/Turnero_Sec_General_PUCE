@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use App\Models\Cubiculo;
+
 class ScheduleController extends Controller
 {
     // Middleware de permisos
@@ -21,44 +22,64 @@ class ScheduleController extends Controller
         $this->middleware('can:horarios.editar')->only(['edit', 'update']);
         $this->middleware('can:horarios.eliminar')->only('destroy');
     }
+
     /**
      * Display a listing of schedules.
      */
     public function index(Request $request)
     {
         $user = auth()->user(); 
-        $misAreasIds = $user->operatingAreas->pluck('id');
-
-        $sortBy = $request->get('sortBy', 'valid_from');
-        $sortDesc = $request->get('sortDesc', 'false') === 'true';
-
         $query = Schedule::query();
 
-        // 1. FILTRO DE SEGURIDAD (Cambiado de 'cubiculos' a 'cubicles')
-        $query->whereHas('cubicles', function($q) use ($misAreasIds) {
-            $q->whereIn('operating_area_id', $misAreasIds);
-        });
-
-        // 2. Filtros de búsqueda opcionales
-        if ($request->filled('start_time')) {
-            $query->where('start_time', $request->input('start_time'));
-        }
-        if ($request->filled('end_time')) {
-            $query->where('end_time', $request->input('end_time'));
+        // --- FILTRO DE SEGURIDAD ---
+        // Solo aplicamos restricción si NO es Super Admin
+        if (!$user->hasRole('Super Admin')) { 
+            $misAreasIds = $user->operatingAreas->pluck('id');
+            $query->whereHas('cubicles', function($q) use ($misAreasIds) {
+                $q->whereIn('operating_area_id', $misAreasIds);
+            });
         }
 
-        // 3. Orden dinámico
+        // --- ORDENAMIENTO ---
+        $sortBy = $request->get('sortBy', 'valid_from');
+        $sortDesc = $request->get('sortDesc', 'false') === 'true';
+        
         if ($sortBy && Schema::hasColumn('schedules', $sortBy)) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         } else {
             $query->latest('valid_from');
         }
 
-        // 4. Carga de relaciones y ejecución final
-        // Importante: Usamos 'cubicles' y 'cubicles.users' (o user según tu modelo)
-        $schedules = $query->withCount(['occupiedShifts', 'shifts', 'days', 'cubicles', 'breaks'])
-            ->with(['cubicles.users', 'days', 'breaks']) 
+        // --- CORRECCIÓN PRINCIPAL ---
+        // Separamos withCount de with para evitar conflictos
+        // y nos aseguramos de cargar TODAS las relaciones necesarias
+        $schedules = $query
+            ->with([
+                'cubicles' => function($q) {
+                    // Sin límite, carga TODOS los cubículos
+                    $q->select('cubiculos.id', 'cubiculos.nombre', 'cubiculos.operating_area_id');
+                },
+                'cubicles.users',
+                'days' => function($q) {
+                    // Sin límite, carga TODOS los días
+                    $q->orderBy('date_day', 'asc');
+                },
+                'breaks' => function($q) {
+                    // Sin límite, carga TODOS los breaks
+                    $q->orderBy('start_break', 'asc');
+                }
+            ])
             ->get();
+
+        // Calculamos los contadores DESPUÉS de cargar los datos
+        // para tener control total sobre los resultados
+        $schedules->each(function($schedule) {
+            $schedule->shifts_count = $schedule->shifts()->count();
+            $schedule->occupied_shifts_count = $schedule->occupiedShifts()->count();
+            $schedule->days_count = $schedule->days->count();
+            $schedule->cubicles_count = $schedule->cubicles->count();
+            $schedule->breaks_count = $schedule->breaks->count();
+        });
 
         return view('schedules.index', compact('schedules'));
     }
@@ -68,81 +89,80 @@ class ScheduleController extends Controller
      */
     public function create()
     {
-        // Aquí podrías pasar cubiculoss disponibles para seleccionar
-         $cubicles = Cubiculo::all();
+        // Aquí podrías pasar cubículos disponibles para seleccionar
+        $cubicles = Cubiculo::all();
         return view('schedules.create', compact('cubicles'));
     }
 
     /**
      * Store a newly created schedule in storage.
      */
-        public function store(Request $request)
-        {
-            // Validación
-            $request->validate([
-                'start_time' => 'required|date_format:H:i',
-                'end_time' => 'required|date_format:H:i|after:start_time',
-                'valid_from' => 'required|date',
-                'break_minutes' => 'required|integer|min:0',
-                'attention_minutes' => 'required|integer|min:1',
-                'cubicles' => 'required|array|min:1', // Cubículos asociados
-                'cubicles.*' => 'integer|exists:cubiculos,id', // Cada cubículo debe existir
-                'breaks' => 'nullable|array',
-                'breaks.*.start' => 'required_with:breaks|date_format:H:i',
-                'breaks.*.end' => 'required_with:breaks|date_format:H:i|after:breaks.*.start',
+    public function store(Request $request)
+    {
+        // Validación
+        $request->validate([
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'valid_from' => 'required|date',
+            'break_minutes' => 'required|integer|min:0',
+            'attention_minutes' => 'required|integer|min:1',
+            'cubicles' => 'required|array|min:1', // Cubículos asociados
+            'cubicles.*' => 'integer|exists:cubiculos,id', // Cada cubículo debe existir
+            'breaks' => 'nullable|array',
+            'breaks.*.start' => 'required_with:breaks|date_format:H:i',
+            'breaks.*.end' => 'required_with:breaks|date_format:H:i|after:breaks.*.start',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $now = now();
+
+            // Crear horario
+            $schedule = Schedule::create([
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'valid_from' => $request->valid_from ?? $now,
+                'break_minutes' => $request->break_minutes,
+                'attention_minutes' => $request->attention_minutes,
             ]);
 
-            DB::beginTransaction();
-            try {
-                $now = now();
+            // Asociar cubículos
+            $cubiculosData = collect($request->cubicles)->map(fn($cub) => [
+                'cubiculo_id' => $cub,
+                'schedule_id' => $schedule->id_hor,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->toArray();
 
-                // Crear horario
-                $schedule = Schedule::create([
-                    'start_time' => $request->start_time,
-                    'end_time' => $request->end_time,
-                    'valid_from' => $request->valid_from ?? $now,
-                    'break_minutes' => $request->break_minutes,
-                    'attention_minutes' => $request->attention_minutes,
-                ]);
+            if (!empty($cubiculosData)) {
+                CubicleSchedule::insert($cubiculosData);
+            }
 
-                // Asociar cubículos
-                $cubiculosData = collect($request->cubicles)->map(fn($cub) => [
-                    'cubiculo_id' => $cub,
+            // Agregar breaks si existen
+            if ($request->filled('breaks')) {
+                $breakData = collect($request->breaks)->map(fn($b) => [
                     'schedule_id' => $schedule->id_hor,
-                    'created_at' => $now,
-                    'updated_at' => $now,
+                    'start_break' => $b['start'],
+                    'end_break'   => $b['end'],
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ])->toArray();
 
-                if (!empty($cubiculosData)) {
-                    CubicleSchedule::insert($cubiculosData);
+                if (!empty($breakData)) {
+                    ScheduleBreak::insert($breakData);
                 }
+            }
 
-                // Agregar breaks si existen
-                if ($request->filled('breaks')) {
-                    $breakData = collect($request->breaks)->map(fn($b) => [
-                        'schedule_id' => $schedule->id_hor,
-                        'start_break' => $b['start'],
-                        'end_break'   => $b['end'],
-                        'created_at'  => now(),
-                        'updated_at'  => now(),
-                    ])->toArray();
+            DB::commit();
 
-                    if (!empty($breakData)) {
-                        ScheduleBreak::insert($breakData);
-                    }
-                }
-
-                DB::commit();
-
-                return redirect()
+            return redirect()
                 ->route('days.create', ['schedule' => $schedule->id_hor])
                 ->with('success', 'Horario creado correctamente. Ahora configure los días.');
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return back()->withErrors(['error' => 'Error creating schedule: ' . $e->getMessage()])->withInput();
-            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Error creating schedule: ' . $e->getMessage()])->withInput();
         }
-
+    }
 
     /**
      * Show the form for editing the specified schedule.
@@ -275,7 +295,7 @@ class ScheduleController extends Controller
                     // 2. Si NO está en descanso, lo agregamos al array
                     if (!$enDescanso) {
                         $turnosParaInsertar[] = [
-                            'id_shift' => (string) \Illuminate\Support\Str::uuid(), // Corregida la barra invertida
+                            'id_shift' => (string) \Illuminate\Support\Str::uuid(),
                             'cubicle_shift' => $cubicle->id,
                             'date_shift' => $day->date_day,
                             'start_shift' => $horaInicioSlot->format('H:i:s'),
@@ -292,99 +312,12 @@ class ScheduleController extends Controller
                     // Si estaba en descanso, el tiempo ya se actualizó arriba con el $finBreak
                     // por lo que el bucle continuará correctamente sin quedarse trabado.
                 }
+            }
+        }
 
         // Inserción masiva para mayor velocidad
         \App\Models\Shift::insert($turnosParaInsertar);
 
-            return redirect()->back()->with('success', '¡Turnos generados exitosamente!');
-            }
-    }
-    /**
-     * ===================================================================
-     * FUNCIÓN DE GENERACIÓN DE TURNOS
-     * ===================================================================
-     * Esta función toma un Horario y crea todas sus filas de Turno.
-     * La llamaremos desde el controlador de Días.
-     */
-
-    /*
-    public function generateShifts(Schedule $schedule)
-    {
-        // 1. Cargar las relaciones que necesitamos (días, cubículos, descansos)
-        // Usamos fresh() para asegurarnos de tener los datos más actuales.
-        $schedule->load('days', 'cubicles', 'breaks');
-
-        // Si no hay días o cubículos, no podemos generar nada.
-        if ($schedule->days->isEmpty() || $schedule->cubicles->isEmpty()) {
-            // Puedes loggear un error aquí si lo deseas
-            return;
-        }
-
-        $turnosParaInsertar = [];
-        $ahora = now(); // Para los timestamps created_at/updated_at
-
-        // 2. Parsear los datos del Horario
-        $inicioHorario = Carbon::parse($schedule->start_time);
-        $finHorario = Carbon::parse($schedule->end_time);
-        $duracionTurno = (int)$schedule->attention_minutes;
-        $duracionDescansoEntreTurnos = (int)$schedule->break_minutes; // El descanso *entre* turnos
-        $duracionTotalSlot = $duracionTurno + $duracionDescansoEntreTurnos;
-
-        // 3. Loop 1: Iterar por cada DÍA asignado al horario
-        // Asumimos que tu modelo 'Day' tiene una columna 'date_day'
-        foreach ($schedule->days as $day) {
-
-            // 4. Loop 2: Iterar por cada CUBÍCULO asignado al horario
-            foreach ($schedule->cubicles as $cubicle) {
-
-                // 5. Loop 3: Iterar por el TIEMPO (desde inicio hasta fin)
-                $horaInicioSlot = $inicioHorario->copy();
-
-                while ($horaInicioSlot->copy()->addMinutes($duracionTurno) <= $finHorario) {
-
-                    $horaFinSlot = $horaInicioSlot->copy()->addMinutes($duracionTurno);
-
-                    // 6. Comprobar si este slot cae en un DESCANSO (Break)
-                    $enDescanso = false;
-                    foreach ($schedule->breaks as $break) {
-                        $inicioDescanso = Carbon::parse($break->start_break);
-                        $finDescanso = Carbon::parse($break->end_break);
-
-                        // Comprobar si el slot se solapa con el descanso
-                        if ($horaInicioSlot < $finDescanso && $horaFinSlot > $inicioDescanso) {
-                            $enDescanso = true;
-                            // Movemos el inicio del próximo slot al final del descanso
-                            $horaInicioSlot = $finDescanso->copy();
-                            break; // Salir del loop de descansos
-                        }
-                    }
-
-                    if ($enDescanso) {
-                        continue; // Saltar al siguiente ciclo del 'while' con la nueva $horaInicioSlot
-                    }
-
-                    // 7. Si NO está en descanso, preparamos el Turno para la inserción
-                    // Asegúrate de que los nombres de columna coincidan con tu BD (horario_tur, etc.)
-                    $turnosParaInsertar[] = [
-                        'id' => (string) \Illuminate\Support\Str::uuid(), // O como generes tus IDs
-                        'horario_tur' => $schedule->id_hor,
-                        'cubiculo_tur' => $cubicle->id,
-                        'fecha_tur' => $day->date_day, // ¡Importante! Asegúrate que tu modelo Day tenga 'date_day'
-                        'inicio_tur' => $horaInicioSlot->format('H:i:s'),
-                        'fin_tur' => $horaFinSlot->format('H:i:s'),
-                        'estado_tur' => 0, // 0 = Disponible
-                        'created_at' => $ahora,
-                        'updated_at' => $ahora,
-                    ];
-
-                    // 8. Avanzar al siguiente slot (sumando turno + descanso entre turnos)
-                    $horaInicioSlot->addMinutes($duracionTotalSlot);
-                }
-            }
-        }
-
-
-    }*/
-
+        return redirect()->back()->with('success', '¡Turnos generados exitosamente!');
     }
 }

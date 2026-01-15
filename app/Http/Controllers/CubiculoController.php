@@ -97,35 +97,36 @@ class CubiculoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-public function edit($id)
-{
-    // 1. Buscamos el cubículo por ID
-    $cubiculo = Cubiculo::findOrFail($id);
-    $user = Auth::user();
+    public function edit($id)
+    {
+        // 1. Buscamos el cubículo por ID
+        $cubiculo = Cubiculo::findOrFail($id);
+        $users = User::with('operatingAreas')->get(); // Importante cargar las relaciones
+        $user = Auth::user();
 
-    // 2. SEGURIDAD: Si no es Super Admin, verificamos que el área le pertenezca
-    if (!$user->roles->pluck('name')->contains('Super Admin')) {
-        // Obtenemos los IDs de las áreas asignadas al usuario en la tabla pivote
-        $misAreasIds = $user->operatingAreas->pluck('id')->toArray();
+        // 2. SEGURIDAD: Si no es Super Admin, verificamos que el área le pertenezca
+        if (!$user->roles->pluck('name')->contains('Super Admin')) {
+            // Obtenemos los IDs de las áreas asignadas al usuario en la tabla pivote
+            $misAreasIds = $user->operatingAreas->pluck('id')->toArray();
 
-        // Si el cubículo que intenta editar no es de su área, bloqueamos el acceso
-        if (!in_array($cubiculo->operating_area_id, $misAreasIds)) {
-            abort(403, 'No tienes permiso para editar cubículos de otras facultades.');
+            // Si el cubículo que intenta editar no es de su área, bloqueamos el acceso
+            if (!in_array($cubiculo->operating_area_id, $misAreasIds)) {
+                abort(403, 'No tienes permiso para editar cubículos de otras facultades.');
+            }
         }
+
+        // 3. Cargamos los datos necesarios para los selects del formulario
+        $users = User::all();
+        $areas = OperatingArea::with('faculty')->get();
+
+        // 4. Lógica para separar el nombre (Prefijo y Número)
+        $partes = explode('-', $cubiculo->nombre, 2);
+        $prefijo = (count($partes) === 2) ? $partes[0] . '-' : '';
+        $numero  = (count($partes) === 2) ? $partes[1] : $cubiculo->nombre;
+
+        // 5. Retornamos la vista con todas las variables necesarias
+        return view('cubiculos.edit', compact('cubiculo', 'users', 'areas', 'prefijo', 'numero'));
     }
-
-    // 3. Cargamos los datos necesarios para los selects del formulario
-    $users = User::all();
-    $areas = OperatingArea::with('faculty')->get();
-
-    // 4. Lógica para separar el nombre (Prefijo y Número)
-    $partes = explode('-', $cubiculo->nombre, 2);
-    $prefijo = (count($partes) === 2) ? $partes[0] . '-' : '';
-    $numero  = (count($partes) === 2) ? $partes[1] : $cubiculo->nombre;
-
-    // 5. Retornamos la vista con todas las variables necesarias
-    return view('cubiculos.edit', compact('cubiculo', 'users', 'areas', 'prefijo', 'numero'));
-}
     /**
      * Update the specified resource in storage.
      */

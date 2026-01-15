@@ -6,46 +6,47 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     * Crea la tabla de registros de estudiantes sin lógica de pagos.
-     */
     public function up(): void
     {
         Schema::create('student_registrations', function (Blueprint $table) {
-            $table->id(); // ID autoincremental
+            $table->id();
 
-            // Datos personales del estudiante
-            $table->string('names'); // Nombres completos
-            $table->string('cedula', 36)->unique(); // Cédula única para vinculación con turnos
-            $table->integer('edad'); // Edad del estudiante
-            $table->date('fecha_nacimiento'); // Fecha de nacimiento
-            $table->string('telefono', 20); // Teléfono de contacto
-            $table->string('direccion'); // Dirección domiciliaria
-            $table->string('correo_puce')->unique(); // Correo institucional único
+            // Identificación
+            $table->string('names');
+            $table->string('cedula', 36)->unique();
+            $table->string('banner_id')->nullable();
+            $table->string('correo_puce')->unique();
 
-            // Información Académica
-            $table->string('facultad'); // Facultad a la que pertenece
-            $table->string('carrera'); // Carrera que cursa
-            $table->string('nivel'); // Nivel o semestre actual
-            $table->string('plan_estudio')->nullable(); // Plan de estudio unificado
-            $table->text('motivo'); // Motivo de la solicitud de atención
+            // Datos personales
+            $table->integer('edad')->nullable();
+            $table->date('fecha_nacimiento')->nullable();
+            $table->string('telefono', 255)->nullable();
+            $table->string('direccion', 255)->nullable();
 
-            // Selección de estado y beneficios
-            $table->enum('nivel_instruccion', ['tec', 'grado', 'posgrado', 'especializacion']); // Nivel de instrucción
-            $table->enum('beca_san_ignacio', ['si', 'no']); // Indicador de beca
+            // Datos académicos (Aquí añadimos plan_estudio)
+            $table->string('facultad')->nullable();
+            $table->string('carrera')->nullable();
+            $table->string('nivel')->nullable();
+            $table->string('plan_estudio')->nullable(); // <-- COLUMNA AÑADIDA
+            $table->text('motivo')->nullable();
 
-            // Control del flujo del turnero
-            $table->boolean('tomado')->default(0); // Estado de atención del registro
-            $table->boolean('acepta_terminos')->default(false); // Consentimiento legal
+            // Selección y campos técnicos
+            $table->string('nivel_instruccion')->nullable();
+            $table->string('beca_san_ignacio')->nullable();
+            $table->decimal('valor_pagar', 10, 2)->nullable()->default(0);
+            $table->string('forma_pago')->nullable();
 
-            $table->timestamps(); // created_at y updated_at
+            // Estado y archivos
+            $table->boolean('acepta_terminos')->default(false);
+            $table->string('comprobante')->nullable();
+            $table->boolean('tomado')->default(0);
+            $table->longText('comprobante_base64')->nullable();
+            $table->string('comprobante_mime')->nullable();
+
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('student_registrations');

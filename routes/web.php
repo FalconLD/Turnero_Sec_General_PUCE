@@ -2,70 +2,75 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
-// --- IMPORTACIÓN DE CONTROLADORES ---
+// ==============================================================================
+//  IMPORTACIÓN DE CONTROLADORES (ESTRUCTURA POR DOMINIOS)
+// ==============================================================================
 
-// 1. Controladores de Autenticación y Perfil
-use App\Http\Controllers\Auth\TokenLoginController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController;
+// 1. Dominio: Common (Utilidades y Vistas Neutras)
+use App\Http\Controllers\Common\HomeController;
+use App\Http\Controllers\Common\ProfileController;
+use App\Http\Controllers\Common\DashboardController;
 
-// 2. Controladores de Gestión (General)
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\CubiculoController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\DayController;
-use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\ParameterController;
-use App\Http\Controllers\FormController;
-
-// 3. Controladores de Operación
-use App\Http\Controllers\AttentionController;
-use App\Http\Controllers\ShiftUnlockController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\StudentRegistrationController;
-
-// 4. Controladores en Sub-Namespace "Admin" (Estructura Académica y Asignaciones)
+// 2. Dominio: Admin (Gestión de Infraestructura y Configuración)
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\CubiculoController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\DayController;
+use App\Http\Controllers\Admin\ParameterController;
+use App\Http\Controllers\Admin\FormController;
 use App\Http\Controllers\Admin\OperatingAreaController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\CareerController;
+use App\Http\Controllers\Admin\PaymentController;
 
-// Ruta para activar la generación de turnos desde un Schedule (Horario)
-Route::post('/schedules/{id}/generate', [App\Http\Controllers\ScheduleController::class, 'generate'])->name('schedules.generate');
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+// 3. Dominio: Operator (Atención y Flujo de Turnos)
+use App\Http\Controllers\Operator\AttentionController;
+use App\Http\Controllers\Operator\ShiftController;
+use App\Http\Controllers\Operator\ShiftUnlockController;
+
+// 4. Dominio: Student (Zona Pública y Registro)
+use App\Http\Controllers\Student\TokenLoginController;
+use App\Http\Controllers\Student\StudentRegistrationController;
 
 
 // ==============================================================================
 //  RUTAS DE INICIO Y AUTENTICACIÓN
 // ==============================================================================
 
-// 1. Ruta Raíz: Redirige a Bienvenida o Login
+// Ruta Raíz: Redirige a Bienvenida o Login
 Route::get('/', function () {
     return Auth::check() ? redirect('/home') : redirect('/login');
 });
 
-// 2. Ruta de Bienvenida (Ventana Neutra)
+// Ruta de Bienvenida (Ventana Neutra)
 Route::get('/home', [HomeController::class, 'index'])
     ->middleware('auth')
     ->name('home');
 
-// 3. Rutas de Auth estándar (Registro desactivado)
+// Rutas de Auth estándar (Registro desactivado)
 Auth::routes(['register' => false]);
+
 
 // ==============================================================================
 //  ZONA PÚBLICA (ESTUDIANTES Y API)
 // ==============================================================================
+
+// APIs de Turnos
 Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('api.shifts');
 Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])->name('api.shifts.modalidad');
 
+// Acceso mediante Token
 Route::controller(TokenLoginController::class)->group(function () {
     Route::get('/registro/{token}', 'loginWithToken')->name('student.registro.token');
     Route::get('/registro/error', fn() => view('student.token_error'))->name('student.token.error');
 });
 
+// Flujo de Registro y Agendamiento del Estudiante
 Route::controller(StudentRegistrationController::class)->prefix('student')->group(function () {
     Route::get('/personal', 'showPersonalForm')->name('student.personal');
     Route::get('/agendamiento', 'agendamiento')->name('student.agendamiento');
@@ -80,17 +85,20 @@ Route::controller(StudentRegistrationController::class)->prefix('student')->grou
     Route::post('/validar-datos', 'validarDatos')->name('validar.datos');
 });
 
+
 // ==============================================================================
-//  ZONA PROTEGIDA (ADMINISTRACIÓN / DASHBOARD)
+//  ZONA PROTEGIDA (ADMINISTRACIÓN / OPERACIÓN)
 // ==============================================================================
+
 Route::middleware(['auth'])->prefix('admin')->group(function () {
 
-    // --- DASHBOARD PRINCIPAL ---
+    // --- DASHBOARD Y PERFIL ---
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-    // Perfil de Usuario
-    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/perfil', 'edit')->name('profile.edit');
+        Route::put('/perfil', 'update')->name('profile.update');
+    });
 
     // --- 1. MÓDULO DE SEGURIDAD (Roles y Usuarios) ---
     Route::middleware(['can:roles.ver'])->group(function () {
@@ -101,7 +109,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('users', UserController::class);
     });
 
-    // --- 2. CONFIGURACIÓN TURNERO (Estructura Académica) ---
+    // --- 2. CONFIGURACIÓN ACADÉMICA ---
     Route::middleware(['can:facultades.ver'])->group(function () {
         Route::resource('faculties', FacultyController::class)->names('faculties');
     });
@@ -110,26 +118,30 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('operating-areas', OperatingAreaController::class)->names('operating-areas');
     });
 
-    Route::middleware(['can:carreras.ver'])->group(function () {
-        Route::resource('careers', CareerController::class)->names('careers');
-    });
-
-    // --- 3. GESTIÓN DE OPERADORES (Asignaciones) ---
+    // --- 3. GESTIÓN DE OPERADORES Y ASIGNACIONES ---
     Route::middleware(['can:asignaciones.ver'])->group(function () {
         Route::controller(AssignmentController::class)->group(function () {
             Route::get('/assignments', 'index')->name('assignments.index');
             Route::get('/assignments/{user}/edit', 'edit')->name('assignments.edit');
             Route::put('/assignments/{user}', 'update')->name('assignments.update');
         });
+        Route::resource('careers', CareerController::class)->names('careers');
     });
 
-    // --- 4. MÓDULO DE ATENCIÓN Y TURNOS ---
+    // --- 4. MÓDULO DE ATENCIÓN (OPERADORES) ---
     Route::middleware(['can:atencion.ver_calendario'])->group(function () {
         Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
         Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     });
 
-    // --- 6. MÓDULO DE DESBLOQUEO DE USUARIO ---
+    // --- 5. MÓDULO DE PAGOS ---
+    Route::middleware(['can:pagos.ver'])->group(function () {
+        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+        Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+    });
+
+    // --- 6. MÓDULO DE DESBLOQUEO ---
     Route::middleware(['can:desbloqueo.ver'])->group(function () {
         Route::controller(ShiftUnlockController::class)->group(function () {
             Route::get('/shift-unlock', 'index')->name('shift_unlock.search');
@@ -138,13 +150,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         });
     });
 
-    // --- 7. INFRAESTRUCTURA Y HORARIOS ---
+    // --- 7. INFRAESTRUCTURA, HORARIOS Y DÍAS ---
     Route::middleware(['can:cubiculos.ver'])->group(function () {
         Route::resource('modulos', CubiculoController::class)->names('cubiculos');
     });
 
     Route::middleware(['can:horarios.ver'])->group(function () {
         Route::resource('schedules', ScheduleController::class);
+        Route::post('/schedules/{id}/generate', [ScheduleController::class, 'generateShifts'])->name('schedules.generate');
+
         Route::resource('shifts', ShiftController::class);
 
         Route::controller(DayController::class)->group(function () {
@@ -152,15 +166,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             Route::get('/days/{schedule}/edit', 'edit')->name('days.edit');
             Route::post('/days', 'store')->name('days.store');
         });
-
-        Route::controller(ScheduleController::class)->group(function () {
-            Route::get('schedules/{schedule}/select-days', 'selectDays')->name('schedules.selectDays');
-            Route::post('schedules/{schedule}/store-days', 'storeDays')->name('schedules.storeDays');
-        });
     });
 
-    // --- 8. PARÁMETROS Y REPORTES ---
-    Route::middleware(['can:usuarios.ver'])->group(function () { // Protegido por permiso de admin general
+    // --- 8. PARÁMETROS, FORMULARIOS Y REPORTES ---
+    Route::middleware(['can:usuarios.ver'])->group(function () {
         Route::resource('parameters', ParameterController::class);
         Route::resource('forms', FormController::class);
     });
@@ -171,17 +180,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     });
 });
 
+// ==============================================================================
+//  UTILIDADES DE SISTEMA
+// ==============================================================================
 
 Route::get('/fix-permissions', function () {
-    // 1. Aseguramos que los permisos existan en la tabla 'permissions'
     Permission::firstOrCreate(['name' => 'cubiculos.ver']);
     Permission::firstOrCreate(['name' => 'horarios.ver']);
-
-    // 2. Buscamos el rol Operador (si no existe, lo crea)
     $role = Role::firstOrCreate(['name' => 'Operador']);
-
-    // 3. Le asignamos los permisos
     $role->givePermissionTo(['cubiculos.ver', 'horarios.ver']);
-
     return "Permisos asignados correctamente al rol Operador.";
 });

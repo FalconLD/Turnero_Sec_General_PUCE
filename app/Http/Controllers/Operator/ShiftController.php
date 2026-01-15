@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Operator;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\NewShift;
 use App\Models\Schedule;
 use App\Models\Shift;

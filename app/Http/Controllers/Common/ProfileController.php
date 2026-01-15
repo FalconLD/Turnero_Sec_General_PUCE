@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Common;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -40,7 +41,7 @@ class ProfileController extends Controller
 
         // Actualiza los datos (el email no cambiará porque es readonly)
         $user->name = $request->name;
-        $user->email = $request->email; 
+        $user->email = $request->email;
 
         // Actualiza la contraseña solo si se proporcionó una nueva
         if ($request->filled('password')) {

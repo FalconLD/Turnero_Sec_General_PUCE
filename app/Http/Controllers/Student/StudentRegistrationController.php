@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
 use App\Models\Parameter; // Donde está el parámetro TERM
@@ -350,7 +351,7 @@ class StudentRegistrationController extends Controller
 
                 return redirect()->route('student.success')->with('success', 'Registro y turno guardados correctamente.');
             }
-    
+
        public function agendarTurno(Request $request)
 {
     $request->validate([
@@ -441,7 +442,7 @@ class StudentRegistrationController extends Controller
         $cedula = trim($request->cedula);
         $correo = trim($request->correo_puce);
 
-        $existe = \App\Models\StudentRegistration::where('cedula', $cedula)
+        $existe = StudentRegistration::where('cedula', $cedula)
             ->orWhere('correo_puce', $correo)
             ->exists();
 
@@ -492,7 +493,7 @@ class StudentRegistrationController extends Controller
                 break;
             case 'posgrado':
                 // Asumiendo que 'posgrado' en el form se refiere a 'Maestría' en tu BD
-                $query->where('nivel', 'Maestría'); 
+                $query->where('nivel', 'Maestría');
                 break;
             case 'especializacion':
                 $query->where('nivel', 'Especialización');
@@ -520,7 +521,7 @@ class StudentRegistrationController extends Controller
 
         $query = Faculty::select('programa_desc')
                         ->where('facultad', $facultad);
-        
+
         // Mapeo de los valores del formulario a los valores de la BD
         switch ($nivelForm) {
             case 'grado':
@@ -530,7 +531,7 @@ class StudentRegistrationController extends Controller
                 $query->where('nivel', 'Tec');
                 break;
             case 'posgrado':
-                $query->where('nivel', 'Maestría'); 
+                $query->where('nivel', 'Maestría');
                 break;
             case 'especializacion':
                 $query->where('nivel', 'Especialización');

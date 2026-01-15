@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Cubiculo;
 use App\Models\User;
 use App\Http\Requests\StoreCubiculoRequest; // <-- Lo usaremos
@@ -35,7 +36,7 @@ class CubiculoController extends Controller
 
         // FILTRO CRÍTICO: Solo cubículos que pertenezcan a esas áreas
         $cubiculos = Cubiculo::with('users')
-            ->whereIn('operating_area_id', $misAreasIds) 
+            ->whereIn('operating_area_id', $misAreasIds)
             ->get();
     }
 
@@ -49,7 +50,7 @@ class CubiculoController extends Controller
     {
         // Cargamos usuarios con sus áreas asignadas para el filtro dinámico
         $users = User::with('operatingAreas')->get();
-        
+
         // El Super Usuario necesita ver esto inicialmente vacío o con todas las áreas
         $areas = OperatingArea::all();
 
@@ -79,13 +80,13 @@ class CubiculoController extends Controller
             'tipo_atencion' => $datosValidados['tipo_atencion'],
             'user_id' => $datosValidados['user_id'],
             'enlace_o_ubicacion' => $datosValidados['enlace_o_ubicacion'] ?? null,
-            'operating_area_id' => $request->operating_area_id, // Area operativa agregadada 
+            'operating_area_id' => $request->operating_area_id, // Area operativa agregadada
         ]);
 
         return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');
     }
 
-    
+
     /**
      * Display the specified resource.
      */

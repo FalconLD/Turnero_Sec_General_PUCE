@@ -14,9 +14,10 @@
                     <div class="card-body">
                         <form action="{{ route('cubiculos.store') }}" method="POST" id="create-cubiculo-form">
                             @csrf
-                            {{-- Fila para Usuario Asignado y Campo Dinámico --}}
+                            
+                            {{-- Fila para Usuario Asignado --}}
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -36,102 +37,89 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div> {{-- Aquí se cierra correctamente la columna del usuario --}}
+                                </div>
+                            </div>
 
-                            {{-- Fila para Nombre y Tipo de Atención --}}
+                            {{-- Fila Principal: Columna Izquierda (Nombre del Cubículo) y Columna Derecha (Tipo de Atención) --}}
                             <div class="row">
-                                {{-- Columna para el GRUPO "Nombre del Cubículo" --}}
-                                    <div class="col-md-6">
-                                        <div class="cubiculo-name-container">
-                                            {{-- Título del grupo (Centrado) --}}
-                                            <h6 class="font-weight-bold text-center" style="margin-bottom: 0.9rem;">Nombre del Cubículo</h6>
-                                            {{-- Fila interna para los dos campos (esta ya la tienes) --}}
-                                            <div class="row">
+                                {{-- Columna Izquierda: GRUPO "Nombre del Cubículo" --}}
+                                <div class="col-md-6">
+                                    <div class="cubiculo-name-container">
+                                        {{-- Título del grupo (Centrado) --}}
+                                        <h6 class="font-weight-bold text-center" style="margin-bottom: 0.9rem;">Nombre del Cubículo</h6>
+                                        
+                                        {{-- Área de Atención / Facultad --}}
+                                        <div class="form-group">
+                                            <label>Área de Atención / Facultad</label>
+                                            <select name="operating_area_id" class="form-control">
+                                                @foreach($areas as $area)
+                                                    <option value="{{ $area->id }}">{{ $area->name }} ({{ $area->faculty->name }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                                            <div class="form-group">
-                                                <label>Área de Atención / Facultad</label>
-                                                <select name="operating_area_id" class="form-control">
-                                                    @foreach($areas as $area)
-                                                        <option value="{{ $area->id }}">{{ $area->name }} ({{ $area->faculty->name }})</option>
-                                                    @endforeach
-                                                </select>
+                                        {{-- Fila interna para Prefijo y Número --}}
+                                        <div class="row">
+                                            {{-- Columna para el Prefijo --}}
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{-- Mantenemos su label original para claridad --}}
+                                                    <label for="prefijo">Prefijo <span class="text-danger">*</span></label>
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                        </div>
+                                                        <select name="prefijo" id="prefijo" class="form-control @error('prefijo') is-invalid @enderror" required>
+                                                            <option value="" disabled {{ old('prefijo') ? '' : 'selected' }}>-- P --</option>
+                                                            <option value="C -" {{ old('prefijo') == 'C -' ? 'selected' : '' }}>C -</option>
+                                                            <option value="P1 -" {{ old('prefijo') == 'P1 -' ? 'selected' : '' }}>P1 -</option>
+                                                            <option value="P -" {{ old('prefijo') == 'P -' ? 'selected' : '' }}>P -</option>
+                                                            <option value="SALA-1 -" {{ old('prefijo') == 'SALA-1 -' ? 'selected' : '' }}>SALA-1 -</option>
+                                                            <option value="SALA -" {{ old('prefijo') == 'SALA -' ? 'selected' : '' }}>SALA -</option>
+                                                        </select>
+                                                    </div>
+                                                    @error('prefijo')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                                
-                                                {{-- Columna para el Prefijo --}}
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
 
-                                                        {{-- Mantenemos su label original para claridad --}}
-                                                        <label for="prefijo">Prefijo <span class="text-danger">*</span></label>
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                                            </div>
-                                                            <select name="prefijo" id="prefijo" class="form-control @error('prefijo') is-invalid @enderror" required>
-                                                                <option value="" disabled {{ old('prefijo') ? '' : 'selected' }}>-- P --</option>
-                                                                <option value="C -" {{ old('prefijo') == 'C -' ? 'selected' : '' }}>C -</option>
-                                                                <option value="P1 -" {{ old('prefijo') == 'P1 -' ? 'selected' : '' }}>P1 -</option>
-                                                                <option value="P -" {{ old('prefijo') == 'P -' ? 'selected' : '' }}>P -</Hoption>
-                                                                <option value="SALA-1 -" {{ old('prefijo') == 'SALA-1 -' ? 'selected' : '' }}>SALA-1 -</option>
-                                                                <option value="SALA -" {{ old('prefijo') == 'SALA -' ? 'selected' : '' }}>SALA -</option>
-                                                            </select>
+                                            {{-- Columna para el Número --}}
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{-- Mantenemos su label original para claridad --}}
+                                                    <label for="numero">Número <span class="text-danger">*</span></label>
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
                                                         </div>
-                                                        @error('prefijo')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
+                                                        <input type="text" 
+                                                            name="numero" 
+                                                            id="numero" 
+                                                            class="form-control @error('numero') is-invalid @enderror" 
+                                                            value="{{ old('numero') }}" 
+                                                            placeholder="Ej: 001" 
+                                                            pattern="[0-9]{3}" 
+                                                            maxlength="3" 
+                                                            inputmode="numeric" 
+                                                            title="Debe ingresar un número de 3 dígitos (ej: 001, 101)." 
+                                                            required>
                                                     </div>
+                                                    @error('numero')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
                                                 </div>
-
-                                                {{-- Columna para el Número --}}
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        {{-- Mantenemos su label original para claridad --}}
-                                                        <label for="numero">Número <span class="text-danger">*</span></label>
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
-                                                            </div>
-                                                            <input type="text" 
-                                                                name="numero" 
-                                                                id="numero" 
-                                                                class="form-control @error('numero') is-invalid @enderror" 
-                                                                value="{{ old('numero') }}" 
-                                                                placeholder="Ej: 001" 
-                                                                pattern="[0-9]{3}" 
-                                                                maxlength="3" 
-                                                                inputmode="numeric" 
-                                                                title="Debe ingresar un número de 3 dígitos (ej: 001, 101)." 
-                                                                required>
-                                                        </div>
-                                                        @error('numero')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-
-                                                    {{-- Campo dinámico --}}
-                                                    <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
-                                                        <div class="form-group">
-                                                            <label id="campo_extra_label"></label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text" id="campo_extra_icon"></span>
-                                                                </div>
-                                                                <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
-                                                            </div>
-                                                            @error('enlace_o_ubicacion')
-                                                                <span class="text-danger">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                </div>
-
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
+                                {{-- Columna Derecha: Tipo de Atención y Campo Dinámico --}}
                                 <div class="col-md-6">
+                                    {{-- Espaciador invisible para alinear con el título del lado izquierdo --}}
                                     <h6 class="font-weight-bold" style="margin-bottom: 0.9rem; visibility: hidden;">&nbsp;</h6>
+                                    
+                                    {{-- Tipo de Atención --}}
                                     <div class="form-group">
                                         <label for="tipo_atencion">Tipo de Atención <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -147,10 +135,24 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
+
+                                    {{-- Campo dinámico (Enlace o Ubicación) --}}
+                                    <div id="campo_extra_wrapper" style="display: none;">
+                                        <div class="form-group">
+                                            <label id="campo_extra_label"></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="campo_extra_icon"></span>
+                                                </div>
+                                                <input type="text" name="enlace_o_ubicacion" id="campo_extra_input" class="form-control @error('enlace_o_ubicacion') is-invalid @enderror" value="{{ old('enlace_o_ubicacion') }}">
+                                            </div>
+                                            @error('enlace_o_ubicacion')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-
 
                             {{-- Botones de Acción --}}
                             <div class="text-right">

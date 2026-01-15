@@ -23,9 +23,48 @@
                             @csrf
                             @method('PUT')
 
-                            {{-- Fila para Nombre y Tipo de Atención --}}
+                            {{-- Fila Principal: Columna Izquierda (Usuario y Área) y Columna Derecha (Nombre del Cubículo) --}}
                             <div class="row">
-                                {{-- Columna para el GRUPO "Nombre del Cubículo" --}}
+                                {{-- Columna Izquierda: Usuario Asignado y Área Operativa --}}
+                                <div class="col-md-6">
+                                    {{-- Usuario Asignado con filtro inteligente --}}
+                                    <div class="form-group">
+                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                                            </div>
+                                            <select name="user_id" id="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
+                                                <option value="">-- Seleccionar Usuario --</option>
+                                                @foreach ($users as $user)
+                                                    {{-- CAMBIO: Comparamos con $cubiculo->user_id y agregamos data-areas para el filtro --}}
+                                                    <option value="{{ $user->id }}" 
+                                                        {{ old('user_id', $cubiculo->user_id) == $user->id ? 'selected' : '' }}
+                                                        data-areas='{{ $user->operatingAreas->map(function($a){ return ["id" => $a->id, "name" => $a->name]; })->toJson() }}'>
+                                                        {{ $user->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @error('user_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    {{-- Área de Atención / Facultad con filtro inteligente --}}
+                                    <div class="form-group">
+                                        <label for="operating_area_id">Área de Atención / Facultad <span class="text-danger">*</span></label>
+                                        <select name="operating_area_id" id="operating_area_id" class="form-control @error('operating_area_id') is-invalid @enderror" required>
+                                            <option value="">-- Seleccionar Área --</option>
+                                            {{-- Se llenará dinámicamente con JS según el usuario seleccionado --}}
+                                        </select>
+                                        @error('operating_area_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                {{-- Columna Derecha: GRUPO "Nombre del Cubículo" --}}
                                 <div class="col-md-6">
                                     <div class="cubiculo-name-container">
                                         <h6 class="font-weight-bold text-center" style="margin-bottom: 0.9rem;">Nombre del Cubículo</h6>
@@ -47,12 +86,11 @@
                                                               y si no, usa '$prefijo' (el valor de la DB).
                                                             --}}
                                                             <option value="" disabled>-- P --</option>
-                                                            {{-- NOTA: He quitado el espacio de 'value' (ej. "C -") para que coincida con el controlador ("C-") --}}
-                                                            <option value="C-" {{ old('prefijo', $prefijo) == 'C-' ? 'selected' : '' }}>C -</option>
-                                                            <option value="P1-" {{ old('prefijo', $prefijo) == 'P1-' ? 'selected' : '' }}>P1 -</option>
-                                                            <option value="P-" {{ old('prefijo', $prefijo) == 'P-' ? 'selected' : '' }}>P -</option>
-                                                            <option value="SALA-1-" {{ old('prefijo', $prefijo) == 'SALA-1-' ? 'selected' : '' }}>SALA-1 -</option>
-                                                            <option value="SALA-" {{ old('prefijo', $prefijo) == 'SALA-' ? 'selected' : '' }}>SALA -</option>
+                                                            <option value="C -" {{ old('prefijo', $prefijo) == 'C -' ? 'selected' : '' }}>C -</option>
+                                                            <option value="P1 -" {{ old('prefijo', $prefijo) == 'P1 -' ? 'selected' : '' }}>P1 -</option>
+                                                            <option value="P -" {{ old('prefijo', $prefijo) == 'P -' ? 'selected' : '' }}>P -</option>
+                                                            <option value="SALA-1 -" {{ old('prefijo', $prefijo) == 'SALA-1 -' ? 'selected' : '' }}>SALA-1 -</option>
+                                                            <option value="SALA -" {{ old('prefijo', $prefijo) == 'SALA -' ? 'selected' : '' }}>SALA -</option>
                                                         </select>
                                                     </div>
                                                     @error('prefijo')
@@ -91,22 +129,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            {{-- NUEVA FILA: Usuario Asignado y Área Operativa --}}
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
-                                        <select name="user_id" class="form-control" required>
-                                            @foreach ($users as $user)
-                                                <option value="{{ $user->id }}" {{ old('user_id', $cubiculo->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
+                            </div>
 
-                                {{-- Columna para Tipo de Atención --}}
+                            {{-- Fila para Tipo de Atención y Campo Dinámico --}}
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <h6 class="font-weight-bold" style="margin-bottom: 0.9rem; visibility: hidden;">&nbsp;</h6>
                                     <div class="form-group">
                                         <label for="tipo_atencion">Tipo de Atención <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -116,41 +143,15 @@
                                             <select name="tipo_atencion" id="tipo_atencion" class="form-control @error('tipo_atencion') is-invalid @enderror" required>
                                                 <option value="">-- Seleccionar tipo --</option>
                                                 {{-- CAMBIO: Comparamos con $cubiculo->tipo_atencion --}}
-                                                <option value="virtual" {{ old('tipo_atencion', $cubiculo->tipo_atencion) == 'virtual' ? 'selected' : '' }}>Virtual</option>
-                                                <option value="presencial" {{ old('tipo_atencion', $cubiculo->tipo_atencion) == 'presencial' ? 'selected' : '' }}>Presencial</option>
-                                            </select>
+                                                <option value="virtual" {{ old('tipo_atencion', $cubiculo->tipo_atencion) == 'virtual' ? 'selected' : '' }}>Virtual</option>                                            </select>
                                         </div>
                                         @error('tipo_atencion')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Fila para Usuario Asignado y Campo Dinámico --}}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="user_id">Usuario Asignado <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fas fa-user-check"></i></span>
-                                            </div>
-                                            <select name="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
-                                                <option value="">-- Seleccionar Usuario --</option>
-                                                @foreach ($users as $user)
-                                                    {{-- CAMBIO: Comparamos con $cubiculo->user_id --}}
-                                                    <option value="{{ $user->id }}" {{ old('user_id', $cubiculo->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @error('user_id')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
                                 
-                                {{-- Campo dinámico --}}
+                                {{-- Campo dinámico (Enlace o Ubicación) --}}
                                 <div class="col-md-6" id="campo_extra_wrapper" style="display: none;">
                                     <div class="form-group">
                                         <label id="campo_extra_label"></label>
@@ -165,20 +166,6 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
-                            </div>
-
-                            {{-- INTEGRACIÓN DEL ÁREA OPERATIVA EN EDICIÓN --}}
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="operating_area_id">Área de Atención / Facultad <span class="text-danger">*</span></label>
-                                    <select name="operating_area_id" class="form-control" required>
-                                        @foreach($areas as $area)
-                                            <option value="{{ $area->id }}" {{ old('operating_area_id', $cubiculo->operating_area_id) == $area->id ? 'selected' : '' }}>
-                                                {{ $area->name }} ({{ $area->faculty->name }})
-                                            </option>
-                                        @endforeach
-                                    </select>
                                 </div>
                             </div>
 
@@ -198,13 +185,12 @@
 @stop
 
 {{-- 
-  CSS y JS son IDÉNTICOS al archivo create.blade.php, 
-  solo cambia el ID del formulario en el selector de JS.
+  CSS y JS con la lógica del filtro inteligente y validaciones
 --}}
 
 @push('css')
     <style>
-    /* Este es el estilo para el contenedor */
+    /* Este es el estilo para el contenedor que agrupa "Prefijo" y "Número" */
     .cubiculo-name-container {
         background-color: #f8f9fa; 
         border: 1px solid #e9ecef;   
@@ -216,6 +202,41 @@
 
 @push('js')
     <script>
+        $(document).ready(function() {
+            const userSelect = $('#user_id');
+            const areaSelect = $('#operating_area_id');
+            const areaActual = "{{ $cubiculo->operating_area_id }}"; // ID del área que ya tiene el cubículo
+
+            function cargarAreas() {
+                // 1. Obtener la opción seleccionada
+                const selectedOption = userSelect.find('option:selected');
+                
+                // 2. Extraer el JSON de áreas del usuario
+                const areasData = selectedOption.data('areas');
+
+                // 3. Limpiar el selector de áreas
+                areaSelect.empty().append('<option value="">-- Seleccionar Área --</option>');
+
+                // 4. Si hay áreas, llenar el selector
+                if (areasData && areasData.length > 0) {
+                    areasData.forEach(function(area) {
+                        // Marcamos como 'selected' si coincide con el área actual del cubículo
+                        const isSelected = (area.id == areaActual) ? 'selected' : '';
+                        areaSelect.append(`<option value="${area.id}" ${isSelected}>${area.name}</option>`);
+                    });
+                } else if (userSelect.val() !== "") {
+                    areaSelect.append('<option value="" disabled>Este usuario no tiene áreas asignadas en la DB</option>');
+                }
+            }
+
+            // 1. Ejecutar al cargar la página (para que aparezca el área actual)
+            cargarAreas();
+
+            // 2. Ejecutar cada vez que cambien el usuario
+            userSelect.on('change', cargarAreas);
+        });
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             
             const cubiculoForm = document.getElementById('cubiculo-form'); 
@@ -225,7 +246,7 @@
             const input = document.getElementById('campo_extra_input');
             const icon = document.getElementById('campo_extra_icon');
 
-            // --- FUNCIÓN MODIFICADA ---
+            // --- FUNCIÓN MODIFICADA PARA EDICIÓN ---
             function actualizarCampoDinamico() {
                 const tipo = tipoSelect.value;
                 const valorActual = input.value.trim();
@@ -267,13 +288,14 @@
             actualizarCampoDinamico(); 
 
 
-            // --- VALIDACIÓN AL ENVIAR (Sin cambios) ---
+            // --- VALIDACIÓN AL ENVIAR EL FORMULARIO ---
             cubiculoForm.addEventListener('submit', function (event) {
                 const tipo = tipoSelect.value;
                 const valorCampo = input.value.trim();
                 const urlPattern = new RegExp('^(https://|http://)'); 
 
                 if (tipo === 'virtual') {
+                    // Si es virtual, DEBE ser un enlace válido
                     if (valorCampo === '' || !urlPattern.test(valorCampo)) {
                         event.preventDefault(); 
                         alert('Error: Para atención virtual, debe ingresar un enlace válido (ej: https://...).');
@@ -281,6 +303,7 @@
                     }
                 
                 } else if (tipo === 'presencial') {
+                    // Si es presencial, NO DEBE ser un enlace
                     if (valorCampo !== '' && urlPattern.test(valorCampo)) {
                         event.preventDefault(); 
                         alert('Error: Para atención presencial, la ubicación no puede ser un enlace. Ingrese solo texto (ej: Piso 2, Oficina 10).');
@@ -289,25 +312,53 @@
                 }
             });
 
-            // Quita la clase de error (Sin cambios)
+            // Quita la clase de error cuando el usuario corrija
             input.addEventListener('input', function() {
                 if(input.classList.contains('is-invalid')) {
                     input.classList.remove('is-invalid');
                 }
             });
 
-            // Bloqueo de teclado para el número (Sin cambios)
+            // Seleccionamos el campo de número
             const inputNumero = document.getElementById('numero');
+
             if (inputNumero) {
+
+                /**
+                 * 1. Bloqueo Proactivo (keydown)
+                 * Bloquea teclas antes de que se escriban.
+                 */
                 inputNumero.addEventListener('keydown', function (event) {
-                    if (['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) { return; }
-                    if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) { return; }
-                    if (!/^[0-9]$/.test(event.key)) { event.preventDefault(); }
+                    
+                    // Permite teclas de control: Backspace, Tab, Delete, Flechas, Home, End
+                    if ([
+                        'Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'
+                    ].includes(event.key)) {
+                        return; // Deja que la tecla funcione
+                    }
+
+                    // Permite atajos comunes (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X / Cmd+A...)
+                    if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) {
+                        return;
+                    }
+
+                    // Si la tecla presionada NO es un dígito (0-9)
+                    if (!/^[0-9]$/.test(event.key)) {
+                        event.preventDefault(); // Detiene la acción (la tecla no se escribe)
+                    }
                 });
+
+                /**
+                 * 2. Limpieza Reactiva (input) - La "Red de Seguridad"
+                 * Limpia el valor si algo se filtra (ej. al pegar con el mouse).
+                 */
                 inputNumero.addEventListener('input', function (event) {
+                    // Reemplaza todo lo que NO sea un dígito por una cadena vacía
                     this.value = this.value.replace(/[^0-9]/g, '');
                 });
             }
+
+
         });
     </script>
 @endpush

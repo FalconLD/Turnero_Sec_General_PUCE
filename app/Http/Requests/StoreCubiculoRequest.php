@@ -3,71 +3,54 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule; // <-- ¡MUY IMPORTANTE! Importa la clase Rule.
 
 class StoreCubiculoRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
+     * Determina si el usuario está autorizado para realizar esta solicitud.
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        // Permite que la validación se ejecute
+        // Se permite la validación para todos los usuarios autenticados con permisos
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
+     * Obtiene las reglas de validación que se aplican a la solicitud.
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'prefijo' => 'required|string|max:10',
-            'numero' => 'required|digits:3',
-            'tipo_atencion'   => 'required|in:virtual,presencial',
-            'user_id'         => 'required|exists:users,id',
+            // Identificadores del nombre del cubículo
+            'prefijo'            => 'required|string|max:10',
+            'numero'             => 'required|digits:3',
 
-            // ---- NUEVA LÓGICA DE VALIDACIÓN CLAVE ----
-            'enlace_o_ubicacion' => [
-                // 1. Es obligatorio SÓLO SI el tipo es 'virtual'.
-                Rule::requiredIf($this->input('tipo_atencion') == 'virtual'),
+            // Relaciones mandatorias
+            'user_id'           => 'required|exists:users,id',
+            'operating_area_id' => 'required|exists:operating_areas,id',
 
-                // 2. Si se rellena (para 'presencial' es opcional), debe ser un string y max 255.
-                'nullable', // Permite que el campo esté vacío (para 'presencial')
-                'string',
-                'max:255',
-
-                // 3. DEBE ser una URL válida SI el tipo es 'virtual'.
-                Rule::when($this->input('tipo_atencion') == 'virtual', [
-                    'url'
-                ]),
-
-                // 4. NO DEBE ser una URL SI el tipo es 'presencial'.
-                Rule::when($this->input('tipo_atencion') == 'presencial', [
-                    // Esta Regex busca si el texto empieza con http:// o https://
-                    'not_regex:/^(https|http):\/\//'
-                ]),
-            ],
+            // Lógica de atención 100% virtual
+            'tipo_atencion'     => 'required|in:virtual',
+            'enlace_o_ubicacion' => 'required|url|max:255', // Siempre debe ser un enlace válido
         ];
     }
 
     /**
-     * Personaliza los mensajes de error.
-     *
-     * @return array
+     * Personaliza los mensajes de error para el usuario.
      */
-    public function messages()
+    public function messages(): array
     {
         return [
-            // Mensaje para la regla 'url' (cuando es virtual)
-            'enlace_o_ubicacion.url' => 'Para atención virtual, el campo debe ser un enlace válido (ej: https://zoom.us/...).',
-            
-            // Mensaje para la regla 'not_regex' (cuando es presencial)
-            'enlace_o_ubicacion.not_regex' => 'Para atención presencial, la ubicación no puede ser un enlace (URL).'
+            'prefijo.required'            => 'El prefijo es obligatorio (ej. C -).',
+            'numero.required'             => 'El número del cubículo es obligatorio.',
+            'numero.digits'               => 'El número debe tener exactamente 3 dígitos (ej. 001).',
+            'user_id.required'            => 'Debe asignar un usuario responsable al cubículo.',
+            'user_id.exists'              => 'El usuario seleccionado no es válido.',
+            'operating_area_id.required'  => 'Debe vincular el cubículo a un área operativa.',
+            'operating_area_id.exists'    => 'El área operativa seleccionada no existe.',
+            'tipo_atencion.in'            => 'Secretaría General solo permite atención virtual.',
+            'enlace_o_ubicacion.required' => 'El enlace de la reunión (Zoom/Teams) es obligatorio para atención virtual.',
+            'enlace_o_ubicacion.url'      => 'Debe ingresar un enlace válido que comience con http:// o https://.',
         ];
     }
 }

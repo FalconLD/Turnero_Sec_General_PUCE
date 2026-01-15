@@ -3,35 +3,31 @@
 @section('title', 'Cubículos')
 
 @section('content_header')
-    {{-- 1. Título centrado --}}
-    <h1 class="text-center">Gestión de Cubículos</h1>
+    <h1 class="text-center">Gestión de Cubículos (Atención Virtual)</h1>
 @stop
 
 @section('content')
-    {{-- 2. Contenedor centrado (11 de 12 columnas) --}}
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-11">
 
                 <div class="card">
                     <div class="card-header d-flex justify-content-end align-items-center">
-                        {{-- 3. Botón "Nuevo" redondeado (pill) --}}
                         @can('cubiculos.crear')
                             <a href="{{ route('cubiculos.create') }}" class="btn btn-primary rounded-pill px-5">
-                                <i class="fas fa-plus"></i> Nuevo
+                                <i class="fas fa-plus"></i> Nuevo Cubículo
                             </a>
                         @endcan
                     </div>
 
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="cubiculos" class="table"> {{-- ID y sin clases extra --}}
-                                <thead> {{-- 4. Cabecera sin "table-primary" --}}
+                            <table id="cubiculos" class="table">
+                                <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Nombre</th>
-                                        <th>Tipo de Atención</th>
-                                        <th>Enlace / Ubicación</th>
+                                        <th>Nombre del Cubículo</th>
+                                        <th>Enlace de Reunión</th>
                                         <th>Usuario Asignado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -42,25 +38,18 @@
                                             <td>{{ $cubiculo->id }}</td>
                                             <td>{{ $cubiculo->nombre }}</td>
                                             <td>
-                                                <span class="badge {{ $cubiculo->tipo_atencion == 'virtual' ? 'bg-info' : 'bg-success' }}">
-                                                    {{ ucfirst($cubiculo->tipo_atencion) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if ($cubiculo->tipo_atencion === 'virtual' && $cubiculo->enlace_o_ubicacion)
-                                                    <a href="{{ $cubiculo->enlace_o_ubicacion }}" target="_blank" class="text-primary">
-                                                        {{ Str::limit($cubiculo->enlace_o_ubicacion, 30) }}
+                                                {{-- Al ser 100% virtual, siempre mostramos el enlace --}}
+                                                @if ($cubiculo->enlace_o_ubicacion)
+                                                    <a href="{{ $cubiculo->enlace_o_ubicacion }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-video"></i> Ir a reunión
                                                     </a>
-                                                @elseif ($cubiculo->tipo_atencion === 'presencial')
-                                                    {{ $cubiculo->enlace_o_ubicacion ?? '—' }}
                                                 @else
-                                                    —
+                                                    <span class="text-muted">Sin enlace configurado</span>
                                                 @endif
                                             </td>
-                                            {{-- Corregido: 'users' es una relación, accede a 'name' --}}
+                                            {{-- Se mantiene el acceso a la relación 'users' que definiste --}}
                                             <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td>
 
-                                            {{-- 5. Botones de acción como links (sin fondo) --}}
                                             <td class="text-nowrap">
                                                 @can('cubiculos.editar')
                                                     <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
@@ -71,7 +60,7 @@
                                                     <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button class="btn btn-link text-danger btn-sm"
+                                                        <button type="submit" class="btn btn-link text-danger btn-sm"
                                                             onclick="return confirm('¿Seguro de eliminar este cubículo?')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
@@ -92,11 +81,9 @@
 @stop
 
 @section('css')
-    {{-- 6. Estilos de DataTables --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
-    {{-- 7. Bloque de estilos completo (tarjeta, tabla, botones) --}}
     <style>
         .dt-buttons .btn:not(:first-child) {
             margin-left: 5px !important;
@@ -113,7 +100,6 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
-        /* Estilos adaptados para #cubiculos */
         #cubiculos thead {
             background-color: #f8f9fa;
         }
@@ -130,15 +116,8 @@
             text-align: center;
             vertical-align: middle;
         }
-        .dt-buttons .btn {
-            border-radius: 0.5rem;
-        }
         .dataTables_filter input[type="search"] {
             width: 400px !important;
-        }
-        .dt-buttons .btn {
-            min-width: 105px;
-            text-align: center;
         }
         #cubiculos tbody .btn-link {
             border: none;
@@ -147,7 +126,7 @@
             padding: 0.25rem;
         }
         #cubiculos tbody .btn-link .fas {
-            font-size: 1.2rem; /* Tamaño de icono sutil */
+            font-size: 1.2rem;
         }
         #cubiculos tbody .btn-link.text-primary:hover { color: #0056b3 !important; }
         #cubiculos tbody .btn-link.text-danger:hover { color: #dc3545 !important; }
@@ -155,7 +134,6 @@
 @stop
 
 @section('js')
-    {{-- 8. Librerías JS de DataTables --}}
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
@@ -168,13 +146,6 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
     <script>
-        // Función para confirmar eliminación
-    function confirmarEliminacion(boton) {
-    if (confirm('¿Estás seguro de que deseas eliminar este cubículo? Esta acción no se puede deshacer.')) {
-        $(boton).closest('form').submit();
-    }
-    }
-    
     $(function() {
         var table = $('#cubiculos').DataTable({
             responsive: true,
@@ -184,7 +155,6 @@
             },
             dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
             buttons: [
-                //9. Bototnes de exportación con estilo unificado 
                 {
                     extend: 'excelHtml5',
                     text: '<i class="fas fa-file-excel"></i> Excel',
@@ -196,7 +166,7 @@
                     className: 'btn btn-danger btn-sm ms-2',
                     orientation: 'landscape',
                     pageSize: 'A4',
-                    title: 'Listado de Cubículos'
+                    title: 'Listado de Cubículos Virtuales'
                 },
                 {
                     extend: 'print',
@@ -205,5 +175,6 @@
                 }
             ]
         });
+    });
     </script>
 @stop

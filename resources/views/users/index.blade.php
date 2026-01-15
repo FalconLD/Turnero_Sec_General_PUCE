@@ -11,43 +11,55 @@
         <div class="row justify-content-center">
             <div class="col-md-11">
 
+                {{-- Mensajes de notificación --}}
+                @if (session('info'))
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> {{ session('info') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Listado de Usuarios</h3>
+                        <h3 class="card-title text-bold">Listado de Usuarios</h3>
                         <div class="card-tools">
-                            {{-- Solo quien puede crear ve el botón --}}
                             @can('usuarios.crear')
-                                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">Nuevo Usuario</a>
+                                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user-plus mr-1"></i> Nuevo Usuario
+                                </a>
                             @endcan
                         </div>
                     </div>
 
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="usuarios" class="table">
+                            {{-- Clase 'datatable-export' activa el script global y 'table-custom' el estilo global --}}
+                            <table id="usuarios" class="table table-custom datatable-export" data-page-title="Listado de Usuarios">
                                 <thead>
-                                    <tr> {{-- Agregué <tr> que faltaba por buenas prácticas --}}
+                                    <tr>
                                         <th>ID</th>
                                         <th>Nombre</th>
                                         <th>Email</th>
                                         <th>DNI</th>
                                         <th>Cubículos Asignados</th>
                                         <th>Roles</th>
-                                        <th>Acciones</th>
+                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($users as $usuario)
                                         <tr>
                                             <td>{{ $usuario->id }}</td>
-                                            <td>{{ $usuario->name }}</td>
+                                            <td class="font-weight-bold">{{ $usuario->name }}</td>
                                             <td>{{ $usuario->email }}</td>
                                             <td>{{ $usuario->DNI ?? 'N/A' }}</td>
                                             <td>
                                                 @if ($usuario->cubiculos->count() > 0)
-                                                    <ul class="mb-0 pl-3"> {{-- pl-3 para mejor indentación --}}
+                                                    <ul class="mb-0 pl-3">
                                                         @foreach ($usuario->cubiculos as $cub)
-                                                            <li>{{ $cub->nombre }} ({{ ucfirst($cub->tipo_atencion) }})</li>
+                                                            <li>{{ $cub->nombre }} <small class="text-muted">({{ ucfirst($cub->tipo_atencion) }})</small></li>
                                                         @endforeach
                                                     </ul>
                                                 @else
@@ -55,39 +67,34 @@
                                                 @endif
                                             </td>
 
-                                            {{-- LÓGICA DE ROLES --}}
                                             <td>
-                                                @if($usuario->roles->isNotEmpty())
-                                                    @foreach($usuario->roles as $rol)
-                                                        @php
-                                                            // Lógica de colores para los badges
-                                                            $badgeClass = 'secondary';
-                                                            $rolName = strtolower($rol->name);
-
-                                                            if(str_contains($rolName, 'admin')) $badgeClass = 'danger';     // Rojo
-                                                            elseif(str_contains($rolName, 'recepcion')) $badgeClass = 'warning'; // Amarillo
-                                                            elseif(str_contains($rolName, 'psicologo')) $badgeClass = 'info';    // Azul
-                                                        @endphp
-                                                        <span class="badge badge-{{ $badgeClass }}" style="font-size: 0.9rem;">
-                                                            {{ $rol->name }}
-                                                        </span>
-                                                    @endforeach
-                                                @else
+                                                @forelse($usuario->roles as $rol)
+                                                    @php
+                                                        $badgeClass = 'secondary';
+                                                        $rolName = strtolower($rol->name);
+                                                        if(str_contains($rolName, 'admin')) $badgeClass = 'danger';
+                                                        elseif(str_contains($rolName, 'recepcion')) $badgeClass = 'warning';
+                                                        elseif(str_contains($rolName, 'psicologo')) $badgeClass = 'info';
+                                                    @endphp
+                                                    <span class="badge badge-{{ $badgeClass }} shadow-sm" style="font-size: 0.85rem;">
+                                                        {{ $rol->name }}
+                                                    </span>
+                                                @empty
                                                     <span class="badge badge-light border text-muted">Sin Rol</span>
-                                                @endif
+                                                @endforelse
                                             </td>
 
-                                            <td>
+                                            <td class="text-center">
                                                 @can('usuarios.editar')
-                                                    <a href="{{ route('users.edit', $usuario) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                                                    <a href="{{ route('users.edit', $usuario) }}" class="btn btn-xs btn-default text-primary mx-1 shadow-sm" title="Editar">
                                                         <i class="fa fa-lg fa-fw fa-pen"></i>
                                                     </a>
                                                 @endcan
 
                                                 @can('usuarios.eliminar')
-                                                    <form action="{{ route('users.destroy', $usuario) }}" method="POST" style="display:inline">
+                                                    <form action="{{ route('users.destroy', $usuario) }}" method="POST" class="d-inline">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow-sm" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar este usuario?')">
                                                             <i class="fa fa-lg fa-fw fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -107,96 +114,11 @@
 @stop
 
 @section('css')
+    <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
-
-    <style>
-        .dt-buttons .btn:not(:first-child) {
-            margin-left: 5px !important;
-        }
-        .card {
-            border-radius: 1rem !important;
-            border: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.07);
-        }
-        .card-header {
-            border-top-left-radius: 1rem !important;
-            border-top-right-radius: 1rem !important;
-            background-color: #fff;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        #usuarios thead {
-            background-color: #f8f9fa;
-        }
-        #usuarios thead th {
-            color: #495057;
-            font-weight: 600;
-            border: none;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-        #usuarios td, #usuarios th {
-            border-left: none;
-            border-right: none;
-            vertical-align: middle; /* Alineación vertical centrada se ve mejor */
-        }
-        .dt-buttons .btn {
-            border-radius: 0.5rem;
-            min-width: 105px;
-            text-align: center;
-        }
-        .dataTables_filter input[type="search"] {
-            width: 400px !important;
-        }
-        #usuarios tbody .btn .fas {
-            font-size: 1.2rem; /* Ajusté un poco el tamaño para que no se vea gigante */
-        }
-    </style>
 @stop
 
 @section('js')
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-
-    <script>
-        $(function () {
-            var table = $('#usuarios').DataTable({
-                responsive: true,
-                autoWidth: false,
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-                },
-                dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm'
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: '<i class="fas fa-file-pdf"></i> PDF',
-                        className: 'btn btn-danger btn-sm ms-2',
-                        orientation: 'landscape',
-                        pageSize: 'A4',
-                        title: 'Listado de Usuarios'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i> Imprimir',
-                        className: 'btn btn-secondary btn-sm ms-2'
-                    }
-                ]
-            });
-        });
-    </script>
+    @include('partials.datatables-scripts')
 @stop

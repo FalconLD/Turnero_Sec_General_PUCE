@@ -12,6 +12,7 @@ class StudentRegistration extends Model
     protected $fillable = [
         'names',
         'cedula',
+        'banner_id',
         'edad',
         'fecha_nacimiento',
         'telefono',

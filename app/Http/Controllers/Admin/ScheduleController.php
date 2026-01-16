@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Schedule;
 use App\Models\ScheduleBreak;
 use App\Models\CubicleSchedule;
@@ -28,12 +29,12 @@ class ScheduleController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user(); 
+        $user = auth()->user();
         $query = Schedule::query();
 
         // --- FILTRO DE SEGURIDAD ---
         // Solo aplicamos restricción si NO es Super Admin
-        if (!$user->hasRole('Super Admin')) { 
+        if (!$user->hasRole('Super Admin')) {
             $misAreasIds = $user->operatingAreas->pluck('id');
             $query->whereHas('cubicles', function($q) use ($misAreasIds) {
                 $q->whereIn('operating_area_id', $misAreasIds);
@@ -43,7 +44,7 @@ class ScheduleController extends Controller
         // --- ORDENAMIENTO ---
         $sortBy = $request->get('sortBy', 'valid_from');
         $sortDesc = $request->get('sortDesc', 'false') === 'true';
-        
+
         if ($sortBy && Schema::hasColumn('schedules', $sortBy)) {
             $query->orderBy($sortBy, $sortDesc ? 'desc' : 'asc');
         } else {
@@ -81,7 +82,7 @@ class ScheduleController extends Controller
             $schedule->breaks_count = $schedule->breaks->count();
         });
 
-        return view('schedules.index', compact('schedules'));
+        return view('admin.schedules.index', compact('schedules'));
     }
 
     /**
@@ -91,7 +92,7 @@ class ScheduleController extends Controller
     {
         // Aquí podrías pasar cubículos disponibles para seleccionar
         $cubicles = Cubiculo::all();
-        return view('schedules.create', compact('cubicles'));
+        return view('admin.schedules.create', compact('cubicles'));
     }
 
     /**
@@ -171,7 +172,7 @@ class ScheduleController extends Controller
     {
         $schedule = Schedule::with(['cubicles', 'breaks'])->findOrFail($id);
         $cubicles = Cubiculo::all();
-        return view('schedules.edit', compact('schedule', 'cubicles'));
+        return view('admin.schedules.edit', compact('schedule', 'cubicles'));
     }
 
     /**
@@ -261,63 +262,77 @@ class ScheduleController extends Controller
             return back()->withErrors(['error' => 'Error al eliminar el horario: ' . $e->getMessage()]);
         }
     }
-    
-    public function generate($id)
+
+    /**
+     * Genera físicamente los registros en la tabla 'shifts'
+     */
+    public function generateShifts($id)
     {
+        // Cargamos el horario con sus relaciones
         $schedule = Schedule::with(['days', 'cubicles', 'breaks'])->findOrFail($id);
+
+        if ($schedule->days->isEmpty() || $schedule->cubicles->isEmpty()) {
+            return redirect()->back()->with('error', 'No se pueden generar turnos sin días o cubículos asignados.');
+        }
+
         $ahora = now();
         $turnosParaInsertar = [];
 
+        // Parámetros de tiempo corregidos según tus migraciones
+        $duracionTurno = (int) $schedule->attention_minutes; //
+        $intervaloEntreTurnos = (int) $schedule->break_minutes; //
+        $saltoTotal = $duracionTurno + $intervaloEntreTurnos;
+
         foreach ($schedule->days as $day) {
             foreach ($schedule->cubicles as $cubicle) {
-                $horaInicioSlot = Carbon::parse($day->date_day . ' ' . $schedule->start_time);
-                $horaFinJornada = Carbon::parse($day->date_day . ' ' . $schedule->end_time);
-                $duracionTurno = $schedule->duration; // minutos
+
+                // Iniciamos el reloj para este día y cubículo
+                $fechaLimpia = Carbon::parse($day->date_day)->format('Y-m-d');
+                $horaInicioSlot = Carbon::parse($fechaLimpia . ' ' . $schedule->start_time);
+                $horaFinJornada = Carbon::parse($fechaLimpia . ' ' . $schedule->end_time);
 
                 while ($horaInicioSlot->copy()->addMinutes($duracionTurno) <= $horaFinJornada) {
+
                     $horaFinSlot = $horaInicioSlot->copy()->addMinutes($duracionTurno);
 
-                    // 1. Verificar si este slot choca con algún descanso
+                    // Verificación de Descansos (Breaks) corregida
                     $enDescanso = false;
                     foreach ($schedule->breaks as $break) {
-                        $inicioBreak = Carbon::parse($day->date_day . ' ' . $break->start_time);
-                        $finBreak = Carbon::parse($day->date_day . ' ' . $break->end_time);
+                        $inicioBreak = Carbon::parse($fechaLimpia . ' ' . $break->start_break);
+                        $finBreak = Carbon::parse($fechaLimpia . ' ' . $break->end_break);
 
-                        // Si el turno se solapa con el descanso
                         if ($horaInicioSlot->lt($finBreak) && $horaFinSlot->gt($inicioBreak)) {
                             $enDescanso = true;
-                            // IMPORTANTE: Saltamos al final del descanso para continuar
-                            $horaInicioSlot = $finBreak->copy();
-                            break; 
+                            $horaInicioSlot = $finBreak->copy(); // Saltamos al final del break
+                            break;
                         }
                     }
 
-                    // 2. Si NO está en descanso, lo agregamos al array
-                    if (!$enDescanso) {
-                        $turnosParaInsertar[] = [
-                            'id_shift' => (string) \Illuminate\Support\Str::uuid(),
-                            'cubicle_shift' => $cubicle->id,
-                            'date_shift' => $day->date_day,
-                            'start_shift' => $horaInicioSlot->format('H:i:s'),
-                            'end_shift' => $horaFinSlot->format('H:i:s'),
-                            'status_shift' => 1,
-                            'created_at' => $ahora,
-                            'updated_at' => $ahora,
-                        ];
+                    if ($enDescanso) continue;
 
-                        // Avanzamos el tiempo para el siguiente turno
-                        $horaInicioSlot->addMinutes($duracionTurno);
-                    }
-                    
-                    // Si estaba en descanso, el tiempo ya se actualizó arriba con el $finBreak
-                    // por lo que el bucle continuará correctamente sin quedarse trabado.
+                    // Preparación del registro según la migración de shifts
+                    $turnosParaInsertar[] = [
+                        'id_shift'       => (string) \Illuminate\Support\Str::uuid(),
+                        'schedule_shift' => $schedule->id_hor,
+                        'cubicle_shift'  => $cubicle->id,
+                        'date_shift'     => $day->date_day,
+                        'start_shift'    => $horaInicioSlot->format('H:i:s'),
+                        'end_shift'      => $horaFinSlot->format('H:i:s'),
+                        'status_shift'   => 1, // 1 = Disponible
+                        'created_at'     => $ahora,
+                        'updated_at'     => $ahora,
+                    ];
+
+                    // Avanzamos sumando duración + intervalo
+                    $horaInicioSlot->addMinutes($saltoTotal);
                 }
             }
         }
 
-        // Inserción masiva para mayor velocidad
-        \App\Models\Shift::insert($turnosParaInsertar);
+        if (!empty($turnosParaInsertar)) {
+            \App\Models\Shift::insert($turnosParaInsertar);
+        }
 
-        return redirect()->back()->with('success', '¡Turnos generados exitosamente!');
+        return redirect()->route('schedules.index')->with('success', '¡Turnos generados exitosamente!');
     }
 }

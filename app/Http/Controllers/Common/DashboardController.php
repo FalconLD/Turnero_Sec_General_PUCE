@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Common;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -71,7 +72,7 @@ class DashboardController extends Controller
             ->get();
 
         // ---- Retornar vista ----
-        return view('dashboard.index', compact(
+        return view('common.dashboard.index', compact(
             'totalEstudiantes',
             'turnosPorDia',
             'turnosAtendidos',

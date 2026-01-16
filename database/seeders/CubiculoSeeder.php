@@ -9,27 +9,35 @@ class CubiculoSeeder extends Seeder
 {
     public function run(): void
     {
-        $cubiculos = [
-            [
-                'nombre' => 'Atención Virtual - Secretaría 1',
-                'tipo_atencion' => 'virtual',
-                'enlace_o_ubicacion' => 'https://teams.microsoft.com/l/meetup-join/ejemplo1',
-                'user_id' => 3, // Belén Salazar
-                'operating_area_id' => 11, // Área de Aprendizaje
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre' => 'Atención Virtual - Secretaría 2',
-                'tipo_atencion' => 'virtual',
-                'enlace_o_ubicacion' => 'https://teams.microsoft.com/l/meetup-join/ejemplo2',
-                'user_id' => 4, // Daniel Vinueza
-                'operating_area_id' => 11,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ];
+        // Obtenemos todas las asignaciones de operadores a áreas para crear un cubículo por cada una
+        $assignments = DB::table('area_user')->get();
+        $data = [];
+        $counter = 1;
 
-        DB::table('cubiculos')->insert($cubiculos);
+        foreach ($assignments as $assignment) {
+
+            $data[] = [
+                // Mantenemos el formato "C -001"
+                'nombre' => 'C -' . str_pad($counter, 3, '0', STR_PAD_LEFT),
+
+                // Forzamos a que siempre sea virtual según tu requerimiento
+                'tipo_atencion' => 'virtual',
+
+                // Generamos un enlace de Teams único por cada cubículo
+                'enlace_o_ubicacion' => 'https://teams.microsoft.com/l/meetup-join/example-session-' . $counter,
+
+                'user_id' => $assignment->user_id,
+                'operating_area_id' => $assignment->operating_area_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $counter++;
+        }
+
+        // Inserción masiva en la base de datos
+        if (!empty($data)) {
+            DB::table('cubiculos')->insert($data);
+        }
     }
 }

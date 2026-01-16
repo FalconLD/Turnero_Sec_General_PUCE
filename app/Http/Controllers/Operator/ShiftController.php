@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Operator;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\NewShift;
 use App\Models\Schedule;
 use App\Models\Shift;
@@ -110,7 +111,7 @@ class ShiftController extends Controller
                        ->orderBy("shifts.start_shift", "asc")
                        ->get();
 
-        return view('shifts.index', ['shifts' => $shifts]);
+        return view('operator.shifts.index', ['shifts' => $shifts]);
     }
 
     /**

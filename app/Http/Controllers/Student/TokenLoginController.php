@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
@@ -14,7 +14,7 @@ class TokenLoginController extends Controller
         return view('auth.token-login');
     }
 
-    
+
     public function login(Request $request)
     {
         $request->validate([
@@ -46,8 +46,8 @@ class TokenLoginController extends Controller
                 'facultad' => null,
                 'carrera' =>null,
                 'nivel' => null,
-                'banner_id'    => $info['idbanner'], 
-                'plan_estudio' => $info['plan_estudio'] ?? null, 
+                'banner_id'    => $info['idbanner'],
+                'plan_estudio' => $info['plan_estudio'] ?? null,
                 'nivel_instruccion' => null,
                 'beca_san_ignacio' => null,
                 'forma_pago' => null,
@@ -55,7 +55,7 @@ class TokenLoginController extends Controller
                 'fecha_nacimiento' => null,
                 'telefono' => null,
                 'direccion' => null,
-                'motivo' => null, 
+                'motivo' => null,
                 'acepta_terminos' => false,
             ]
         );
@@ -84,10 +84,10 @@ class TokenLoginController extends Controller
         return redirect()->route('token.login.form');
     }
 
-    
+
     // public function loginWithToken($token)
     // {
-        
+
     // // // 🔧 MODO PRUEBA
     // session([
     //     'student_logged_in' => true,
@@ -142,7 +142,7 @@ public function loginWithToken($token)
             'facultad'     => $facultad,
             'carrera'      => $carrera,
             'acepta_terminos' => false, // Valor inicial por defecto
-            'edad'              => null, 
+            'edad'              => null,
             'nivel'             => null,
             'nivel_instruccion' => null,
             'beca_san_ignacio'  => null,
@@ -151,7 +151,6 @@ public function loginWithToken($token)
             'telefono'          => null,
             'direccion'         => null,
             'motivo'            => null,
-            'acepta_terminos'   => false,
         ]
     );
 

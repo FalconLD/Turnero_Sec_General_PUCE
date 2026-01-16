@@ -19,7 +19,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Retorna la vista y le pasa los datos del usuario
-        return view('profile.edit', ['user' => $user]);
+        return view('common.profile.edit', ['user' => $user]);
     }
 
     /**

@@ -23,7 +23,7 @@ class DayController extends Controller
     public function create($scheduleId)
     {
         $schedule = Schedule::findOrFail($scheduleId);
-        return view('days.create', compact('schedule'));
+        return view('admin.days.create', compact('schedule'));
     }
 
     public function edit($scheduleId)
@@ -33,7 +33,7 @@ class DayController extends Controller
             return Carbon::parse($date)->format('Y-m-d');
         })->toArray();
 
-        return view('days.edit', compact('schedule', 'existingDays'));
+        return view('admin.days.edit', compact('schedule', 'existingDays'));
     }
 
     /**

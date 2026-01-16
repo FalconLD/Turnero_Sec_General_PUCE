@@ -82,7 +82,7 @@ class ScheduleController extends Controller
             $schedule->breaks_count = $schedule->breaks->count();
         });
 
-        return view('schedules.index', compact('schedules'));
+        return view('admin.schedules.index', compact('schedules'));
     }
 
     /**
@@ -92,7 +92,7 @@ class ScheduleController extends Controller
     {
         // Aquí podrías pasar cubículos disponibles para seleccionar
         $cubicles = Cubiculo::all();
-        return view('schedules.create', compact('cubicles'));
+        return view('admin.schedules.create', compact('cubicles'));
     }
 
     /**
@@ -172,7 +172,7 @@ class ScheduleController extends Controller
     {
         $schedule = Schedule::with(['cubicles', 'breaks'])->findOrFail($id);
         $cubicles = Cubiculo::all();
-        return view('schedules.edit', compact('schedule', 'cubicles'));
+        return view('admin.schedules.edit', compact('schedule', 'cubicles'));
     }
 
     /**

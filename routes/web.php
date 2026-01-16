@@ -175,7 +175,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     });
 
     Route::middleware(['can:reportes.ver'])->group(function () {
-        Route::get('/encuesta', fn() => view('encuesta.index'))->name('encuesta.index');
+        Route::get('/encuesta', fn() => view('common.encuesta.index'))->name('encuesta.index');
         Route::get('/auditorias', fn() => view('auditoria.index'))->name('auditoria.index');
     });
 });

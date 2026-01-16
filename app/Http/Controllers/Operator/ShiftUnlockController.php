@@ -18,7 +18,7 @@ class ShiftUnlockController extends Controller
     // Mostrar formulario de búsqueda
     public function index()
     {
-        return view('shift_unlock.search');
+        return view('operator.shift_unlock.search');
     }
 
     // Buscar cédula en shifts
@@ -38,7 +38,7 @@ class ShiftUnlockController extends Controller
     // Traer el estudiante (puede no existir)
     $student = StudentRegistration::where('cedula', $request->cedula)->first();
 
-    return view('shift_unlock.result', [
+    return view('operator.shift_unlock.result', [
         'shift' => $shift,
         'student' => $student
     ]);

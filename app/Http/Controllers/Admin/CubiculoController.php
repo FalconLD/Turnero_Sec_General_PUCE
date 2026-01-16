@@ -40,7 +40,7 @@ class CubiculoController extends Controller
             ->get();
     }
 
-    return view('cubiculos.index', compact('cubiculos'));
+    return view('admin.cubiculos.index', compact('cubiculos'));
 }
 
     /**
@@ -54,7 +54,7 @@ class CubiculoController extends Controller
         // El Super Usuario necesita ver esto inicialmente vacío o con todas las áreas
         $areas = OperatingArea::all();
 
-        return view('cubiculos.create', compact('users', 'areas'));
+        return view('admin.cubiculos.create', compact('users', 'areas'));
     }
     public function store(StoreCubiculoRequest $request)
     {
@@ -126,7 +126,7 @@ class CubiculoController extends Controller
         $numero  = (count($partes) === 2) ? $partes[1] : $cubiculo->nombre;
 
         // 5. Retornamos la vista con todas las variables necesarias
-        return view('cubiculos.edit', compact('cubiculo', 'users', 'areas', 'prefijo', 'numero'));
+        return view('admin.cubiculos.edit', compact('cubiculo', 'users', 'areas', 'prefijo', 'numero'));
     }
     /**
      * Update the specified resource in storage.

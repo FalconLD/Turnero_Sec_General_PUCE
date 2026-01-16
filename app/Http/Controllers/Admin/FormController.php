@@ -14,7 +14,7 @@ class FormController extends Controller
     public function index()
     {
         $forms = Form::all();
-        return view('forms.index', compact('forms'));
+        return view('admin.forms.index', compact('forms'));
     }
 
     /**
@@ -22,7 +22,7 @@ class FormController extends Controller
      */
     public function create()
     {
-        return view('forms.create');
+        return view('admin.forms.create');
     }
 
     /**
@@ -56,7 +56,7 @@ class FormController extends Controller
      */
     public function edit(Form $form)
     {
-        return view('forms.edit', compact('form'));
+        return view('admin.forms.edit', compact('form'));
     }
 
     /**

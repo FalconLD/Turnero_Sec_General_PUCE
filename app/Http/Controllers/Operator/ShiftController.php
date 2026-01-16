@@ -111,7 +111,7 @@ class ShiftController extends Controller
                        ->orderBy("shifts.start_shift", "asc")
                        ->get();
 
-        return view('shifts.index', ['shifts' => $shifts]);
+        return view('operator.shifts.index', ['shifts' => $shifts]);
     }
 
     /**

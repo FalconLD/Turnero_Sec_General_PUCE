@@ -72,7 +72,7 @@ class DashboardController extends Controller
             ->get();
 
         // ---- Retornar vista ----
-        return view('dashboard.index', compact(
+        return view('common.dashboard.index', compact(
             'totalEstudiantes',
             'turnosPorDia',
             'turnosAtendidos',

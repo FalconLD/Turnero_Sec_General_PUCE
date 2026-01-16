@@ -11,12 +11,12 @@ class ParameterController extends Controller
     public function index()
     {
         $parameters = Parameter::all();
-        return view('parameters.index', compact('parameters'));
+        return view('admin.parameters.index', compact('parameters'));
     }
 
     public function create()
     {
-        return view('parameters.create');
+        return view('admin.parameters.create');
     }
 
     public function store(Request $request)
@@ -43,7 +43,7 @@ class ParameterController extends Controller
     public function edit($id)
     {
         $parameter = Parameter::findOrFail($id);
-        return view('parameters.edit', compact('parameter'));
+        return view('admin.parameters.edit', compact('parameter'));
     }
 
     public function update(Request $request, $id)

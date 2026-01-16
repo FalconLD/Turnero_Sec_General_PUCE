@@ -53,6 +53,6 @@ class AttentionController extends Controller
             ->whereIn('operating_area_id', $misAreasIds)
             ->get();
 
-        return view('attention.index', compact('calendarEvents', 'cubiculos'));
+        return view('operator.attention.index', compact('calendarEvents', 'cubiculos'));
     }
 }

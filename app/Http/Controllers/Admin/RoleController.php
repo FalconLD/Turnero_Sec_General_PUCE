@@ -13,7 +13,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::withCount('users')->get();
-        return view('roles.index', compact('roles'));
+        return view('admin.roles.index', compact('roles'));
     }
 
     // 2. Mostrar el formulario para EDITAR un rol (AQUÍ ESTÁ LA ESTRATEGIA UX)
@@ -31,7 +31,7 @@ class RoleController extends Controller
             return explode('.', $perm->name)[0];
         });
 
-        return view('roles.edit', compact('role', 'permissionGroups'));
+        return view('admin.roles.edit', compact('role', 'permissionGroups'));
     }
 
     // 3. Guardar los cambios (Actualizar permisos)
@@ -55,7 +55,7 @@ class RoleController extends Controller
             return explode('.', $perm->name)[0];
         });
 
-        return view('roles.create', compact('permissionGroups'));
+        return view('admin.roles.create', compact('permissionGroups'));
     }
 
     // 5. Guardar el NUEVO rol en la BD

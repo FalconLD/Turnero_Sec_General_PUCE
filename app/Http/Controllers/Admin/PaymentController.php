@@ -74,7 +74,7 @@ class PaymentController extends Controller
         $payments = $query->paginate($perPage)->withQueryString();
 
         // --- 7. ENVIAR DATOS A LA VISTA ---
-        return view('payments.index', [
+        return view('admin.payments.index', [
             'payments' => $payments,
             'currentStatus' => $currentStatus,
             'perPage' => $perPage, 

@@ -7,14 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
 use App\Models\Parameter;
 use App\Models\Shift;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentRegistered;
 use App\Models\Schedule;
-use App\Models\PayStudent;
 use Carbon\Carbon;
 use App\Models\Faculty;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -162,18 +159,17 @@ class StudentRegistrationController extends Controller
         $student->telefono = $request->input('telefono');
         $student->direccion = $request->input('direccion');
         $student->fecha_nacimiento = $request->input('fecha_nacimiento');
-        
+
         // Otros campos necesarios
         $student->nivel_instruccion = $request->input('nivel_instruccion');
         $student->motivo = $request->input('motivo');
-        $student->forma_pago = $request->input('forma_pago');
 
         // 3. Rescatar datos de sesión (Garantiza que Facultad y Carrera se guarden)
         $student->banner_id = session('student_banner_id');
         $student->plan_estudio = session('student_plan_estudio');
         $student->facultad     = session('student_facultad') ?? $student->facultad;
         $student->carrera      = session('student_carrera') ?? $student->carrera;
-        
+
         $student->tomado = 1;
 
         // 4. GUARDADO Y REDIRECCIÓN
@@ -181,7 +177,7 @@ class StudentRegistrationController extends Controller
         // Volvemos a la misma página, activando el paso 1 (Datos) mediante el 'step'
         return redirect()->route('student.personal')
             ->with('success', 'Datos guardados correctamente.')
-            ->with('step', 1); 
+            ->with('step', 1);
     }
 
     // Si llega aquí es porque hubo un error al guardar

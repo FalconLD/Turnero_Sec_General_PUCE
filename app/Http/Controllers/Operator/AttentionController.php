@@ -14,42 +14,42 @@ class AttentionController extends Controller
 {
     public function index()
     {
-        $user = auth()->user(); // 1. Obtenemos al usuario logueado
-
-        // 2. Obtenemos los IDs de las áreas operativas que tiene asignadas
+        $user = auth()->user();
         $misAreasIds = $user->operatingAreas->pluck('id');
 
-        // 3. Consultamos los turnos filtrando por las áreas del usuario
-        $bookedShifts = Shift::join("cubiculos", "cubiculos.id", "=", "shifts.cubicle_shift")
-            ->join("student_registrations", "student_registrations.cedula", "=", "shifts.person_shift")
+        // Traemos TODOS los turnos de las áreas del operador
+        $shifts = Shift::join("cubiculos", "cubiculos.id", "=", "shifts.cubicle_shift")
+            ->leftJoin("student_registrations", "student_registrations.cedula", "=", "shifts.person_shift")
             ->select(
+                "shifts.id_shift",
                 "shifts.date_shift",
                 "shifts.start_shift",
                 "shifts.end_shift",
+                "shifts.status_shift", // Importante para el color
                 "cubiculos.nombre as cubicle_name",
                 "student_registrations.names as student_name"
             )
-            ->whereNotNull('shifts.person_shift')
-            // FILTRO CLAVE: Solo turnos de cubículos que pertenecen a mis áreas
             ->whereIn('cubiculos.operating_area_id', $misAreasIds)
             ->get();
 
-        // 4. Formateamos los datos para FullCalendar (Tu lógica actual se mantiene)
-        $calendarEvents = $bookedShifts->map(function ($shift) {
-            $start = $shift->date_shift . 'T' . $shift->start_shift;
-            $end = $shift->date_shift . 'T' . $shift->end_shift;
-
+        $calendarEvents = $shifts->map(function ($shift) {
+            $estaOcupado = ($shift->status_shift == 0);
+            
             return [
-                'title' => $shift->cubicle_name . ': ' . $shift->student_name,
-                'start' => $start,
-                'end'   => $end,
-                'backgroundColor' => '#3788d8', // Opcional: Color para eventos
+                'id'    => $shift->id_shift,
+                'title' => $estaOcupado 
+                            ? "🚫 " . $shift->cubicle_name . ": " . ($shift->student_name ?? 'Ocupado') 
+                            : "✅ " . $shift->cubicle_name . ": Libre",
+                'start' => $shift->date_shift . 'T' . $shift->start_shift,
+                'end'   => $shift->date_shift . 'T' . $shift->end_shift,
+                'backgroundColor' => $estaOcupado ? '#dc3545' : '#28a745', // Rojo ocupado, Verde libre
+                'borderColor'     => $estaOcupado ? '#bd2130' : '#1e7e34',
             ];
         })->toArray();
 
-        // 5. Filtramos la lista de cubículos laterales (Equipo)
-        // Solo los cubículos que pertenecen a las áreas del usuario
-        $cubiculos = Cubiculo::with('users')
+        $cubiculos = Cubiculo::with(['users', 'shifts' => function($query) {
+                $query->where('date_shift', date('Y-m-d'));
+            }])
             ->whereIn('operating_area_id', $misAreasIds)
             ->get();
 

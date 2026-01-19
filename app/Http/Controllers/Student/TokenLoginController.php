@@ -161,7 +161,8 @@ public function loginWithToken($token)
         'student_id'        => $student->id,
         'student_cedula'    => $student->cedula,
         'student_name'      => $student->names,
-        'student_plan_estudio' => $planEstudio,
+        'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
+        'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
     ]);
 
     // 5. Redirigir al primer paso del formulario de datos personales

@@ -45,8 +45,7 @@
                     <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
                 </div>
 
-                <form action="{{ route('student.finish') }}" method="POST" enctype="multipart/form-data" id="multiStepForm">
-                    @csrf
+                <form id="student-registration-form" method="POST" action="{{ route('student.finish') }}" enctype="multipart/form-data">                    @csrf
                     {{-- Paso 1: Términos --}}
                     <div class="form-step">
                         <h5 class="text-secondary mb-3">Términos y Condiciones</h5>
@@ -169,12 +168,8 @@
                                         <h6 class="fw-bold text-secondary mb-3">Configuración de cita</h6>
                                         <div class="mb-3">
                                             <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
-                                            <select id="modalidadSelect" class="form-select shadow-sm" required>
-                                                <option value="" selected disabled>Seleccione...</option>
-                                                <option value="virtual">Virtual</option>
-                                            </select>
+                                            <input type="text" id="modalidadSelect" name="modalidad" class="form-control shadow-sm bg-light" value="Virtual" readonly>
                                         </div>
-
                                         <div class="mb-3">
                                             <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
                                             <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
@@ -654,51 +649,7 @@
                         }
                     });
                 });
-/*
-                // 2. Cuando cambia "Facultad"
-                facultadSelect.addEventListener('change', async (e) => {
-                    const facultadVal = e.target.value;
-                    const nivelVal = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
 
-                    if (!facultadVal || !nivelVal) return;
-
-                    // A) Resetear y deshabilitar el select de carrera
-                    resetSelect(carreraSelect, 'Cargando carreras...');
-
-                    // B) Buscar carreras vía AJAX
-                    try {
-                        // Usamos la ruta que creamos en web.php
-                        const response = await fetch(`{{ route('get.programs') }}?nivel_instruccion=${nivelVal}&facultad=${facultadVal}`);
-                        if (!response.ok) throw new Error('Error al cargar carreras');
-                        const programs = await response.json();
-
-                        // C) Poblar el select de carreras
-                        populateSelect(carreraSelect, programs, 'programa_desc', 'programa_desc', 'Seleccione una carrera...');
-                    } catch (error) {
-                        console.error(error);
-                        resetSelect(carreraSelect, 'Error al cargar carreras');
-                    }
-                });
-
-                becaRadios.forEach(r => r.addEventListener('change', actualizarPago));
-
-
-                // === PAGO Y COMPROBANTE ===
-                const tipoPagoSelect = document.getElementById('tipo-pago');
-                const comprobanteContainer = document.getElementById('comprobante-container');
-                const pagoEfectivoNote = document.getElementById('pago-efectivo-note');
-
-                tipoPagoSelect.addEventListener('change', () => {
-                    const val = tipoPagoSelect.value;
-
-                    // Debe coincidir EXACTO con los valores de tu enum
-                    comprobanteContainer.style.display =
-                        (val === 'DeUna' || val === 'Transferencia') ? 'block' : 'none';
-
-                    pagoEfectivoNote.style.display = val === 'Efectivo' ? 'block' : 'none';
-                });
-
-*/
                 // === AGENDAMIENTO ===
                 const fechaInput = document.getElementById('fechaSeleccionada');
                 const modalidadSelect = document.getElementById('modalidadSelect');

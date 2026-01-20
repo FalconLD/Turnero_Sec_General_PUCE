@@ -407,3 +407,4 @@ class StudentRegistrationController extends Controller
         }
     }
 }
+

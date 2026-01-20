@@ -62,7 +62,7 @@ Auth::routes(['register' => false]);
 
 // APIs de Turnos
 Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('api.shifts');
-Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])->name('api.shifts.modalidad');
+// Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])->name('api.shifts.modalidad');
 
 // Acceso mediante Token
 Route::controller(TokenLoginController::class)->group(function () {

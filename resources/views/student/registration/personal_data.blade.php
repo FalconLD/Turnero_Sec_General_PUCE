@@ -168,14 +168,8 @@
                                         <h6 class="fw-bold text-secondary mb-3">Configuración de cita</h6>
                                         <div class="mb-3">
                                             <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
-                                            <input type="text" 
-                                                id="modalidadSelect" 
-                                                name="modalidad" 
-                                                class="form-control shadow-sm bg-light" 
-                                                value="Virtual" 
-                                                readonly>
+                                            <input type="text" id="modalidadSelect" name="modalidad" class="form-control shadow-sm bg-light" value="Virtual" readonly>
                                         </div>
-
                                         <div class="mb-3">
                                             <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
                                             <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"

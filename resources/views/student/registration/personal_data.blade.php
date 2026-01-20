@@ -410,395 +410,271 @@
     });
     </script>
     
+
     <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const steps = document.querySelectorAll('.form-step');
-                const nextBtn = document.getElementById('nextBtn');
-                const prevBtn = document.getElementById('prevBtn');
-                const submitBtn = document.getElementById('submitBtn');
-                const aceptaTerminos = document.getElementById('acepta_terminos');
-                const aceptaPoliticas = document.getElementById('acepta_politicas');
+    document.addEventListener('DOMContentLoaded', function() {
+        const steps = document.querySelectorAll('.form-step');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const aceptaTerminos = document.getElementById('acepta_terminos');
+        const aceptaPoliticas = document.getElementById('acepta_politicas');
+        const stepIndicators = document.querySelectorAll('.step-item');
+        const inputTelefonoSuffix = document.getElementById('inputTelefonoSuffix');
+        const inputTelefonoFull = document.getElementById('inputTelefono');
 
-                const stepIndicators = document.querySelectorAll('.step-item');
-                const inputTelefonoSuffix = document.getElementById('inputTelefonoSuffix');
-                const inputTelefonoFull = document.getElementById('inputTelefono');
+        let currentStep = 0;
 
-                let currentStep = 0;
+        function updateStepIndicator() {
+            stepIndicators.forEach((s, i) => s.classList.toggle('active', i === currentStep));
+        }
 
-                function updateStepIndicator() {
-                    stepIndicators.forEach((s, i) => s.classList.toggle('active', i === currentStep));
-                }
+        function showStep(step) {
+            steps.forEach((s, i) => s.style.display = (i === step) ? 'block' : 'none');
+            prevBtn.style.display = step === 0 ? 'none' : 'inline-block';
+            nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
+            submitBtn.style.display = step === steps.length - 1 ? 'inline-block' : 'none';
+            document.getElementById('progressBar').style.width = ((step + 1) / steps.length) * 100 + '%';
+            updateStepIndicator();
+            if (step === steps.length - 1) populateConfirmation();
+        }
 
-                function showStep(step) {
-                    steps.forEach((s, i) => s.style.display = (i === step) ? 'block' : 'none');
-                    prevBtn.style.display = step === 0 ? 'none' : 'inline-block';
-                    nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
-                    submitBtn.style.display = step === steps.length - 1 ? 'inline-block' : 'none';
-                    document.getElementById('progressBar').style.width = ((step + 1) / steps.length) * 100 + '%';
-                    updateStepIndicator();
-                    if (step === steps.length - 1) populateConfirmation();
-                }
-
-                    function validarChecks() {
+        function validarChecks() {
             nextBtn.disabled = !(aceptaTerminos.checked && aceptaPoliticas.checked);
         }
 
-            // Eventos de ambos checks
-            aceptaTerminos.addEventListener('change', validarChecks);
-            aceptaPoliticas.addEventListener('change', validarChecks);
+        // Eventos de ambos checks
+        aceptaTerminos.addEventListener('change', validarChecks);
+        aceptaPoliticas.addEventListener('change', validarChecks);
 
-            // Botón desactivado al inicio
-            nextBtn.disabled = true;
+        // Botón desactivado al inicio
+        nextBtn.disabled = true;
 
-                aceptaTerminos.addEventListener('change', () => nextBtn.disabled = !aceptaTerminos.checked);
+        // ✅ Botón SIGUIENTE con todas las validaciones
+        nextBtn.onclick = async () => {
+            if (!validateCurrentStep()) {
+                return;
+            }
+            
+            if (currentStep === 0) {
+                if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+                    alert("Debes aceptar ambos términos para continuar.");
+                    return;
+                }
+            }
+            
+            if (currentStep === 1) {
+                currentStep++;
+                showStep(currentStep);
+                return;
+            }
 
+            // ✅ Validación para el paso de agendamiento (paso 3 = índice 2)
+            if (currentStep === 2) {
+                const turnoSeleccionado = turnoIdInput.value;
+                
+                console.log('🔍 Validando turno seleccionado:', turnoSeleccionado);
+                
+                if (!turnoSeleccionado) {
+                    alert('Por favor seleccione un turno antes de continuar.');
+                    return;
+                }
+            }
 
-                // ✅ MODIFICADO: validación AJAX en el paso 2
-                nextBtn.onclick = async () => {
-                    // 1. VALIDAMOS LOS CAMPOS REQUERIDOS PRIMERO
-                    // Esto ahora se ejecutará en TODOS los pasos, incluido el Paso 2 (Datos).
-                    if (!validateCurrentStep()) {
-                        return; // Si la validación (edad, teléfono, etc.) falla, no avanza.
+            currentStep++;
+            showStep(currentStep);
+        };
+
+        // Botón ANTERIOR
+        prevBtn.onclick = () => { 
+            currentStep--; 
+            showStep(currentStep); 
+        };
+
+        // === CONTROL DE TELÉFONO COMBINADO ===
+        if (inputTelefonoSuffix && inputTelefonoFull) {
+            function actualizarTelefonoCompleto() {
+                inputTelefonoFull.value = '09' + inputTelefonoSuffix.value;
+            }
+            inputTelefonoSuffix.addEventListener('input', actualizarTelefonoCompleto);
+            actualizarTelefonoCompleto();
+        }
+
+        // === VALIDACIÓN DE CAMPOS REQUERIDOS ===
+        function validateCurrentStep() {
+            const step = steps[currentStep];
+            const requireds = step.querySelectorAll('[required]');
+
+            for (let el of requireds) {
+                if (el.type === 'radio') {
+                    const name = el.name;
+                    if (!step.querySelector(`input[name="${name}"]:checked`)) {
+                        el.focus();
+                        return false;
                     }
+                } else if (!el.value || el.value.trim() === '') {
+                    el.focus();
+                    return false;
+                }
+            }
 
-                    // 2. SI LA VALIDACIÓN BÁSICA PASA, MANEJAMOS LA LÓGICA ESPECIAL DE CADA PASO
-                    // Lógica especial para Paso 1 (Términos)
-                    if (currentStep === 0) {
-                    if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
-                                alert("Debes aceptar ambos términos para continuar.");
-                                return;
-                            }
-                    }
+            if (currentStep === 0) {
+                if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
+                    return false;
+                }
+            }
 
-                    // ✅ Caso especial: paso 2 (índice 1)
-                    // Este bloque ahora SÓLO se ejecuta si los campos del Paso 2 SON VÁLIDOS.
-                    if (currentStep === 1) {
-                        currentStep++;
-                        showStep(currentStep);
+            return true;
+        }
+
+        // === AGENDAMIENTO ===
+        const fechaInput = document.getElementById('fechaSeleccionada');
+        const turnosContainer = document.getElementById('turnosContainer');
+        const turnoIdInput = document.getElementById('turno_id');
+        const dateShiftInput = document.getElementById('date_shift');
+        const shiftTimeInput = document.getElementById('shift_time');
+        const modalidadShiftInput = document.getElementById('modalidad_shift');
+
+        function cargarTurnos() {
+            const fecha = fechaInput.value;
+
+            if (!fecha) {
+                turnosContainer.innerHTML = '<div class="text-muted text-center"><em>Seleccione una fecha...</em></div>';
+                return;
+            }
+
+            turnoIdInput.value = '';
+            turnosContainer.innerHTML = '<p class="text-center text-muted"><i class="bi bi-hourglass-split"></i> Cargando turnos...</p>';
+
+            console.log('🔍 Cargando turnos para fecha:', fecha);
+
+            fetch(`/shifts/${fecha}`)
+                .then(res => {
+                    console.log('📡 Response status:', res.status);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('📦 Turnos recibidos:', data);
+                    
+                    turnosContainer.innerHTML = '';
+
+                    if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                        turnosContainer.innerHTML = `
+                            <div class="alert alert-warning text-center w-100">
+                                <i class="bi bi-exclamation-triangle"></i><br>
+                                No hay turnos disponibles para esta fecha.
+                            </div>
+                        `;
                         return;
                     }
 
-
-                    currentStep++;
-                    showStep(currentStep);
-                };
-
-                // === CONTROL DE TELÉFONO COMBINADO (Input Group) ===
-                if (inputTelefonoSuffix && inputTelefonoFull) {
-
-                    // Función para actualizar el campo oculto
-                    function actualizarTelefonoCompleto() {
-                        inputTelefonoFull.value = '09' + inputTelefonoSuffix.value;
-                    }
-
-                    // Actualizar al escribir
-                    inputTelefonoSuffix.addEventListener('input', actualizarTelefonoCompleto);
-
-                    // Actualizar por si la página se recarga con datos (old data)
-                    actualizarTelefonoCompleto();
-                }
-
-                    prevBtn.onclick = () => { currentStep--; showStep(currentStep); };
-
-
-
-                function validateCurrentStep() {
-                    const step = steps[currentStep];
-                    const requireds = step.querySelectorAll('[required]');
-
-                    // Validación normal de campos requeridos
-                    for (let el of requireds) {
-                        if (el.type === 'radio') {
-                            const name = el.name;
-                            if (!step.querySelector(`input[name="${name}"]:checked`)) {
-                                el.focus();
-                                return false;
-                            }
-                        } else if (!el.value || el.value.trim() === '') {
-                            el.focus();
-                            return false;
-                        }
-                    }
-
-                    // 🚨 Validación adicional SOLO en el paso 0 (el de los términos)
-                    if (currentStep === 0) {
-                        const aceptaTerminos = document.getElementById('acepta_terminos');
-                        const aceptaPoliticas = document.getElementById('acepta_politicas');
-
-                        if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-
-
-                // === LÓGICA NIVEL / BECA / PAGO ===
-                const nivelRadios = document.querySelectorAll('input[name="nivel_instruccion"]');
-
-                // Contenedores dinámicos
-                const becaPreguntaContainer = document.getElementById('beca_pregunta_container');
-                const nivelSemestreContainer = document.getElementById('nivel_semestre_container');
-                const nivelSemestreSelect = document.getElementById('nivel_semestre_select');
-                const becaRadios = document.querySelectorAll('input[name="beca_san_ignacio"]');
-                const mensajePago = document.getElementById('mensaje_pago');
-
-                // Selects dinámicos
-                const facultadSelect = document.getElementById('facultad_select');
-                const carreraSelect = document.getElementById('carrera_select');
-
-                // ---Helper para poblar selects ---
-                function populateSelect(selectElement, items, valueField, textField, defaultOptionText) {
-                    selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
-                    items.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item[valueField];
-                        option.textContent = item[textField];
-                        selectElement.appendChild(option);
-                    });
-                    selectElement.disabled = false;
-                }
-
-                // ---Helper para resetear selects ---
-                function resetSelect(selectElement, defaultOptionText) {
-                    selectElement.innerHTML = `<option value="" selected disabled>${defaultOptionText}</option>`;
-                    selectElement.disabled = true;
-                }
-
-                // ---actualizarPago ---
-                function actualizarPago() {
-                    const nivelSeleccionado = document.querySelector('input[name="nivel_instruccion"]:checked')?.value;
-                    const becaSeleccionada = document.querySelector('input[name="beca_san_ignacio"]:checked')?.value;
-
-                    if (!nivelSeleccionado) return;
-
-                    // --- GRUPO 1: Grado y Tec (Muestran beca y nivel de semestre) ---
-                    if (nivelSeleccionado === 'grado' || nivelSeleccionado === 'tec') {
-
-                        // Muestra Beca y Nivel(semestre)
-                        if (becaPreguntaContainer) becaPreguntaContainer.style.display = "block";
-                        if (nivelSemestreContainer) nivelSemestreContainer.style.display = "block";
-
-                        // Añade 'required' a los campos visibles
-                        nivelSemestreSelect.required = true;
-                        document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = true);
-
-                        // Lógica de pago (Asumiendo que 'Tec' cuesta igual que 'Grado')
-                        if (becaSeleccionada === 'si') {
-                            mensajePago.textContent = "Pago de $0.50 (Atención Secretaria Única - APSU con beca)";
-                        } else if (becaSeleccionada === 'no') {
-                            mensajePago.textContent = "Pago de $2.50 (Atención Secretaria Única - APSU)";
-                        } else {
-                            mensajePago.textContent = "Seleccione si cuenta con beca para mostrar el valor a pagar.";
-                        }
-
-                    // --- GRUPO 2: Posgrado y Especialización (Ocultan todo) ---
-                    } else if (nivelSeleccionado === 'posgrado' || nivelSeleccionado === 'especializacion') {
-
-                        // Oculta Beca y Nivel(semestre)
-                        if (becaPreguntaContainer) becaPreguntaContainer.style.display = "none";
-                        if (nivelSemestreContainer) nivelSemestreContainer.style.display = "none";
-
-                        // Quita 'required' de los campos ocultos
-                        nivelSemestreSelect.required = false;
-                        document.querySelectorAll('input[name="beca_san_ignacio"]').forEach(r => r.required = false);
-
-                        // Selecciona automáticamente "No" en la beca (lógica de backend)
-                        if (document.getElementById('beca_no')) {
-                            document.getElementById('beca_no').checked = true;
-                        }
-
-                        // Lógica de pago (Asumiendo que 'Especialización' cuesta igual que 'Posgrado')
-                        mensajePago.textContent = "Pago de $7.50 (Atención Secretaria Única - APSU)";
-
-                    } else {
-                        mensajePago.textContent = "";
-                    }
-
-                    mensajePago.classList.add("fs-5", "text-success", "mt-3");
-                }
-
-
-
-                // --- NUEVOS EVENT LISTENERS (AJAX) ---
-                // 1. Cuando cambia "Nivel de Instrucción" (Grado/Posgrado)
-                nivelRadios.forEach(radio => {
-                    radio.addEventListener('change', async (e) => {
-                        const nivelVal = e.target.value; // 'grado' o 'posgrado'
-
-                        // A) Ejecutar la lógica de visibilidad y pago
-                        actualizarPago();
-
-                        // B) Resetear y deshabilitar los selects dependientes
-                        resetSelect(facultadSelect, 'Cargando facultades...');
-                        resetSelect(carreraSelect, 'Seleccione primero una facultad...');
-
-                        // C) Buscar facultades vía AJAX
-                        try {
-                            // Usamos la ruta que creamos en web.php
-                            const response = await fetch(`{{ route('get.faculties') }}?nivel_instruccion=${nivelVal}`);
-                            if (!response.ok) throw new Error('Error al cargar facultades');
-                            const faculties = await response.json();
-
-                            // D) Poblar el select de facultades
-                            populateSelect(facultadSelect, faculties, 'facultad', 'facultad', 'Seleccione una facultad...');
-                        } catch (error) {
-                            console.error(error);
-                            resetSelect(facultadSelect, 'Error al cargar facultades');
-                        }
-                    });
-                });
-
-                // === AGENDAMIENTO ===
-                const fechaInput = document.getElementById('fechaSeleccionada');
-                const modalidadSelect = document.getElementById('modalidadSelect');
-                const turnosContainer = document.getElementById('turnosContainer');
-                const turnoIdInput = document.getElementById('turno_id');
-                const dateShiftInput = document.getElementById('date_shift');
-                const shiftTimeInput = document.getElementById('shift_time');
-                const modalidadShiftInput = document.getElementById('modalidad_shift');
-
-
-                function cargarTurnos() {
-                const modalidad = modalidadSelect.value;
-                const fecha = fechaInput.value;
-
-                if (!modalidad || !fecha) return;
-
-                turnosContainer.innerHTML = '<p class="text-center text-muted">Cargando turnos...</p>';
-
-                fetch(`/shifts/${fecha}?modalidad=${modalidad}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        turnosContainer.innerHTML = '';
-
-                        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-                            turnosContainer.innerHTML = '<p class="text-center text-muted">No hay turnos disponibles para esta fecha.</p>';
-                            return;
-                        }
-
-                        data.data.forEach(turno => {
-                            const div = document.createElement('div');
-                            div.className = 'turno-card text-center';
-                            div.innerHTML = `
-                                <strong>${turno.start_shift}</strong><br>
-                                <span class="text-muted small">${turno.end_shift}</span><br>
-                                <span class="badge bg-light text-dark mt-1">${turno.cubiculo}</span>
-                            `;
-                            div.onclick = () => {
-                                turnoIdInput.value = turno.id_shift;
-                                dateShiftInput.value = data.fecha_consulta; // viene del JSON principal
-                                shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
-                                modalidadShiftInput.value = turno.tipo_atencion;
-                                document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
-                                div.classList.add('selected');
-                            };
-
-
-                            turnosContainer.appendChild(div);
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Error al cargar los turnos:", error);
-                        turnosContainer.innerHTML = '<p class="text-danger text-center">Error al cargar los turnos.</p>';
-                    });
-                }
-
-
-                fechaInput.addEventListener('change', cargarTurnos);
-                modalidadSelect.addEventListener('change', cargarTurnos);
-
-                // === CONFIRMACIÓN FINAL ===
-                function populateConfirmation() {
-                    document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
-                    document.getElementById('namesConfirm').textContent = document.querySelector('[name="names"]').value;
-                    document.getElementById('correoConfirm').textContent = document.querySelector('[name="correo_puce"]').value;
-                    document.getElementById('telefonoConfirm').textContent = document.querySelector('[name="telefono"]').value;
-                    document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
-                    document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
-                }
-
-                showStep(currentStep);
-
-                // === CONTROL DE EDAD Y FECHA DE NACIMIENTO ===
-                const inputEdad = document.getElementById('inputEdad');
-                const inputFecha = document.getElementById('inputFechaNacimiento');
-                const errorEdad = document.getElementById('errorEdad');
-                const infoFecha = document.getElementById('infoFecha');
-
-                if (inputEdad && inputFecha) {
-                    inputEdad.addEventListener('input', function() {
-                        let edad = parseInt(this.value);
-
-                        // 1. Validación visual inmediata de rango (17 - 80)
-                        if (edad < 17 || edad > 80) {
-                            inputEdad.classList.add('is-invalid');
-                            if(errorEdad) errorEdad.style.display = 'block';
-
-                            // Si la edad es inválida, desbloqueamos la fecha o la limpiamos
-                            inputFecha.min = '';
-                            inputFecha.max = '';
-                            return; // Salimos, no calculamos fecha
-                        } else {
-                            inputEdad.classList.remove('is-invalid');
-                            if(errorEdad) errorEdad.style.display = 'none';
-                        }
-
-                        // 2. Calcular el año de nacimiento
-                        const anioActual = new Date().getFullYear();
-                        const anioNacimiento = anioActual - edad;
-
-                        // 3. Restringir el calendario SOLAMENTE a ese año
-                        // Esto hace que el selector de año del calendario se bloquee o limite
-                        const primerDia = `${anioNacimiento}-01-01`;
-                        const ultimoDia = `${anioNacimiento}-12-31`;
-
-                        inputFecha.min = primerDia;
-                        inputFecha.max = ultimoDia;
-
-                        // (Opcional) Si el campo estaba vacío, podemos sugerir el 1 de enero para que se vea el año
-                        // Si el usuario ya tenía una fecha, verificamos si coincide con el año, si no, la reseteamos
-                        if (inputFecha.value) {
-                            const fechaActualInput = new Date(inputFecha.value).getFullYear();
-                            if (fechaActualInput !== anioNacimiento) {
-                                inputFecha.value = primerDia; // Reseteamos al 1 de enero del año calculado
-                            }
-                        }
-
-                        // Mostramos mensaje visual
-                        if(infoFecha) {
-                            infoFecha.textContent = `Calendario ajustado al año ${anioNacimiento}`;
-                            infoFecha.style.display = 'block';
-                        }
-                    });
-                }
-
-            });
-
-            // === CONVERTIR ARCHIVO A BASE64 ===
-            document.addEventListener("DOMContentLoaded", function () {
-
-                const fileInput = document.getElementById("comprobante");
-                const base64Input = document.getElementById("comprobante_base64");
-
-                if (fileInput) {
-                    fileInput.addEventListener("change", function () {
-
-                        const file = this.files[0];
-                        if (!file) return;
-
-                        const reader = new FileReader();
-                        reader.onloadend = function () {
-                            base64Input.value = reader.result; // Guarda base64 en el hidden
+                    data.data.forEach(turno => {
+                        const div = document.createElement('div');
+                        div.className = 'turno-card text-center';
+                        div.setAttribute('data-turno-id', turno.id_shift);
+                        div.innerHTML = `
+                            <i class="bi bi-clock text-primary" style="font-size:1.5rem;"></i><br>
+                            <strong>${turno.start_shift}</strong><br>
+                            <span class="text-muted small">${turno.end_shift}</span><br>
+                            <span class="badge bg-light text-dark mt-2">${turno.cubiculo}</span>
+                        `;
+                        
+                        div.onclick = () => {
+                            console.log('✅ Turno seleccionado:', turno.id_shift);
+                            
+                            turnoIdInput.value = turno.id_shift;
+                            dateShiftInput.value = data.fecha_consulta || fecha;
+                            shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
+                            modalidadShiftInput.value = 'virtual';
+                            
+                            console.log('💾 Valores guardados:', {
+                                turno_id: turnoIdInput.value,
+                                fecha: dateShiftInput.value,
+                                horario: shiftTimeInput.value
+                            });
+                            
+                            document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+                            div.classList.add('selected');
                         };
-
-                        reader.readAsDataURL(file); // Convierte a base64
+                        
+                        turnosContainer.appendChild(div);
                     });
+
+                    const totalInfo = document.createElement('div');
+                    totalInfo.className = 'w-100 text-center text-muted small mt-3';
+                    totalInfo.innerHTML = `<i class="bi bi-info-circle"></i> ${data.total || data.data.length} turno(s) disponible(s)`;
+                    turnosContainer.appendChild(totalInfo);
+                })
+                .catch(error => {
+                    console.error("❌ Error al cargar los turnos:", error);
+                    turnosContainer.innerHTML = `
+                        <div class="alert alert-danger text-center w-100">
+                            <i class="bi bi-x-circle"></i><br>
+                            Error al cargar los turnos. Por favor intente nuevamente.
+                        </div>
+                    `;
+                });
+        }
+
+        fechaInput.addEventListener('change', cargarTurnos);
+
+        // === CONFIRMACIÓN FINAL ===
+        function populateConfirmation() {
+            document.getElementById('cedulaConfirm').textContent = document.querySelector('[name="cedula"]').value;
+            document.getElementById('namesConfirm').textContent = document.querySelector('[name="names"]').value;
+            document.getElementById('correoConfirm').textContent = document.querySelector('[name="correo_puce"]').value;
+            document.getElementById('telefonoConfirm').textContent = document.querySelector('[name="telefono"]').value;
+            document.getElementById('fechaConfirm').textContent = dateShiftInput.value || '-';
+            document.getElementById('horarioConfirm').textContent = shiftTimeInput.value || '-';
+        }
+
+        // === CONTROL DE EDAD Y FECHA DE NACIMIENTO ===
+        const inputEdad = document.getElementById('inputEdad');
+        const inputFecha = document.getElementById('inputFechaNacimiento');
+        const errorEdad = document.getElementById('errorEdad');
+        const infoFecha = document.getElementById('infoFecha');
+
+        if (inputEdad && inputFecha) {
+            inputEdad.addEventListener('input', function() {
+                let edad = parseInt(this.value);
+
+                if (edad < 17 || edad > 80) {
+                    inputEdad.classList.add('is-invalid');
+                    if(errorEdad) errorEdad.style.display = 'block';
+                    inputFecha.min = '';
+                    inputFecha.max = '';
+                    return;
+                } else {
+                    inputEdad.classList.remove('is-invalid');
+                    if(errorEdad) errorEdad.style.display = 'none';
                 }
 
-            });
+                const anioActual = new Date().getFullYear();
+                const anioNacimiento = anioActual - edad;
+                const primerDia = `${anioNacimiento}-01-01`;
+                const ultimoDia = `${anioNacimiento}-12-31`;
 
+                inputFecha.min = primerDia;
+                inputFecha.max = ultimoDia;
+
+                if (inputFecha.value) {
+                    const fechaActualInput = new Date(inputFecha.value).getFullYear();
+                    if (fechaActualInput !== anioNacimiento) {
+                        inputFecha.value = primerDia;
+                    }
+                }
+
+                if(infoFecha) {
+                    infoFecha.textContent = `Calendario ajustado al año ${anioNacimiento}`;
+                    infoFecha.style.display = 'block';
+                }
+            });
+        }
+
+        showStep(currentStep);
+    });
     </script>
 
 @stop
+                

@@ -10,6 +10,7 @@ use App\Models\StudentRegistration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ShiftController extends Controller
 {
@@ -36,7 +37,6 @@ class ShiftController extends Controller
         }
 
         // 2. Buscar o crear el registro del estudiante (StudentRegistration)
-        // Usamos los nombres de columna de la migración consolidada
         $person = StudentRegistration::where('cedula', $idNumber)
             ->orWhere('correo_puce', $email)
             ->first();
@@ -45,7 +45,7 @@ class ShiftController extends Controller
             $person = new StudentRegistration();
             $person->cedula = $idNumber;
             $person->correo_puce = $email;
-            $person->names = $request['names'] ?? 'Estudiante Nuevo'; // Campo obligatorio
+            $person->names = $request['names'] ?? 'Estudiante Nuevo';
             $person->telefono = $request['phone'] ?? '0000000000';
             $person->direccion = $request['address'] ?? 'N/A';
             $person->edad = $request['age'] ?? 18;
@@ -59,12 +59,12 @@ class ShiftController extends Controller
 
         // 3. Crear el turno (Shift) vinculado por cédula
         $shift = new Shift();
-        $shift->id_shift = (string) \Illuminate\Support\Str::uuid(); // Usamos UUID como definimos
+        $shift->id_shift = (string) \Illuminate\Support\Str::uuid();
         $shift->cubicle_shift = $request['cubicle'];
         $shift->date_shift = $request['date'];
         $shift->start_shift = $request['start_time'];
         $shift->end_shift = $request['end_time'];
-        $shift->person_shift = $person->cedula; // Relación por cédula
+        $shift->person_shift = $person->cedula;
         $shift->status_shift = 1; // 1 = Disponible/Reservado
         $shift->save();
 
@@ -115,18 +115,29 @@ class ShiftController extends Controller
     }
 
     /**
-     * API para obtener turnos disponibles filtrados estrictamente por modalidad virtual.
+     * ✅ API CORREGIDA: Obtener turnos disponibles SOLO modalidad virtual
      */
     public function getShifts(Request $request, $fecha)
     {
         try {
             $fechaFormateada = Carbon::parse($fecha)->format('Y-m-d');
 
+            // Validar que la fecha no sea pasada
+            if (Carbon::parse($fechaFormateada)->isPast()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pueden consultar turnos de fechas pasadas.',
+                    'data' => []
+                ]);
+            }
+
+            // Consultar turnos SOLO virtuales y disponibles
             $turnos = DB::table('shifts')
                 ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
                 ->whereDate('shifts.date_shift', $fechaFormateada)
-                ->where('shifts.status_shift', 1)
-                ->where('cubiculos.tipo_atencion', 'virtual') // Forzamos virtualidad
+                ->where('shifts.status_shift', 1) // ✅ Solo disponibles
+                ->where('cubiculos.tipo_atencion', 'virtual') // ✅ Solo virtuales
+                ->whereNull('shifts.person_shift') // ✅ Asegurar que no esté ocupado
                 ->select(
                     'shifts.id_shift',
                     'shifts.start_shift',
@@ -140,11 +151,18 @@ class ShiftController extends Controller
             return response()->json([
                 'success' => true,
                 'fecha_consulta' => $fechaFormateada,
-                'data' => $turnos
+                'data' => $turnos,
+                'total' => $turnos->count()
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al procesar la solicitud'], 500);
+            Log::error('Error en getShifts: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al procesar la solicitud',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 

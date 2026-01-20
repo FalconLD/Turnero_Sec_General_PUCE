@@ -15,6 +15,8 @@ use App\Models\Faculty;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 
 class StudentRegistrationController extends Controller
@@ -144,92 +146,217 @@ class StudentRegistrationController extends Controller
         return view('student.status.success');
     }
 
-    //MÉTODO CORREGIDO: Guardar todo y asignar turno
-    public function finish(Request $request)
-    {
-        // 1. Buscamos al estudiante por el ID que guardamos en la sesión al loguearse
-        $student = StudentRegistration::find(session('student_id'));
+        /**
+         * ✅ MÉTODO CORREGIDO: Guardar datos personales Y asignar turno
+         */
+        public function finish(Request $request)
+        {
+            // Validar datos requeridos
+            $request->validate([
+                'edad' => 'required|integer|min:16|max:100',
+                'telefono' => 'required|string|max:15',
+                'direccion' => 'required|string|max:255',
+                'fecha_nacimiento' => 'required|date',
+                'turno_id' => 'required|string', // ✅ AGREGADO: validar turno
+            ]);
 
-        if (!$student) {
-            return redirect()->route('token.login.form')->withErrors(['error' => 'Sesión expirada.']);
+            try {
+                DB::beginTransaction();
+
+                // 1. Buscar o crear el estudiante
+                $cedula = session('student_cedula');
+                
+                if (!$cedula) {
+                    DB::rollBack();
+                    return redirect()->route('token.login.form')
+                        ->withErrors(['error' => 'Sesión expirada.']);
+                }
+
+                $student = StudentRegistration::where('cedula', $cedula)->first();
+
+                if (!$student) {
+                    // Crear nuevo registro
+                    $student = new StudentRegistration();
+                    $student->cedula = $cedula;
+                    $student->correo_puce = session('student_correo');
+                    $student->names = session('student_name');
+                    $student->facultad = session('student_facultad');
+                    $student->carrera = session('student_carrera');
+                    $student->plan = session('student_plan');
+                }
+
+                // 2. Actualizar datos personales
+                $student->edad = $request->input('edad');
+                $student->telefono = $request->input('telefono');
+                $student->direccion = $request->input('direccion');
+                $student->fecha_nacimiento = $request->input('fecha_nacimiento');
+                $student->nivel_instruccion = $request->input('nivel_instruccion', 'grado');
+                $student->motivo = $request->input('motivo', 'Consulta General');
+                $student->forma_pago = $request->input('forma_pago', 'Efectivo');
+                
+                // Datos de sesión
+                $student->banner_id = session('student_banner_id');
+                $student->plan_estudio = session('student_plan_estudio');
+                
+                // ✅ IMPORTANTE: Marcar como que TIENE turno asignado
+                $student->tomado = 0; // 0 = Ya tiene turno
+                
+                $student->save();
+
+                // 3. ✅ ASIGNAR EL TURNO
+                $turnoId = $request->input('turno_id');
+                
+                if (!$turnoId) {
+                    DB::rollBack();
+                    return back()->withErrors(['error' => 'Debe seleccionar un turno.']);
+                }
+
+                // Buscar el turno con bloqueo
+                $turno = Shift::where('id_shift', $turnoId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$turno) {
+                    DB::rollBack();
+                    return back()->withErrors(['error' => 'El turno seleccionado no existe.']);
+                }
+
+                // Validar que el turno esté disponible
+                if ($turno->status_shift == 0 || $turno->person_shift !== null) {
+                    DB::rollBack();
+                    return back()->withErrors(['error' => 'El turno seleccionado ya fue ocupado por otro estudiante.']);
+                }
+
+                // Asignar turno al estudiante
+                $turno->person_shift = $student->cedula;
+                $turno->status_shift = 0; // 0 = Ocupado
+                $turno->save();
+
+                DB::commit();
+
+                // 4. Enviar correo de confirmación
+                try {
+                    Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
+                } catch (\Exception $e) {
+                    Log::error("Error enviando correo a {$student->correo_puce}: " . $e->getMessage());
+                }
+
+                // 5. Guardar ID en sesión
+                session(['student_id' => $student->id]);
+
+                // 6. Redirigir a página de éxito
+                return redirect()->route('student.success')
+                    ->with('success', 'Registro completado. Su turno ha sido agendado exitosamente.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error en finish(): ' . $e->getMessage());
+                
+                return back()->withErrors(['error' => 'Ocurrió un error al procesar su registro. Intente nuevamente.']);
+            }
         }
 
-        // 2. Mapeo manual de campos (Asegúrate de que los 'name' en el HTML coincidan)
-        $student->edad = $request->input('edad');
-        $student->telefono = $request->input('telefono');
-        $student->direccion = $request->input('direccion');
-        $student->fecha_nacimiento = $request->input('fecha_nacimiento');
-
-        // Otros campos necesarios
-        $student->nivel_instruccion = $request->input('nivel_instruccion');
-        $student->motivo = $request->input('motivo');
-
-        // 3. Rescatar datos de sesión (Garantiza que Facultad y Carrera se guarden)
-        $student->banner_id = session('student_banner_id');
-        $student->plan_estudio = session('student_plan_estudio');
-        $student->facultad     = session('student_facultad') ?? $student->facultad;
-        $student->carrera      = session('student_carrera') ?? $student->carrera;
-
-        $student->tomado = 1;
-
-        // 4. GUARDADO Y REDIRECCIÓN
-        if($student->save()) {
-        // Volvemos a la misma página, activando el paso 1 (Datos) mediante el 'step'
-        return redirect()->route('student.personal')
-            ->with('success', 'Datos guardados correctamente.')
-            ->with('step', 1);
-    }
-
-    // Si llega aquí es porque hubo un error al guardar
-    return back()->with('error', 'No se pudieron actualizar los datos.');
-    }
-
-    // Método para agendar turno (estudiantes que ya existen)
+    /**
+     * ✅ MÉTODO CORREGIDO: Agendar turno para estudiante
+     */
     public function agendarTurno(Request $request)
     {
         $request->validate([
-            'turno_id' => 'required|exists:shifts,id_shift',
-            'cedula' => 'required|exists:student_registrations,cedula',
+            'turno_id' => 'required|string',
+            'cedula' => 'required|string',
         ]);
 
-        $student = StudentRegistration::where('cedula', $request->cedula)->first();
-        $turno = Shift::find($request->turno_id);
-
-        if (!$student || !$turno) {
-            return back()->with('error', 'No se encontró el estudiante o el turno.');
-        }
-
-        // Validar si el turno ya está ocupado
-        if ($turno->status_shift == 0) {
-            return back()->with('error', 'El turno seleccionado ya fue ocupado.');
-        }
-
-        // Asignar turno
-        $turno->person_shift = $student->cedula;
-        $turno->status_shift = 0;
-        $turno->save();
-
-        $student->tomado = 0;
-        $student->save();
-
-        // Enviar correo
         try {
-            Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
-        } catch (\Exception $e) {
-            Log::error("Error enviando correo: " . $e->getMessage());
-        }
+            DB::beginTransaction();
 
-        if ($student->save()) {
-            // Si la petición es AJAX, devolvemos JSON
+            // 1. Buscar estudiante
+            $student = StudentRegistration::where('cedula', $request->cedula)->first();
+
+            if (!$student) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Estudiante no encontrado.'
+                ], 404);
+            }
+
+            // 2. Verificar si el estudiante puede tomar turno
+            if ($student->tomado == 0) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya tiene un turno asignado. Debe cancelarlo antes de agendar uno nuevo.'
+                ], 400);
+            }
+
+            // 3. Buscar turno usando id_shift (UUID)
+            $turno = Shift::where('id_shift', $request->turno_id)
+                ->lockForUpdate() // Bloqueo pesimista para evitar condiciones de carrera
+                ->first();
+
+            if (!$turno) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Turno no encontrado.'
+                ], 404);
+            }
+
+            // 4. Validar que el turno esté disponible
+            if ($turno->status_shift == 0 || $turno->person_shift !== null) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El turno seleccionado ya fue ocupado por otro estudiante.'
+                ], 409);
+            }
+
+            // 5. Asignar turno al estudiante
+            $turno->person_shift = $student->cedula;
+            $turno->status_shift = 0; // 0 = Ocupado
+            $turno->save();
+
+            // 6. Marcar al estudiante como que tiene turno
+            $student->tomado = 0; // 0 = Ya tiene turno asignado
+            $student->save();
+
+            DB::commit();
+
+            // 7. Enviar correo de confirmación
+            try {
+                Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
+            } catch (\Exception $e) {
+                Log::error("Error enviando correo a {$student->correo_puce}: " . $e->getMessage());
+            }
+
+            // 8. Retornar respuesta exitosa
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Datos guardados correctamente'
+                    'message' => 'Turno agendado exitosamente. Revise su correo para más detalles.',
+                    'turno' => [
+                        'fecha' => $turno->date_shift,
+                        'hora_inicio' => $turno->start_shift,
+                        'hora_fin' => $turno->end_shift,
+                    ]
                 ]);
             }
 
-            // Si no es AJAX, redirigimos al formulario pero con un marcador de éxito
-            return redirect()->route('student.personal')->with('step', 1)->with('success', 'Información guardada.');
+            return redirect()->route('student.success')
+                ->with('success', 'Turno agendado correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al agendar turno: ' . $e->getMessage());
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ocurrió un error al procesar su solicitud. Intente nuevamente.'
+                ], 500);
+            }
+
+            return back()->with('error', 'Error al agendar el turno.');
         }
     }
 
@@ -339,6 +466,9 @@ class StudentRegistrationController extends Controller
         return response()->json($programs);
     }
 
+    /**
+     * ✅ Página de agendamiento de turnos
+     */
     public function agendamiento()
     {
         $student = StudentRegistration::find(session('student_id'));
@@ -373,38 +503,51 @@ class StudentRegistrationController extends Controller
         return redirect()->route('student.token.error')->with('error', 'No se pudo determinar el estado del turno.');
     }
 
+    /**
+     * ✅ MÉTODO CORREGIDO: Eliminar turno del estudiante
+     */
     public function eliminarTurno(Request $request)
     {
         $cedula = $request->cedula;
 
-        $student = StudentRegistration::where('cedula', $cedula)->first();
-
-        if (!$student) {
-            return redirect()->back()->with('error', 'Estudiante no encontrado.');
-        }
-
-        $turno = Shift::where('person_shift', $cedula)->first();
-
-        if (!$turno) {
-            return redirect()->back()->with('error', 'No se encontró un turno asociado a esta cédula.');
-        }
-
         try {
+            DB::beginTransaction();
+
+            $student = StudentRegistration::where('cedula', $cedula)->first();
+
+            if (!$student) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Estudiante no encontrado.');
+            }
+
+            $turno = Shift::where('person_shift', $cedula)
+                ->where('status_shift', 0)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$turno) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'No se encontró un turno activo asociado a esta cédula.');
+            }
+
             // Liberar turno
             $turno->person_shift = null;
-            $turno->status_shift = 1;
+            $turno->status_shift = 1; // 1 = Disponible
             $turno->save();
 
-            // Marcar al estudiante como "puede tomar otro turno"
-            $student->tomado = 1;
+            // Marcar al estudiante como disponible para tomar otro turno
+            $student->tomado = 1; // 1 = Puede tomar turno
             $student->save();
 
-            return redirect()->route('student.turno')
+            DB::commit();
+
+            return redirect()->route('student.agendamiento')
                 ->with('success', 'El turno ha sido eliminado correctamente. Ahora puede agendar un nuevo turno.');
+
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al eliminar turno: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Ocurrió un error al eliminar el turno.');
         }
     }
 }
-

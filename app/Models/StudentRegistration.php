@@ -25,24 +25,12 @@ class StudentRegistration extends Model
         'motivo',
         'nivel_instruccion',
         'beca_san_ignacio',
-        'valor_pagar',
-        'forma_pago',
         'acepta_terminos',
-        'comprobante',
         'tomado',
-        'comprobante_base64',
-        'comprobante_mime',
     ];
 
     /**
-     * Obtiene el registro de pago asociado con este registro de estudiante.
+     * El modelo ya no requiere relaciones con Payment ni PayStudent
+     * ya que la lógica de cobros ha sido removida del sistema.
      */
-    public function payment()
-    {
-        return $this->hasOne(Payment::class);
-    }
-    public function payStudents()
-    {
-        return $this->hasMany(PayStudent::class, 'student_registration_id');
-    }
 }

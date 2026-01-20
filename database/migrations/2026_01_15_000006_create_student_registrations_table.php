@@ -33,16 +33,10 @@ return new class extends Migration
             // Selección y campos técnicos
             $table->string('nivel_instruccion')->nullable();
             $table->string('beca_san_ignacio')->nullable();
-            $table->decimal('valor_pagar', 10, 2)->nullable()->default(0);
-            $table->string('forma_pago')->nullable();
 
             // Estado y archivos
             $table->boolean('acepta_terminos')->default(false);
-            $table->string('comprobante')->nullable();
             $table->boolean('tomado')->default(0);
-            $table->longText('comprobante_base64')->nullable();
-            $table->string('comprobante_mime')->nullable();
-
             $table->timestamps();
         });
     }

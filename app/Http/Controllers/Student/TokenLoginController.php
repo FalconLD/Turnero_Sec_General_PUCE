@@ -66,6 +66,7 @@ class TokenLoginController extends Controller
             'student_id' => $student->id,
             'student_name' => $student->names,
             'student_cedula' => $student->cedula,
+            'student_correo' => $info['usuario'] . '@puce.edu.ec', 
         ]);
 
         // 4️⃣ Redirigir al formulario principal de estudiantes
@@ -161,6 +162,7 @@ public function loginWithToken($token)
         'student_id'        => $student->id,
         'student_cedula'    => $student->cedula,
         'student_name'      => $student->names,
+        'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null, // Agregamos para que se pueda mostrar al estudiante 
         'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
         'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
     ]);

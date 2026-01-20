@@ -50,7 +50,6 @@ class TokenLoginController extends Controller
                 'plan_estudio' => $info['plan_estudio'] ?? null,
                 'nivel_instruccion' => null,
                 'beca_san_ignacio' => null,
-                'forma_pago' => null,
                 'edad' => null,
                 'fecha_nacimiento' => null,
                 'telefono' => null,
@@ -84,23 +83,6 @@ class TokenLoginController extends Controller
         return redirect()->route('token.login.form');
     }
 
-
-    // public function loginWithToken($token)
-    // {
-
-    // // // 🔧 MODO PRUEBA
-    // session([
-    //     'student_logged_in' => true,
-    //     'student_id' => 1,
-    //     'student_cedula' => '0102030405',
-    //     'student_name' => 'Estudiante Prueba',
-    //     'correo_puce' => 'estudiantePrueba@puce.edu.ec',
-    // ]);
-
-    // return redirect()->route('student.personal');
-
-
-        // URL del servicio remoto
 public function loginWithToken($token)
 {
     // 1. URL del servicio remoto (Ya configurada para la PUCE)
@@ -146,7 +128,6 @@ public function loginWithToken($token)
             'nivel'             => null,
             'nivel_instruccion' => null,
             'beca_san_ignacio'  => null,
-            'forma_pago'        => null,
             'fecha_nacimiento'  => null,
             'telefono'          => null,
             'direccion'         => null,
@@ -161,7 +142,7 @@ public function loginWithToken($token)
         'student_id'        => $student->id,
         'student_cedula'    => $student->cedula,
         'student_name'      => $student->names,
-        'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
+        'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante
         'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
     ]);
 

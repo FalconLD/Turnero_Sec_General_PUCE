@@ -134,13 +134,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     });
 
-    // --- 5. MÓDULO DE PAGOS ---
-    Route::middleware(['can:pagos.ver'])->group(function () {
-        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-        Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
-        Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
-    });
-
     // --- 6. MÓDULO DE DESBLOQUEO ---
     Route::middleware(['can:desbloqueo.ver'])->group(function () {
         Route::controller(ShiftUnlockController::class)->group(function () {
@@ -178,16 +171,4 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/encuesta', fn() => view('common.encuesta.index'))->name('encuesta.index');
         Route::get('/auditorias', fn() => view('auditoria.index'))->name('auditoria.index');
     });
-});
-
-// ==============================================================================
-//  UTILIDADES DE SISTEMA
-// ==============================================================================
-
-Route::get('/fix-permissions', function () {
-    Permission::firstOrCreate(['name' => 'cubiculos.ver']);
-    Permission::firstOrCreate(['name' => 'horarios.ver']);
-    $role = Role::firstOrCreate(['name' => 'Operador']);
-    $role->givePermissionTo(['cubiculos.ver', 'horarios.ver']);
-    return "Permisos asignados correctamente al rol Operador.";
 });

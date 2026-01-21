@@ -28,9 +28,4 @@ class StudentRegistration extends Model
         'acepta_terminos',
         'tomado',
     ];
-
-    /**
-     * El modelo ya no requiere relaciones con Payment ni PayStudent
-     * ya que la lógica de cobros ha sido removida del sistema.
-     */
 }

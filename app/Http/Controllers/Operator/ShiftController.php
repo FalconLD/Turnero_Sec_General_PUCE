@@ -135,9 +135,10 @@ class ShiftController extends Controller
             $turnos = DB::table('shifts')
                 ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
                 ->whereDate('shifts.date_shift', $fechaFormateada)
+                ->where('date_shift', '>=', Carbon::today()) // Solo turnos de hoy y futuros
                 ->where('shifts.status_shift', 1) // ✅ Solo disponibles
                 ->where('cubiculos.tipo_atencion', 'virtual') // ✅ Solo virtuales
-                ->whereNull('shifts.person_shift') // ✅ Asegurar que no esté ocupado
+                ->whereNull('shifts.person_shift') // Asegurar que no esté ocupado
                 ->select(
                     'shifts.id_shift',
                     'shifts.start_shift',

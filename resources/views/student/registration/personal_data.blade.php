@@ -103,7 +103,16 @@
                                     La edad debe ser mayor o igual a 17 años.
                                 </div>
                             </div>
-
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Facultad</label>
+                                    <input type="text" class="form-control" value="{{ session('student_facultad') }}" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Carrera</label>
+                                    <input type="text" class="form-control" value="{{ session('student_carrera') }}" readonly>
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <label>Correo electrónico</label>
                                 <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
@@ -210,6 +219,8 @@
                         <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
                         <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
                         <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
+                        <strong>Facultad:</strong><p class="text-muted">{{ session('student_facultad') }}</p> 
+                        <strong>Carrera:</strong><p class="text-muted">{{ session('student_carrera') }}</p>
                         <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
                         <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
                         <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>

@@ -157,7 +157,7 @@
 
                         {{-- Paso 3: Agendamiento --}}
                         <div class="form-step" style="display:none;">
-                            <h5 class="text-primary mb-4 text-center">📅 Seleccione modalidad, fecha y horario disponible</h5>
+                            <h5 class="text-primary mb-4 text-center">📅 Seleccione fecha y horario disponible</h5>
                             <div class="row justify-content-center g-4">
 
                                 {{-- Columna izquierda: calendario y modalidad --}}
@@ -165,11 +165,7 @@
 
                                     <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
 
-                                        <h6 class="fw-bold text-secondary mb-3">Configuración de cita</h6>
-                                        <div class="mb-3">
-                                            <label for="modalidadSelect" class="form-label fw-bold">Modalidad</label>
-                                            <input type="text" id="modalidadSelect" name="modalidad" class="form-control shadow-sm bg-light" value="Virtual" readonly>
-                                        </div>
+                                        <h6 class="fw-bold text-secondary mb-3">Selección de fecha y horario</h6>
                                         <div class="mb-3">
                                             <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
                                             <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
@@ -367,7 +363,7 @@
         }
 
         /* === Versión centrada para selects del paso 5 === */
-        #modalidadSelect, #fechaSeleccionada {
+        #fechaSeleccionada {
             border-radius: 12px;
             max-width: 360px;
             font-weight: 500;
@@ -389,7 +385,7 @@
 
 
 {{-- === Script de funcionalidad === --}}
-    
+
     <script> // Script para calcular fecha de nacimiento según edad
     document.addEventListener('DOMContentLoaded', function () {
         const edadInput = document.getElementById('inputEdad');
@@ -409,7 +405,7 @@
         });
     });
     </script>
-    
+
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -455,14 +451,14 @@
             if (!validateCurrentStep()) {
                 return;
             }
-            
+
             if (currentStep === 0) {
                 if (!aceptaTerminos.checked || !aceptaPoliticas.checked) {
                     alert("Debes aceptar ambos términos para continuar.");
                     return;
                 }
             }
-            
+
             if (currentStep === 1) {
                 currentStep++;
                 showStep(currentStep);
@@ -472,9 +468,9 @@
             // ✅ Validación para el paso de agendamiento (paso 3 = índice 2)
             if (currentStep === 2) {
                 const turnoSeleccionado = turnoIdInput.value;
-                
+
                 console.log('🔍 Validando turno seleccionado:', turnoSeleccionado);
-                
+
                 if (!turnoSeleccionado) {
                     alert('Por favor seleccione un turno antes de continuar.');
                     return;
@@ -486,9 +482,9 @@
         };
 
         // Botón ANTERIOR
-        prevBtn.onclick = () => { 
-            currentStep--; 
-            showStep(currentStep); 
+        prevBtn.onclick = () => {
+            currentStep--;
+            showStep(currentStep);
         };
 
         // === CONTROL DE TELÉFONO COMBINADO ===
@@ -556,7 +552,7 @@
                 })
                 .then(data => {
                     console.log('📦 Turnos recibidos:', data);
-                    
+
                     turnosContainer.innerHTML = '';
 
                     if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
@@ -579,25 +575,25 @@
                             <span class="text-muted small">${turno.end_shift}</span><br>
                             <span class="badge bg-light text-dark mt-2">${turno.cubiculo}</span>
                         `;
-                        
+
                         div.onclick = () => {
                             console.log('✅ Turno seleccionado:', turno.id_shift);
-                            
+
                             turnoIdInput.value = turno.id_shift;
                             dateShiftInput.value = data.fecha_consulta || fecha;
                             shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
                             modalidadShiftInput.value = 'virtual';
-                            
+
                             console.log('💾 Valores guardados:', {
                                 turno_id: turnoIdInput.value,
                                 fecha: dateShiftInput.value,
                                 horario: shiftTimeInput.value
                             });
-                            
+
                             document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
                             div.classList.add('selected');
                         };
-                        
+
                         turnosContainer.appendChild(div);
                     });
 
@@ -677,4 +673,3 @@
     </script>
 
 @stop
-                

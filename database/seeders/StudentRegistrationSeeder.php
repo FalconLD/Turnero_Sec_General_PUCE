@@ -9,7 +9,6 @@ class StudentRegistrationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * Inserta estudiantes de prueba sin campos de pago.
      */
     public function run(): void
     {

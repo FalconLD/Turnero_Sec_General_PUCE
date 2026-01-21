@@ -153,11 +153,13 @@ class StudentRegistrationController extends Controller
         {
             // Validar datos requeridos
             $request->validate([
-                'edad' => 'required|integer|min:16|max:100',
-                'telefono' => 'required|string|max:15',
-                'direccion' => 'required|string|max:255',
-                'fecha_nacimiento' => 'required|date',
-                'turno_id' => 'required|string', // ✅ AGREGADO: validar turno
+                'edad'              => 'required|integer|min:16|max:100',
+                'telefono'          => 'required|string|max:15',
+                'direccion'         => 'required|string|max:255',
+                'fecha_nacimiento'  => 'required|date',
+                'turno_id'          => 'required|string',
+                'acepta_terminos'   => 'accepted',
+                'acepta_politicas'  => 'accepted',
             ]);
 
             try {
@@ -165,7 +167,7 @@ class StudentRegistrationController extends Controller
 
                 // 1. Buscar o crear el estudiante
                 $cedula = session('student_cedula');
-                
+
                 if (!$cedula) {
                     DB::rollBack();
                     return redirect()->route('token.login.form')
@@ -192,7 +194,6 @@ class StudentRegistrationController extends Controller
                 $student->fecha_nacimiento = $request->input('fecha_nacimiento');
                 $student->nivel_instruccion = $request->input('nivel_instruccion', 'grado');
                 $student->motivo = $request->input('motivo', 'Matriculación');
-                $student->forma_pago = $request->input('forma_pago', 'Efectivo');
                 $student->acepta_terminos = $request->input('acepta_terminos') ? 1 : 0;
 
                 
@@ -200,15 +201,15 @@ class StudentRegistrationController extends Controller
                 // Datos de sesión
                 $student->banner_id = session('student_banner_id');
                 $student->plan_estudio = session('student_plan_estudio');
-                
+
                 // ✅ IMPORTANTE: Marcar como que TIENE turno asignado
                 $student->tomado = 0; // 0 = Ya tiene turno
-                
+
                 $student->save();
 
                 // 3. ✅ ASIGNAR EL TURNO
                 $turnoId = $request->input('turno_id');
-                
+
                 if (!$turnoId) {
                     DB::rollBack();
                     return back()->withErrors(['error' => 'Debe seleccionar un turno.']);
@@ -254,7 +255,7 @@ class StudentRegistrationController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Error en finish(): ' . $e->getMessage());
-                
+
                 return back()->withErrors(['error' => 'Ocurrió un error al procesar su registro. Intente nuevamente.']);
             }
         }
@@ -351,7 +352,7 @@ class StudentRegistrationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al agendar turno: ' . $e->getMessage());
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,

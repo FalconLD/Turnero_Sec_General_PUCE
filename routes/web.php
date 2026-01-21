@@ -26,7 +26,6 @@ use App\Http\Controllers\Admin\OperatingAreaController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\CareerController;
-use App\Http\Controllers\Admin\PaymentController;
 
 // 3. Dominio: Operator (Atención y Flujo de Turnos)
 use App\Http\Controllers\Operator\AttentionController;

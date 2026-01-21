@@ -13,6 +13,7 @@ class DashboardController extends Controller
     {
         $this->middleware('can:reportes.ver')->only('index');
     }
+
     // Mostrar el dashboard con estadísticas
     public function index(Request $request)
     {
@@ -35,7 +36,10 @@ class DashboardController extends Controller
 
         // Turnos por día
         $turnosPorDia = (clone $turnosQuery)
-            ->select(DB::raw('CAST(date_shift AS DATE) as fecha'), DB::raw('COUNT(*) as total'))
+            ->select(
+                DB::raw('CAST(date_shift AS DATE) as fecha'),
+                DB::raw('COUNT(*) as total')
+            )
             ->groupBy(DB::raw('CAST(date_shift AS DATE)'))
             ->orderBy(DB::raw('CAST(date_shift AS DATE)'))
             ->get();
@@ -43,16 +47,6 @@ class DashboardController extends Controller
         // Turnos atendidos y pendientes
         $turnosAtendidos = (clone $turnosQuery)->whereNotNull('person_shift')->count();
         $turnosPendientes = (clone $turnosQuery)->whereNull('person_shift')->count();
-
-        // ---- Pagos ----
-        $pagosQuery = DB::table('student_registrations');
-        if ($anio) $pagosQuery->whereYear('created_at', $anio);
-        if ($mes)  $pagosQuery->whereMonth('created_at', $mes);
-
-        $pagosPorForma = $pagosQuery
-            ->select('forma_pago', DB::raw('COUNT(*) as total'))
-            ->groupBy('forma_pago')
-            ->get();
 
         // ---- Registros por cubículo y tipo de atención ----
         $cubiculosQuery = DB::table('shifts as s')
@@ -77,7 +71,6 @@ class DashboardController extends Controller
             'turnosPorDia',
             'turnosAtendidos',
             'turnosPendientes',
-            'pagosPorForma',
             'cubiculosQuery',
             'aniosDisponibles',
             'mes',

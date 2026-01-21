@@ -53,7 +53,7 @@ class ShiftController extends Controller
             $person->facultad = $request['faculty'] ?? 'N/A';
             $person->carrera = $request['career'] ?? 'N/A';
             $person->nivel = $request['level'] ?? 'N/A';
-            $person->motivo = $request['reason'] ?? 'Consulta General';
+            $person->motivo = $request['reason'] ?? 'Matriculación';
             $person->save();
         }
 

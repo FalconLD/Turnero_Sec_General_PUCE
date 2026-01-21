@@ -191,8 +191,11 @@ class StudentRegistrationController extends Controller
                 $student->direccion = $request->input('direccion');
                 $student->fecha_nacimiento = $request->input('fecha_nacimiento');
                 $student->nivel_instruccion = $request->input('nivel_instruccion', 'grado');
-                $student->motivo = $request->input('motivo', 'Consulta General');
+                $student->motivo = $request->input('motivo', 'Matriculación');
                 $student->forma_pago = $request->input('forma_pago', 'Efectivo');
+                $student->acepta_terminos = $request->input('acepta_terminos') ? 1 : 0;
+
+                
                 
                 // Datos de sesión
                 $student->banner_id = session('student_banner_id');

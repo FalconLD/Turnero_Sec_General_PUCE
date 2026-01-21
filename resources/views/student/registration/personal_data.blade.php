@@ -196,7 +196,6 @@
                             <input type="hidden" name="turno_id" id="turno_id">
                             <input type="hidden" name="date_shift" id="date_shift">
                             <input type="hidden" name="shift_time" id="shift_time">
-                            <input type="hidden" name="modalidad_shift" id="modalidad_shift">
                         </div>
 
                     {{-- Paso 4: Confirmación --}}
@@ -529,7 +528,6 @@
         const turnoIdInput = document.getElementById('turno_id');
         const dateShiftInput = document.getElementById('date_shift');
         const shiftTimeInput = document.getElementById('shift_time');
-        const modalidadShiftInput = document.getElementById('modalidad_shift');
 
         function cargarTurnos() {
             const fecha = fechaInput.value;
@@ -582,7 +580,6 @@
                             turnoIdInput.value = turno.id_shift;
                             dateShiftInput.value = data.fecha_consulta || fecha;
                             shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
-                            modalidadShiftInput.value = 'virtual';
 
                             console.log('💾 Valores guardados:', {
                                 turno_id: turnoIdInput.value,

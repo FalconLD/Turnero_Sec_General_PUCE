@@ -19,7 +19,7 @@
                         </a>
                     </div>
                 <div class="card">
-                    
+
 
                     <div class="card-body">
                         {{-- 3. Wrapper 'table-responsive' y ID 'turnos' para DataTables --}}
@@ -35,7 +35,7 @@
                                         <th>DNI</th>
                                         <th>Nom. Estudiante</th>
                                         <th>Correo Electrónico</th>
-                                        <th>Estado</th>                                        
+                                        <th>Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45,7 +45,7 @@
                                             <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-link text-danger btn-sm" 
+                                                <button type="submit" class="btn btn-link text-danger btn-sm"
                                                         onclick="return confirm('¿Seguro de que deseas borrar este turno?')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -57,7 +57,7 @@
                                         <td>{{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}</td>
                                         <td>{{ $shift->student_dni ?? 'N/A' }}</td>
                                         <td>{{ $shift->student_name ?? 'Disponible' }}</td>
-                                        <td>{{ $shift->student_email ?? 'N/A' }}</td>                                        
+                                        <td>{{ $shift->student_email ?? 'N/A' }}</td>
                                         <td>
                                             {{-- 5. Lógica de estado mejorada con badges --}}
                                             @if($shift->status == 1)
@@ -66,7 +66,7 @@
                                                 <span class="badge bg-secondary">Agendado</span>
                                             @endif
                                         </td>
-                                        
+
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -103,11 +103,11 @@
 
         /* 7. Estilos adaptados para #turnos */
         #turnos thead {
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
         #turnos thead th {
-            color: #495057; 
-            font-weight: 600; 
+            color: #495057;
+            font-weight: 600;
             border: none;
             padding-top: 1rem;
             padding-bottom: 1rem;
@@ -119,7 +119,7 @@
             vertical-align: middle; /* <-- Centrado vertical */
         }
         .dt-buttons .btn {
-            border-radius: 0.5rem; 
+            border-radius: 0.5rem;
         }
         .dataTables_filter input[type="search"] {
             width: 400px !important;

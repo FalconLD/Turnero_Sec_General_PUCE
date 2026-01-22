@@ -14,10 +14,20 @@
             var title = $(this).data('page-title') || 'Reporte';
             $(this).DataTable({
                 responsive: true,
-                autoWidth: false,
+                autoWidth: false, // Importante dejarlo en false
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
                 },
+                columnDefs: [
+                    {
+                        targets: -1,    // Selecciona la última columna (Acciones)
+                        width: '120px', // Define el ancho fijo en píxeles
+                        className: 'text-center', // Opcional: centra el contenido
+                        orderable: false, // Opcional: quita la ordenación a los botones
+                        searchable: false
+                    }
+                ],
+
                 dom: '<"d-flex justify-content-between mb-3"Bf>rtip',
                 buttons: [
                     {

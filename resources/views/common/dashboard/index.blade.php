@@ -1,10 +1,10 @@
 @extends('adminlte::page')
- 
+
 @section('title', 'Dashboard Principal')
- 
+
 @section('content')
 <div class="container-fluid">
- 
+
     {{-- ======= FILTROS ======= --}}
     {{-- ======= FILTROS + BOTÓN EXPORTAR ======= --}}
 <form method="GET" action="{{ route('dashboard.index') }}" class="mb-4">
@@ -18,7 +18,7 @@
                 @endforeach
             </select>
         </div>
- 
+
         <div class="col-md-3">
             <label for="mes" class="form-label">Mes</label>
             <select name="mes" id="mes" class="form-control">
@@ -30,13 +30,13 @@
                 @endfor
             </select>
         </div>
- 
+
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
                 <i class="fas fa-filter"></i> Filtrar
             </button>
         </div>
- 
+
         <div class="col-md-2">
             <button id="exportPdfBtn" class="btn btn-danger w-100">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
@@ -44,10 +44,10 @@
         </div>
     </div>
 </form>
- 
- 
+
+
     {{-- ======= TARJETAS KPI ======= --}}
- 
+
     <div class="row justify-content-center">
         <div class="col-md-3 mb-3">
             <div class="small-box bg-info">
@@ -77,8 +77,8 @@
             </div>
         </div>
     </div>
- 
- 
+
+
     {{-- ======= FILA 1: Turnos + Pagos ======= --}}
     <div class="row">
         <div class="col-md-6 mb-4">
@@ -88,7 +88,7 @@
                 </div>
             </div>
         </div>
- 
+
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -97,7 +97,7 @@
             </div>
         </div>
     </div>
- 
+
     {{-- ======= FILA 2: Turnos Atendidos vs Libres + Cubículos ======= --}}
     <div class="row">
         <div class="col-md-6 mb-4">
@@ -107,7 +107,7 @@
                 </div>
             </div>
         </div>
- 
+
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -116,30 +116,30 @@
             </div>
         </div>
     </div>
- 
+
 </div>
 
 
 
 @endsection
 
- 
+
 @section('js')
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- jsPDF y html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
- 
+
 <script>
 // --- Gráfico: Turnos por Día ---
 // --- Gráfico: Turnos por Día ---
 const turnosLabels = @json($turnosPorDia->pluck('fecha'));
 const turnosData   = @json($turnosPorDia->pluck('total'));
- 
+
 // Generar tonos de azul
 const blueShades = turnosData.map((_, i) => `rgba(54, 162, 235, ${0.3 + 0.7 * (i / turnosData.length)})`);
- 
+
 new Chart(document.getElementById('turnosDiaChart'), {
     type: 'bar',
     data: {
@@ -158,13 +158,13 @@ new Chart(document.getElementById('turnosDiaChart'), {
         scales: { y: { beginAtZero: true, precision: 0 } }
     }
 });
- 
- 
+
+
 // --- Gráfico: Pagos por Forma ---
 const pagosLabels = @json($pagosPorForma->pluck('forma_pago'));
 const pagosData   = @json($pagosPorForma->pluck('total'));
 const blueShadesPagos = pagosData.map((_, i) => `rgba(54, 162, 235, ${0.3 + 0.7 * (i / pagosData.length)})`);
- 
+
 new Chart(document.getElementById('pagosFormaChart'), {
     type: 'bar',
     data: {
@@ -183,8 +183,8 @@ new Chart(document.getElementById('pagosFormaChart'), {
         plugins: { legend: { display: false }, title: { display: true, text: 'Pagos por forma de pago' } }
     }
 });
- 
- 
+
+
 // --- Gráfico: Turnos Atendidos vs Libres ---
 const blueShadesStatus = ['rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 0.3)'];
 new Chart(document.getElementById('turnosStatusChart'), {
@@ -205,13 +205,13 @@ new Chart(document.getElementById('turnosStatusChart'), {
         scales: { y: { beginAtZero: true, precision: 0 } }
     }
 });
- 
- 
+
+
 // --- Gráfico: Registros por Cubículo y Tipo de Atención ---
 const cubiculosData = @json($cubiculosQuery);
 const cubiculosLabels = [...new Set(cubiculosData.map(c => c.nombre))];
 const tiposAtencion = [...new Set(cubiculosData.map(c => c.tipo_atencion))];
- 
+
 // Dataset por tipo de atención con tonos de azul
 const datasetsCubiculos = tiposAtencion.map((tipo, i) => ({
     label: tipo,
@@ -221,7 +221,7 @@ const datasetsCubiculos = tiposAtencion.map((tipo, i) => ({
     }),
     backgroundColor: `rgba(54, 162, 235, ${0.3 + 0.7 * (i / tiposAtencion.length)})`
 }));
- 
+
 new Chart(document.getElementById('cubiculosChart'), {
     type: 'bar',
     data: {
@@ -234,40 +234,40 @@ new Chart(document.getElementById('cubiculosChart'), {
         plugins: { title: { display: true, text: 'Registros por Cubículo y Tipo de Atención' }, tooltip: { mode: 'index', intersect: false } }
     }
 });
- 
+
 </script>
 <script>
 document.getElementById('exportPdfBtn').addEventListener('click', async (e) => {
     e.preventDefault(); // Evita que el formulario se envíe
- 
+
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
     const charts = ['turnosDiaChart', 'pagosFormaChart', 'turnosStatusChart', 'cubiculosChart'];
-   
+
     let yOffset = 10; // margen superior
- 
+
     for (let i = 0; i < charts.length; i++) {
         const canvas = document.getElementById(charts[i]);
- 
+
         // html2canvas espera un elemento DOM
         const imgData = await html2canvas(canvas, { scale: 2 }).then(c => c.toDataURL('image/png'));
- 
+
         const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // margen horizontal
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
- 
+
         // Si se pasa del alto, agregar página
         if (yOffset + pdfHeight > pdf.internal.pageSize.getHeight()) {
             pdf.addPage();
             yOffset = 10;
         }
- 
+
         pdf.addImage(imgData, 'PNG', 10, yOffset, pdfWidth, pdfHeight);
         yOffset += pdfHeight + 10; // espacio entre gráficos
     }
- 
+
     pdf.save('dashboard.pdf'); // Fuerza la descarga
 });
 </script>
- 
+
 @endsection

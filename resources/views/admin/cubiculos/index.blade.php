@@ -11,7 +11,6 @@
         <div class="row justify-content-center">
             <div class="col-md-11">
 
-                {{-- Opcional: Alerta de sesión si la usas en el controlador --}}
                 @if (session('info'))
                     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                         <i class="fas fa-check-circle mr-2"></i> {{ session('info') }}
@@ -61,17 +60,17 @@
 
                                             <td class="text-nowrap">
                                                 @can('cubiculos.editar')
-                                                    <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-link text-primary btn-sm me-1" title="Editar">
-                                                        <i class="fas fa-edit"></i>
+                                                    <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-xs btn-default text-primary mx-1 shadow-sm" title="Editar">
+                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
                                                     </a>
                                                 @endcan
                                                 @can('cubiculos.eliminar')
                                                     <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-link text-danger btn-sm"
+                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
                                                             onclick="return confirm('¿Seguro de eliminar este cubículo?')">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 @endcan
@@ -90,13 +89,11 @@
 @stop
 
 @section('css')
-    {{-- Cargamos los estilos compartidos y los CDN necesarios --}}
     <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 @stop
 
 @section('js')
-    {{-- Incluimos el script centralizado que inicializa automáticamente cualquier .datatable-export --}}
     @include('partials.datatables-scripts')
 @stop

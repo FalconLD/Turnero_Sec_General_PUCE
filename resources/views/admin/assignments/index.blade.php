@@ -56,9 +56,10 @@
                                             <td class="text-center">
                                                 @can('asignaciones.editar')
                                                     <a href="{{ route('assignments.edit', $usuario->id) }}"
-                                                       class="btn btn-primary rounded-pill px-4 btn-sm shadow-sm"
-                                                       title="Gestionar Áreas">
-                                                        <i class="fas fa-tasks mr-1"></i> Gestionar
+                                                    class="btn btn-primary rounded-pill px-3 btn-sm shadow-sm d-inline-flex align-items-center"
+                                                    title="Gestionar Áreas">
+                                                        <i class="fas fa-tasks mr-2"></i>
+                                                        <span>Gestionar</span>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -76,13 +77,11 @@
 @stop
 
 @section('css')
-    {{-- Carga estilos globales --}}
     <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 @stop
 
 @section('js')
-    {{-- Carga la lógica de DataTables centralizada --}}
     @include('partials.datatables-scripts')
 @stop

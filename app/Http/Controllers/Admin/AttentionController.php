@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Operator;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -34,11 +34,11 @@ class AttentionController extends Controller
 
         $calendarEvents = $shifts->map(function ($shift) {
             $estaOcupado = ($shift->status_shift == 0);
-            
+
             return [
                 'id'    => $shift->id_shift,
-                'title' => $estaOcupado 
-                            ? "🚫 " . $shift->cubicle_name . ": " . ($shift->student_name ?? 'Ocupado') 
+                'title' => $estaOcupado
+                            ? "🚫 " . $shift->cubicle_name . ": " . ($shift->student_name ?? 'Ocupado')
                             : "✅ " . $shift->cubicle_name . ": Libre",
                 'start' => $shift->date_shift . 'T' . $shift->start_shift,
                 'end'   => $shift->date_shift . 'T' . $shift->end_shift,
@@ -53,6 +53,6 @@ class AttentionController extends Controller
             ->whereIn('operating_area_id', $misAreasIds)
             ->get();
 
-        return view('operator.attention.index', compact('calendarEvents', 'cubiculos'));
+        return view('admin.attention.index', compact('calendarEvents', 'cubiculos'));
     }
 }

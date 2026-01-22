@@ -37,13 +37,13 @@
                             <td>{{ $param->clave }}</td>
                             <td>{{ $param->descripcion }}</td>
                             <td>{{ $param->parametro }}</td>
-                            <td>{{ $param->created_at->format('Y-m-d H:i') }}</td>
-                            <td>{{ $param->updated_at->format('Y-m-d H:i') }}</td>
+                            <td>{{ $param->created_at?->format('Y-m-d H:i') }}</td>
+                            <td>{{ $param->updated_at?->format('Y-m-d H:i') }}</td>
                             <td>
                                 <a href="{{ route('parameters.edit', $param) }}" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                
+
                                 <form action="{{ route('parameters.destroy', $param) }}" method="POST" style="display:inline-block;">
                                     @csrf
                                     @method('DELETE')
@@ -58,9 +58,9 @@
             </table>
         </div>
     </div>
-    
+
 </div>
-@stop   
+@stop
 
 @section('css')
     {{-- DataTables estilos --}}

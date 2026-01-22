@@ -148,6 +148,8 @@ public function loginWithToken($token)
         'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null, // Agregamos para que se pueda mostrar al estudiante 
         'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
         'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
+        'student_facultad'  => $facultad, // Capturamos la Facultad del estudiante
+        'student_carrera'   => $carrera,  // Capturamos la Carrera del estudiante
     ]);
 
     // 5. Redirigir al primer paso del formulario de datos personales

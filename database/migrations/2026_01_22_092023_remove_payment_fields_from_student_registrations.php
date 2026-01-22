@@ -11,10 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('student_registrations', function (Blueprint $table) {
-            // Eliminamos ambos campos basura
-            $table->dropColumn(['forma_pago', 'valor_pagar']);
-        });
+    Schema::table('student_registrations', function (Blueprint $table) {
+        // Verificamos si la columna existe antes de borrar
+        if (Schema::hasColumn('student_registrations', 'forma_pago')) {
+            $table->dropColumn('forma_pago');
+        }
+        
+        if (Schema::hasColumn('student_registrations', 'valor_pagar')) {
+            $table->dropColumn('valor_pagar');
+        }
+    });
     }
     /**
      * Reverse the migrations.

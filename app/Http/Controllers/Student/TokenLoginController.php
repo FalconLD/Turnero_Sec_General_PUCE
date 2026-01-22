@@ -36,6 +36,8 @@ class TokenLoginController extends Controller
         }
 
         $info = $data['data'];
+        $facultad = $info['facultad'] ?? 'No especificada';
+        $carrera = $info['carrera'] ?? 'No especificada';
 
         // 2️⃣ Crear o actualizar el estudiante
         $student = StudentRegistration::updateOrCreate(
@@ -64,7 +66,9 @@ class TokenLoginController extends Controller
             'student_id' => $student->id,
             'student_name' => $student->names,
             'student_cedula' => $student->cedula,
-            'student_correo' => $info['usuario'] . '@puce.edu.ec', 
+            'student_correo' => $info['usuario'] . '@puce.edu.ec',
+            'student_facultad'  => $facultad, // <--- Agregado para mostrarse al estudiante
+            'student_carrera'   => $carrera,  // <--- Agregado para mostrarse al estudiante
         ]);
 
         // 4️⃣ Redirigir al formulario principal de estudiantes
@@ -144,6 +148,8 @@ public function loginWithToken($token)
         'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null, // Agregamos para que se pueda mostrar al estudiante 
         'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
         'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
+        'student_facultad'  => $facultad, // Capturamos la Facultad del estudiante
+        'student_carrera'   => $carrera,  // Capturamos la Carrera del estudiante
     ]);
 
     // 5. Redirigir al primer paso del formulario de datos personales

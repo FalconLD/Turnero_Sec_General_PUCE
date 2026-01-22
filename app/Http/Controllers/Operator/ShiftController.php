@@ -119,6 +119,7 @@ class ShiftController extends Controller
      */
     public function getShifts(Request $request, $fecha)
     {
+    
         try {
             $fechaFormateada = Carbon::parse($fecha)->format('Y-m-d');
 
@@ -131,6 +132,25 @@ class ShiftController extends Controller
                 ]);
             }
 
+        // Obtener plan_estudio del estudiante desde sesión
+        $planEstudio = session('student_plan_estudio');
+
+        // Buscar el operating_area_id que corresponde a ese plan_estudio
+        $operatingAreaId = DB::table('careers')
+            ->where('career_code', $planEstudio) // career_code = plan_estudio
+            ->value('operating_area_id');
+
+        // Si no se encuentra, no mostrar turnos
+        if (!$operatingAreaId) {
+            return response()->json([
+                'success' => true,
+                'fecha_consulta' => $fechaFormateada,
+                'data' => [],
+                'total' => 0,
+                'message' => 'No hay cubículos disponibles para tu carrera de estudios.'
+            ]);
+        }
+
             // Consultar turnos SOLO virtuales y disponibles
             $turnos = DB::table('shifts')
                 ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
@@ -139,6 +159,7 @@ class ShiftController extends Controller
                 ->where('shifts.status_shift', 1) // ✅ Solo disponibles
                 ->where('cubiculos.tipo_atencion', 'virtual') // ✅ Solo virtuales
                 ->whereNull('shifts.person_shift') // Asegurar que no esté ocupado
+                ->where('cubiculos.operating_area_id', $operatingAreaId) // ← Cubiculos segun el area operativa
                 ->select(
                     'shifts.id_shift',
                     'shifts.start_shift',

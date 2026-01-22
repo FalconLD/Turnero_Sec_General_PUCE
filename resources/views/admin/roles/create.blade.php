@@ -47,7 +47,6 @@
                     $icon = 'fas fa-cogs';
                     switch(strtolower($groupName)) {
                         case 'atencion': $bgHeader = 'bg-info'; $icon = 'far fa-calendar-alt'; break;
-                        case 'pagos':    $bgHeader = 'bg-success'; $icon = 'fas fa-file-invoice-dollar'; break;
                         case 'usuarios': $bgHeader = 'bg-warning'; $icon = 'fas fa-users'; break; 
                         case 'roles':    $bgHeader = 'bg-danger'; $icon = 'fas fa-user-shield'; break;
                         case 'horarios': $bgHeader = 'bg-teal'; $icon = 'far fa-clock'; break;

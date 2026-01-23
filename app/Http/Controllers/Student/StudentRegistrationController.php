@@ -203,7 +203,7 @@ class StudentRegistrationController extends Controller
                 $student->plan_estudio = session('student_plan_estudio');
 
                 // ✅ IMPORTANTE: Marcar como que TIENE turno asignado
-                $student->tomado = 0; // 0 = Ya tiene turno
+                $student->tomado = 1; // 1 = Ya tomó turno
 
                 $student->save();
 
@@ -285,7 +285,7 @@ class StudentRegistrationController extends Controller
             }
 
             // 2. Verificar si el estudiante puede tomar turno
-            if ($student->tomado == 0) {
+            if ($student->tomado == 1) {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
@@ -321,7 +321,7 @@ class StudentRegistrationController extends Controller
             $turno->save();
 
             // 6. Marcar al estudiante como que tiene turno
-            $student->tomado = 0; // 0 = Ya tiene turno asignado
+            $student->tomado = 1; // 1 = Ya tomó turno
             $student->save();
 
             DB::commit();
@@ -488,13 +488,13 @@ class StudentRegistrationController extends Controller
             ->where('status_shift', 0)
             ->first();
 
-        // Si tiene un turno y tomado = 0, mostrar el turno actual
-        if ($turnoActual && $student->tomado == 0) {
+        // Si tiene un turno y tomado = 1, mostrar el turno actual
+        if ($turnoActual && $student->tomado == 1) {
             return view('student.status.turno_actual', compact('student', 'turnoActual'));
         }
 
-        // Si tomado = 1, permitir agendar otro turno
-        if ($student->tomado == 1) {
+        // Si tomado = 0, permitir agendar otro turno
+        if ($student->tomado == 0) {
             return view('student.booking.agendamiento', compact('student'));
         }
 
@@ -540,7 +540,7 @@ class StudentRegistrationController extends Controller
             $turno->save();
 
             // Marcar al estudiante como disponible para tomar otro turno
-            $student->tomado = 1; // 1 = Puede tomar turno
+            $student->tomado = 0; // 0 = Puede tomar turno
             $student->save();
 
             DB::commit();

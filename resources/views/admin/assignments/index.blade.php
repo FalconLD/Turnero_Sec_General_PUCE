@@ -3,7 +3,7 @@
 @section('title', 'Asignaciones')
 
 @section('content_header')
-    <h1 class="text-center">Asignación de Operadores a Áreas</h1>
+    <h1 class="text-center font-weight-bold text-dark">Asignación de Operadores a Áreas</h1>
 @stop
 
 @section('content')
@@ -11,6 +11,7 @@
         <div class="row justify-content-center">
             <div class="col-md-11">
 
+                {{-- Las alertas ahora se auto-eliminan gracias al JS global --}}
                 @if (session('info'))
                     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                         <i class="fas fa-check-circle mr-2"></i> {{ session('info') }}
@@ -20,15 +21,15 @@
                     </div>
                 @endif
 
-                <div class="card">
+                <div class="card shadow-sm"> {{-- Clase shadow-sm ahora centralizada en CSS --}}
                     <div class="card-header">
                         <h3 class="card-title text-bold">Listado de Asignaciones</h3>
                     </div>
 
                     <div class="card-body">
                         <div class="table-responsive">
-                            {{-- datatable-export activa el JS global y table-custom el estilo global --}}
-                            <table id="asignaciones" class="table table-custom datatable-export" data-page-title="Reporte de Asignaciones">
+                            {{-- datatable-export activa el JS global y data-page-title define el nombre del PDF/Excel --}}
+                            <table class="table table-hover datatable-export" data-page-title="Reporte de Asignaciones de Operadores">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -42,11 +43,11 @@
                                     @foreach ($users as $usuario)
                                         <tr>
                                             <td>{{ $usuario->id }}</td>
-                                            <td class="font-weight-bold">{{ $usuario->name }}</td>
+                                            <td class="font-weight-bold text-primary">{{ $usuario->name }}</td>
                                             <td>{{ $usuario->DNI ?? 'N/A' }}</td>
                                             <td>
                                                 @forelse ($usuario->operatingAreas as $area)
-                                                    <span class="badge badge-info p-2 mb-1 shadow-sm" style="font-size: 0.8rem; font-weight: 500;">
+                                                    <span class="badge badge-info p-2 mb-1 shadow-sm" style="font-weight: 500;">
                                                         <i class="fas fa-tag mr-1"></i> {{ $area->name }}
                                                     </span>
                                                 @empty
@@ -56,8 +57,8 @@
                                             <td class="text-center">
                                                 @can('asignaciones.editar')
                                                     <a href="{{ route('assignments.edit', $usuario->id) }}"
-                                                    class="btn btn-primary rounded-pill px-3 btn-sm shadow-sm d-inline-flex align-items-center"
-                                                    title="Gestionar Áreas">
+                                                       class="btn btn-primary rounded-pill px-3 btn-sm shadow-sm d-inline-flex align-items-center"
+                                                       title="Gestionar Áreas">
                                                         <i class="fas fa-tasks mr-2"></i>
                                                         <span>Gestionar</span>
                                                     </a>
@@ -75,13 +76,10 @@
         </div>
     </div>
 @stop
-
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+        <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
 @stop
 
 @section('js')
-    @include('partials.datatables-scripts')
+    <script src="{{ asset('js/admin-init.js') }}"></script>
 @stop

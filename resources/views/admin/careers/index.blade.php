@@ -95,13 +95,9 @@
 @stop
 
 @section('css')
-    {{-- Hereda los estilos globales del archivo que creamos --}}
-    <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+        <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
 @stop
 
 @section('js')
-    {{-- Hereda la inicialización automática de DataTables y botones --}}
-    @include('partials.datatables-scripts')
+    <script src="{{ asset('js/admin-init.js') }}"></script>
 @stop

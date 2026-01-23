@@ -1,35 +1,77 @@
-/* resources/css/admin-custom.css o public/css/admin-custom.css */
+/* ==========================================================================
+   1. TARJETAS (CARDS) - Estética de bordes redondeados y sombras
+   ========================================================================== */
 .card {
     border-radius: 1rem !important;
     border: none;
     box-shadow: 0 8px 24px rgba(0,0,0,0.07);
 }
+
 .card-header {
     border-top-left-radius: 1rem !important;
     border-top-right-radius: 1rem !important;
     background-color: #fff;
     border-bottom: 1px solid #f0f0f0;
 }
+
+/* ==========================================================================
+   2. TABLAS Y DATATABLES - Limpieza visual y botones de exportación
+   ========================================================================== */
 .table thead {
     background-color: #f8f9fa;
 }
+
 .table thead th {
     color: #495057;
     font-weight: 600;
-    border: none;
+    border: none !important;
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
+
 .table td, .table th {
-    border-left: none;
-    border-right: none;
+    border-left: none !important;
+    border-right: none !important;
     vertical-align: middle;
 }
+
+/* Buscador de DataTables más ancho */
 .dataTables_filter input[type="search"] {
     width: 400px !important;
+    border-radius: 20px;
+    padding-left: 15px;
 }
+
+/* Botones de Exportación (Excel, PDF, Imprimir) */
 .dt-buttons .btn {
     border-radius: 0.5rem;
     min-width: 105px;
     text-align: center;
+    margin-right: 5px;
+}
+
+/* ==========================================================================
+   3. COMPONENTES DE FORMULARIO - Switches y efectos visuales
+   ========================================================================== */
+/* Color verde para los switches de asignación y roles */
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+/* Efecto de elevación para tarjetas (usado en Roles) */
+.hover-shadow-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    transition: all 0.2s ease;
+}
+
+/* ==========================================================================
+   4. CALENDARIO - Estilos para FullCalendar
+   ========================================================================== */
+/* Deshabilitar visualmente fines de semana */
+.fc-day-sat, .fc-day-sun {
+    background-color: #f0f0f0 !important;
+    opacity: 0.6;
+    cursor: not-allowed;
 }

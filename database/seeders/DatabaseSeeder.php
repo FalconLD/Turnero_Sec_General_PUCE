@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             AssignmentSeeder::class,
             CubiculoSeeder::class,
             StudentRegistrationSeeder::class,
-            ScheduleSeeder::class,
+            // ScheduleSeeder::class, // <-- Desactivado temporalmente
         ]);
     }
 }

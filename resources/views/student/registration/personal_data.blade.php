@@ -1,400 +1,409 @@
 @extends('layouts.app')
 
-    @section('title', 'Registro de Estudiante')
+@section('title', 'Registro de Estudiante')
 
-    @section('layout_sidebar', false)
+@section('layout_sidebar', false)
 
-    @section('content_header')
-        <h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
+@section('content_header')
+<h1 class="text-center mb-4 fw-bold text-primary">Registro de Estudiante</h1>
 @stop
 
 @section('content')
-    <div class="container">
-        <div class="card shadow-lg border-0 rounded-4 mb-5">
-            <div class="card-body p-5">
-                <h4 class="card-title text-center mb-4 text-primary"></h4>
-                {{-- Wizard de pasos visual --}}
-                <div class="steps mb-4">
-                    <ul class="step-list d-flex justify-content-between text-center list-unstyled">
+<div class="container">
+    <div class="card shadow-lg border-0 rounded-4 mb-5">
+        <div class="card-body p-5">
+            <h4 class="card-title text-center mb-4 text-primary"></h4>
+            {{-- Wizard de pasos visual --}}
+            <div class="steps mb-4">
+                <ul class="step-list d-flex justify-content-between text-center list-unstyled">
 
-                        <li class="step-item active" data-step="0">
-                            <span class="step-number">1</span>
-                            <span class="step-title">Términos</span>
-                        </li>
+                    <li class="step-item active" data-step="0">
+                        <span class="step-number">1</span>
+                        <span class="step-title">Términos</span>
+                    </li>
 
-                        <li class="step-item" data-step="1">
-                            <span class="step-number">2</span>
-                            <span class="step-title">Datos</span>
-                        </li>
+                    <li class="step-item" data-step="1">
+                        <span class="step-number">2</span>
+                        <span class="step-title">Datos</span>
+                    </li>
 
+                    <li class="step-item" data-step="4">
+                        <span class="step-number">3</span>
+                        <span class="step-title">Agendamiento</span>
+                    </li>
 
-                        <li class="step-item" data-step="4">
-                            <span class="step-number">3</span>
-                            <span class="step-title">Agendamiento</span>
-                        </li>
-
-                        <li class="step-item" data-step="5">
-                            <span class="step-number">4</span>
-                            <span class="step-title">Confirmación</span>
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Barra de progreso --}}
-                <div class="progress mb-4" style="height: 8px;">
-                    <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
-                </div>
-
-                <form id="student-registration-form" method="POST" action="{{ route('student.finish') }}" enctype="multipart/form-data">                    @csrf
-                    {{-- Paso 1: Términos --}}
-                    <div class="form-step">
-                        <h5 class="text-secondary mb-3">Términos y Condiciones</h5>
-                        <div class="border rounded p-3 bg-light mb-3" style="max-height: 200px; overflow-y: auto;">
-                            @if($terminos)
-                                {!! nl2br(e($terminos->descripcion)) !!}
-                            @else
-                                <p class="text-muted">No se han configurado los términos y condiciones.</p>
-                            @endif
-                        </div>
-
-                        <div class="form-check text-center">
-
-                            <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
-
-                            <label for="acepta_terminos">Acepto los términos y condiciones</label>
-
-                    <!-- 🆕 Segundo checkbox agregado -->
-                    <div class="form-check text-center">
-                        <input type="checkbox" id="acepta_politicas" name="acepta_politicas" value="1">
-                        <label for="acepta_politicas">Consiento el manejo de mis datos personales bajo las normas de privacidad y confidencialidad.</label>
-                    </div>
-
-                        </div>
-                    </div>
-
-                    {{-- Paso 2: Datos personales --}}
-                    @php
-                        $student = session('student_data');
-                    @endphp
-                    <div class="form-step" style="display:none;">
-                        <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label>Nombre completo</label>
-                                <input type="text" name="names" value="{{  old('names', $student_name ?? '')}}" class="form-control" readonly>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label>Cédula</label>
-                                <input type="text" name="cedula" value="{{ old('cedula', $student_cedula ?? '')  }}" class="form-control" readonly>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label>Edad</label>
-                                <input type="number"
-                                    class="form-control"
-                                    name="edad"
-                                    id="inputEdad"
-                                    min="17"
-                                    max="80"
-                                    required
-                                    oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
-                                <div id="errorEdad" class="text-danger small mt-1" style="display:none;">
-                                    La edad debe ser mayor o igual a 17 años.
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label>Correo electrónico</label>
-                                <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Celular</label>
-
-                                {{-- 1. Usamos un "input-group" de Bootstrap --}}
-                                <div class="input-group">
-
-                                    {{-- 2. El prefijo "09" fijo --}}
-                                    <span class="input-group-text">09</span>
-
-                                    {{-- 3. El input (solo para los 8 dígitos restantes) --}}
-                                    <input type="text"
-                                        class="form-control"
-                                        id="inputTelefonoSuffix" {{-- ID cambiado --}}
-                                        maxlength="8"           {{-- Longitud cambiada a 8 --}}
-                                        inputmode="numeric"
-                                        placeholder="XXXXXXXX"  {{-- El placeholder ahora sí se verá --}}
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                        required
-                                    >
-                                </div>
-
-                                {{-- 4. Un campo oculto para enviar el número completo (09 + sufijo) --}}
-                                <input type="hidden" name="telefono" id="inputTelefono">
-
-                                <div id="errorTelefono" class="text-danger small mt-1" style="display:none;">
-                                    Debe ingresar los 8 dígitos restantes.
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label>Dirección</label>
-                                <input type="text" class="form-control" name="direccion" placeholder="Ingrese la dirección de su domicilio" required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Fecha de nacimiento</label>
-                                <input type="date"
-                                    class="form-control"
-                                    name="fecha_nacimiento"
-                                    id="inputFechaNacimiento"
-                                    required>
-                                <small class="text-muted" id="infoFecha" style="display:none;">Año bloqueado por edad.</small>
-                            </div>
-                        </div>
-                    </div>
-
-                        {{-- Paso 3: Agendamiento --}}
-                        <div class="form-step" style="display:none;">
-                            <h5 class="text-primary mb-4 text-center">📅 Seleccione fecha y horario disponible</h5>
-                            <div class="row justify-content-center g-4">
-
-                                {{-- Columna izquierda: calendario y modalidad --}}
-                                <div class="col-lg-6 col-md-7">
-
-                                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-
-                                        <h6 class="fw-bold text-secondary mb-3">Selección de fecha y horario</h6>
-                                        <div class="mb-3">
-                                            <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
-                                            <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
-                                                min="{{ date('Y-m-d') }}" required>
-                                        </div>
-
-                                        <div class="bg-light text-center p-4 rounded-3 border mt-3">
-                                            <i class="bi bi-calendar-date text-primary" style="font-size:2rem;"></i>
-                                            <p class="mt-2 text-muted small">Seleccione una fecha para mostrar los turnos</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Columna derecha: horarios disponibles --}}
-                                <div class="col-lg-6 col-md-5">
-                                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                                        <h6 class="fw-bold text-secondary mb-3 text-center">Horarios disponibles</h6>
-                                        <div id="turnosContainer" class="d-flex flex-wrap justify-content-center align-items-start gap-3">
-                                            <div class="text-muted text-center">
-                                                <em>Seleccione modalidad y fecha para ver los turnos disponibles...</em>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Campos ocultos --}}
-                            <input type="hidden" name="turno_id" id="turno_id">
-                            <input type="hidden" name="date_shift" id="date_shift">
-                            <input type="hidden" name="shift_time" id="shift_time">
-                            <input type="hidden" name="modalidad_shift" id="modalidad_shift">
-                        </div>
-
-                    {{-- Paso 4: Confirmación --}}
-                    <div class="form-step" style="display:none;">
-                        @if (session('error'))
-                            <div class="alert alert-danger">
-                                {{ session('error') }}
-                            </div>
-                        @endif
-                        <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
-                        <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
-                        <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
-                        <p><strong>Facultad:</strong> <span id="facultadConfirm">-</span></p>
-                        <p><strong>Carrera:</strong> <span id="carreraConfirm">-</span></p>
-                        <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
-                        <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
-                        <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
-                        <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>
-                        <div class="text-muted small">Al presionar *Confirmar y Guardar* se registrará su turno y se enviará un correo.</div>
-                    </div>
-
-                    {{-- Navegación --}}
-                    <div class="d-flex justify-content-between mt-4">
-                        <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
-                        <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
-                        <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
-                    </div>
-                </form>
+                    <li class="step-item" data-step="5">
+                        <span class="step-number">4</span>
+                        <span class="step-title">Confirmación</span>
+                    </li>
+                </ul>
             </div>
+
+            {{-- Barra de progreso --}}
+            <div class="progress mb-4" style="height: 8px;">
+                <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
+            </div>
+
+            <form id="student-registration-form" method="POST" action="{{ route('student.finish') }}" enctype="multipart/form-data"> @csrf
+                {{-- Paso 1: Términos --}}
+                <div class="form-step">
+                    <h5 class="text-secondary mb-3">Términos y Condiciones</h5>
+                    <div class="border rounded p-3 bg-light mb-3" style="max-height: 200px; overflow-y: auto;">
+                        @if($terminos)
+                        {!! nl2br(e($terminos->descripcion)) !!}
+                        @else
+                        <p class="text-muted">No se han configurado los términos y condiciones.</p>
+                        @endif
+                    </div>
+
+                    <div class="form-check text-center">
+
+                        <input type="checkbox" id="acepta_terminos" name="acepta_terminos" value="1">
+
+                        <label for="acepta_terminos">Acepto los términos y condiciones</label>
+
+                        <!-- 🆕 Segundo checkbox agregado -->
+                        <div class="form-check text-center">
+                            <input type="checkbox" id="acepta_politicas" name="acepta_politicas" value="1">
+                            <label for="acepta_politicas">Consiento el manejo de mis datos personales bajo las normas de privacidad y confidencialidad.</label>
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- Paso 2: Datos personales --}}
+                @php
+                $student = session('student_data');
+                @endphp
+                <div class="form-step" style="display:none;">
+                    <h5 class="text-secondary mb-3">Datos Personales y de Contacto</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label>Nombre completo</label>
+                            <input type="text" name="names" value="{{  old('names', $student_name ?? '')}}" class="form-control" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Cédula</label>
+                            <input type="text" name="cedula" value="{{ old('cedula', $student_cedula ?? '')  }}" class="form-control" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Edad</label>
+                            <input type="number"
+                                class="form-control"
+                                name="edad"
+                                id="inputEdad"
+                                min="17"
+                                max="80"
+                                required
+                                oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
+                            <div id="errorEdad" class="text-danger small mt-1" style="display:none;">
+                                La edad debe ser mayor o igual a 17 años.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Correo electrónico</label>
+                            <input type="email" class="form-control" name="correo_puce" value="{{  old('correo_puce', $student_correo ?? '')  }}" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Celular</label>
+
+                            {{-- 1. Usamos un "input-group" de Bootstrap --}}
+                            <div class="input-group">
+
+                                {{-- 2. El prefijo "09" fijo --}}
+                                <span class="input-group-text">09</span>
+
+                                {{-- 3. El input (solo para los 8 dígitos restantes) --}}
+                                <input type="text"
+                                    class="form-control"
+                                    id="inputTelefonoSuffix" {{-- ID cambiado --}}
+                                    maxlength="8" {{-- Longitud cambiada a 8 --}}
+                                    inputmode="numeric"
+                                    placeholder="XXXXXXXX" {{-- El placeholder ahora sí se verá --}}
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                    required>
+                            </div>
+
+                            {{-- 4. Un campo oculto para enviar el número completo (09 + sufijo) --}}
+                            <input type="hidden" name="telefono" id="inputTelefono">
+
+                            <div id="errorTelefono" class="text-danger small mt-1" style="display:none;">
+                                Debe ingresar los 8 dígitos restantes.
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Dirección</label>
+                            <input type="text" class="form-control" name="direccion" placeholder="Ingrese la dirección de su domicilio" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Fecha de nacimiento</label>
+                            <input type="date"
+                                class="form-control"
+                                name="fecha_nacimiento"
+                                id="inputFechaNacimiento"
+                                required>
+                            <small class="text-muted" id="infoFecha" style="display:none;">Año bloqueado por edad.</small>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Paso 3: Agendamiento --}}
+                <div class="form-step" style="display:none;">
+                    <h5 class="text-primary mb-4 text-center">📅 Seleccione fecha y horario disponible</h5>
+                    <div class="row justify-content-center g-4">
+
+                        {{-- Columna izquierda: calendario y modalidad --}}
+                        <div class="col-lg-6 col-md-7">
+
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                                <h6 class="fw-bold text-secondary mb-3">Selección de fecha y horario</h6>
+                                <div class="mb-3">
+                                    <label for="fechaSeleccionada" class="form-label fw-bold">Fecha disponible</label>
+                                    <input type="date" id="fechaSeleccionada" class="form-control shadow-sm"
+                                        min="{{ date('Y-m-d') }}" required>
+                                </div>
+
+                                <div class="bg-light text-center p-4 rounded-3 border mt-3">
+                                    <i class="bi bi-calendar-date text-primary" style="font-size:2rem;"></i>
+                                    <p class="mt-2 text-muted small">Seleccione una fecha para mostrar los turnos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Columna derecha: horarios disponibles --}}
+                        <div class="col-lg-6 col-md-5">
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <h6 class="fw-bold text-secondary mb-3 text-center">Horarios disponibles</h6>
+                                <div id="turnosContainer" class="d-flex flex-wrap justify-content-center align-items-start gap-3">
+                                    <div class="text-muted text-center">
+                                        <em>Seleccione modalidad y fecha para ver los turnos disponibles...</em>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Campos ocultos --}}
+                    <input type="hidden" name="turno_id" id="turno_id">
+                    <input type="hidden" name="date_shift" id="date_shift">
+                    <input type="hidden" name="shift_time" id="shift_time">
+                    <input type="hidden" name="modalidad_shift" id="modalidad_shift">
+                </div>
+
+                {{-- Paso 4: Confirmación --}}
+                <div class="form-step" style="display:none;">
+                    @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                    @endif
+                    <h5 class="text-secondary mb-3 text-center">Confirmación de Registro</h5>
+                    <p><strong>Cédula:</strong> <span id="cedulaConfirm">-</span></p>
+                    <p><strong>Nombres:</strong> <span id="namesConfirm">-</span></p>
+                    <p><strong>Facultad:</strong> <span id="facultadConfirm">-</span></p>
+                    <p><strong>Carrera:</strong> <span id="carreraConfirm">-</span></p>
+                    <p><strong>Correo PUCE:</strong> <span id="correoConfirm">-</span></p>
+                    <p><strong>Teléfono:</strong> <span id="telefonoConfirm">-</span></p>
+                    <p><strong>Fecha seleccionada:</strong> <span id="fechaConfirm">-</span></p>
+                    <p><strong>Horario:</strong> <span id="horarioConfirm">-</span></p>
+                    <div class="text-muted small">Al presionar *Confirmar y Guardar* se registrará su turno y se enviará un correo.</div>
+                </div>
+
+                {{-- Navegación --}}
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
+                    <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
+                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <div class="bg-light text-center py-3 mt-4 border-top">
-  <div class="container">
-    <small>Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador</small>
-  </div>
 </div>
 
-    {{-- === Estilos personalizados === --}}
-    <style>
-        .steps .step-item {
-            flex: 1;
-            position: relative;
-            /* Convertimos el 'paso' en un contenedor flex vertical */
-            display: flex;
-            flex-direction: column; /* Apila los hijos (número y título) */
-            align-items: center;    /* Centra los hijos horizontalmente */
+<div class="bg-light text-center py-3 mt-4 border-top">
+    <div class="container">
+        <small>Desarrollado por la Dirección de Informática - Pontificia Universidad Católica del Ecuador</small>
+    </div>
+</div>
+
+{{-- === Estilos personalizados === --}}
+<style>
+    .steps .step-item {
+        flex: 1;
+        position: relative;
+        /* Convertimos el 'paso' en un contenedor flex vertical */
+        display: flex;
+        flex-direction: column;
+        /* Apila los hijos (número y título) */
+        align-items: center;
+        /* Centra los hijos horizontalmente */
+    }
+
+    .steps .step-number {
+        background-color: #dee2e6;
+        color: #495057;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 6px;
+        font-weight: bold;
+    }
+
+    .steps .step-item.active .step-number {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .steps .step-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .steps .step-item.active .step-title {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .progress {
+        border-radius: 10px;
+    }
+
+    #progressBar {
+        border-radius: 10px;
+        transition: width 0.4s ease;
+    }
+
+    .form-step {
+        animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
 
-        .steps .step-number {
-            background-color: #dee2e6;
-            color: #495057;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 6px;
-            font-weight: bold;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .steps .step-item.active .step-number {
-            background-color: #0d6efd;
-            color: #fff;
-        }
+    .turno-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #fff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
 
-        .steps .step-title {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
+    .turno-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-color: #0d6efd;
+    }
 
-        .steps .step-item.active .step-title {
-            color: #0d6efd;
-            font-weight: 600;
-        }
+    .turno-card.selected {
+        border: 2px solid #0d6efd;
+        background-color: #e8f0fe;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+    }
+</style>
 
-        .progress {
-            border-radius: 10px;
-        }
+<style>
+    /* === Mejora visual de los combo box (selects) === */
+    .form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        padding: 10px 38px 10px 14px;
+        font-size: 0.95rem;
+        color: #495057;
+        line-height: 1.5;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.25s ease-in-out;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.354 10.354a.5.5 0 0 1-.708 0L4.646 7.354a.5.5 0 0 1 0-.708z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 14px;
+    }
 
-        #progressBar {
-            border-radius: 10px;
-            transition: width 0.4s ease;
-        }
+    .form-select:hover {
+        border-color: #86b7fe;
+        box-shadow: 0 0 6px rgba(13, 110, 253, 0.15);
+    }
 
-        .form-step {
-            animation: fadeIn 0.4s ease;
-        }
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        outline: none;
+    }
 
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(10px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
+    /* === Etiquetas y alineación === */
+    label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 6px;
+    }
 
-        .turno-card {
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 16px;
-            background-color: #fff;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
+    /* === Efecto suave en inputs generales === */
+    .form-control,
+    .form-select {
+        transition: all 0.3s ease;
+    }
 
-        .turno-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-color: #0d6efd;
-        }
+    /* === Sombras suaves al enfocar === */
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+    }
 
-        .turno-card.selected {
-            border: 2px solid #0d6efd;
-            background-color: #e8f0fe;
-            box-shadow: 0 0 10px rgba(13,110,253,0.2);
-        }
-    </style>
+    /* === Versión centrada para selects del paso 5 === */
+    #fechaSeleccionada {
+        border-radius: 12px;
+        max-width: 360px;
+        font-weight: 500;
+    }
 
-    <style>
-        /* === Mejora visual de los combo box (selects) === */
-        .form-select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-color: #fff;
-            border: 1px solid #ced4da;
-            border-radius: 10px;
-            padding: 10px 38px 10px 14px;
-            font-size: 0.95rem;
-            color: #495057;
-            line-height: 1.5;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.25s ease-in-out;
-            background-image: url("data:image/svg+xml;utf8,<svg fill='%236c757d' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.354 10.354a.5.5 0 0 1-.708 0L4.646 7.354a.5.5 0 0 1 0-.708z'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 14px;
-        }
+    /* Mejor apariencia del paso de agendamiento */
+    #turnosContainer .turno-card {
+        flex: 1 1 40%;
+        min-width: 160px;
+        max-width: 220px;
+    }
 
-        .form-select:hover {
-            border-color: #86b7fe;
-            box-shadow: 0 0 6px rgba(13,110,253,0.15);
-        }
-
-        .form-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
-            outline: none;
-        }
-
-        /* === Etiquetas y alineación === */
-        label {
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 6px;
-        }
-
-        /* === Efecto suave en inputs generales === */
-        .form-control, .form-select {
-            transition: all 0.3s ease;
-        }
-
-        /* === Sombras suaves al enfocar === */
-        .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.2);
-        }
-
-        /* === Versión centrada para selects del paso 5 === */
-        #fechaSeleccionada {
-            border-radius: 12px;
-            max-width: 360px;
-            font-weight: 500;
-        }
-
-        /* Mejor apariencia del paso de agendamiento */
+    @media (max-width: 768px) {
         #turnosContainer .turno-card {
-            flex: 1 1 40%;
-            min-width: 160px;
-            max-width: 220px;
+            flex: 1 1 100%;
         }
-
-        @media (max-width: 768px) {
-            #turnosContainer .turno-card {
-                flex: 1 1 100%;
-            }
-        }
-    </style>
+    }
+</style>
 
 
 {{-- === Script de funcionalidad === --}}
 
-    <script> // Script para calcular fecha de nacimiento según edad
-    document.addEventListener('DOMContentLoaded', function () {
+<script>
+    // Script para calcular fecha de nacimiento según edad
+    document.addEventListener('DOMContentLoaded', function() {
         const edadInput = document.getElementById('inputEdad');
         const fechaInput = document.getElementById('inputFechaNacimiento');
 
         if (!edadInput || !fechaInput) return;
 
-        edadInput.addEventListener('change', function () {
+        edadInput.addEventListener('change', function() {
             const edad = parseInt(this.value);
             if (!edad) return;
 
@@ -405,10 +414,10 @@
             fechaInput.value = fecha.toISOString().split('T')[0];
         });
     });
-    </script>
+</script>
 
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const steps = document.querySelectorAll('.form-step');
         const nextBtn = document.getElementById('nextBtn');
@@ -640,13 +649,13 @@
 
                 if (edad < 17 || edad > 80) {
                     inputEdad.classList.add('is-invalid');
-                    if(errorEdad) errorEdad.style.display = 'block';
+                    if (errorEdad) errorEdad.style.display = 'block';
                     inputFecha.min = '';
                     inputFecha.max = '';
                     return;
                 } else {
                     inputEdad.classList.remove('is-invalid');
-                    if(errorEdad) errorEdad.style.display = 'none';
+                    if (errorEdad) errorEdad.style.display = 'none';
                 }
 
                 const anioActual = new Date().getFullYear();
@@ -664,7 +673,7 @@
                     }
                 }
 
-                if(infoFecha) {
+                if (infoFecha) {
                     infoFecha.textContent = `Calendario ajustado al año ${anioNacimiento}`;
                     infoFecha.style.display = 'block';
                 }
@@ -673,6 +682,6 @@
 
         showStep(currentStep);
     });
-    </script>
+</script>
 
 @stop

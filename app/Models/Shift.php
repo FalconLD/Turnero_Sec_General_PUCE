@@ -6,8 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use OwenIt\Auditing\Contracts\Auditable;
 
+
 class Shift extends Model implements Auditable
 {
+    const STATUS_OCCUPIED = 0;    // Ocupado
+    const STATUS_AVAILABLE = 1;   // Disponible
+    const STATUS_CANCELLED = 2;   // Cancelado
+
     use HasUuids, \OwenIt\Auditing\Auditable;
 
     protected $table = 'shifts';
@@ -42,8 +47,16 @@ class Shift extends Model implements Auditable
     {
         return $this->hasOne(StudentRegistration::class, 'cedula', 'person_shift');
     }
-     
+    public function scopeAvailable($query)
+    {
+        return $query->where('status_shift', self::STATUS_AVAILABLE);
+    }
 
+    public function scopeOccupied($query)
+    {
+        return $query->where('status_shift', self::STATUS_OCCUPIED);
+    }
+        
     // Eliminamos los eventos manuales de auditoría
     // OwenIt\Auditing se encarga automáticamente
 }

@@ -65,7 +65,7 @@ class ShiftController extends Controller
         $shift->start_shift = $request['start_time'];
         $shift->end_shift = $request['end_time'];
         $shift->person_shift = $person->cedula;
-        $shift->status_shift = 1; // 1 = Disponible/Reservado
+        $shift->status_shift = Shift::STATUS_AVAILABLE; 
         $shift->save();
 
         return response()->json(['data' => $shift, 'message' => 'Turno creado con éxito']);
@@ -156,7 +156,7 @@ class ShiftController extends Controller
                 ->join('cubiculos', 'cubiculos.id', '=', 'shifts.cubicle_shift')
                 ->whereDate('shifts.date_shift', $fechaFormateada)
                 ->where('date_shift', '>=', Carbon::today()) // Solo turnos de hoy y futuros
-                ->where('shifts.status_shift', 1) // ✅ Solo disponibles
+                ->where('shifts.status_shift', Shift::STATUS_AVAILABLE) // ✅ Solo disponibles
                 ->where('cubiculos.tipo_atencion', 'virtual') // ✅ Solo virtuales
                 ->whereNull('shifts.person_shift') // Asegurar que no esté ocupado
                 ->where('cubiculos.operating_area_id', $operatingAreaId) // ← Cubiculos segun el area operativa

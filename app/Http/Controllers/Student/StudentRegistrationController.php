@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\DB;
 
 class StudentRegistrationController extends Controller
 {
+    private const STUDENT_CAN_TAKE_SHIFT = 0;  // Puede tomar turno
+    private const STUDENT_HAS_SHIFT = 1;       // Ya tiene turno
+
     // Login mediante token (desde PUCE)
     public function loginWithToken($token)
     {
@@ -203,7 +206,7 @@ class StudentRegistrationController extends Controller
             $student->plan_estudio = session('student_plan_estudio');
 
             // ✅ IMPORTANTE: Marcar como que TIENE turno asignado
-            $student->tomado = 1; // ✅ 1 = OCUPADO (ya tiene turno asignado)
+            $student->tomado = self::STUDENT_HAS_SHIFT; // 1 = Ya tiene turno
 
             $student->save();
 
@@ -283,8 +286,21 @@ class StudentRegistrationController extends Controller
                 ], 404);
             }
 
+            // ✅ MEJORAR VALIDACIÓN: Verificar si ya tiene turno activo en la tabla shifts
+            $turnoExistente = Shift::where('person_shift', $student->cedula)
+                ->where('status_shift', Shift::STATUS_OCCUPIED)
+                ->exists();
+                
+            if ($turnoExistente) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya tiene un turno activo. Debe cancelarlo antes de agendar uno nuevo.'
+                ], 400);
+            }
+
             // 2. Verificar si el estudiante puede tomar turno
-            if ($student->tomado == 1) { // tomado = 1, ya tiene turno
+            if ($student->tomado == self::STUDENT_HAS_SHIFT) { // tomado = 1, ya tiene turno
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
@@ -320,7 +336,7 @@ class StudentRegistrationController extends Controller
             $turno->save();
 
             // 6. Marcar al estudiante como que tiene turno
-            $student->tomado = 1; // 1 = Ya tomó turno
+            $student->tomado = self::STUDENT_HAS_SHIFT; // 1 = Ya tomó turno
             $student->save();
 
             DB::commit();
@@ -483,16 +499,16 @@ class StudentRegistrationController extends Controller
 
         // Buscar si el estudiante ya tiene un turno tomado
         $turnoActual = Shift::where('person_shift', $student->cedula)
-            ->where('status_shift', 0)
+            ->where('status_shift', Shift::STATUS_OCCUPIED)
             ->first();
 
         // Si tiene un turno y tomado = 1, mostrar el turno actual
-        if ($turnoActual && $student->tomado == 1) {
+        if ($turnoActual && $student->tomado == self::STUDENT_HAS_SHIFT) {
             return view('student.status.turno_actual', compact('student', 'turnoActual'));
         }
 
         // Si tomado = 0, permitir agendar otro turno
-        if ($student->tomado == 0) {
+        if ($student->tomado == self::STUDENT_CAN_TAKE_SHIFT) {
             return view('student.booking.agendamiento', compact('student'));
         }
 
@@ -523,7 +539,7 @@ class StudentRegistrationController extends Controller
             }
 
             $turno = Shift::where('person_shift', $cedula)
-                ->where('status_shift', 0)
+                ->where('status_shift', Shift::STATUS_OCCUPIED)
                 ->lockForUpdate()
                 ->first();
 
@@ -538,7 +554,7 @@ class StudentRegistrationController extends Controller
             $turno->save();
 
             // Marcar al estudiante como disponible para tomar otro turno
-            $student->tomado = 0; // 0 = Puede tomar turno
+            $student->tomado = self::STUDENT_CAN_TAKE_SHIFT; // 0 = Puede tomar turno
             $student->save();
 
             DB::commit();

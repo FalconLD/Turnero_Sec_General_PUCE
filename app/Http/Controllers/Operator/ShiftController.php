@@ -65,7 +65,7 @@ class ShiftController extends Controller
         $shift->start_shift = $request['start_time'];
         $shift->end_shift = $request['end_time'];
         $shift->person_shift = $person->cedula;
-        $shift->status_shift = Shift::STATUS_AVAILABLE; 
+        $shift->status_shift = Shift::STATUS_OCCUPIED; // Marca el turno como ocupado inmediatamente
         $shift->save();
 
         return response()->json(['data' => $shift, 'message' => 'Turno creado con éxito']);
@@ -140,6 +140,21 @@ class ShiftController extends Controller
             ->where('career_code', $planEstudio) // career_code = plan_estudio
             ->value('operating_area_id');
 
+        $cedula = session('student_cedula');
+        if ($cedula) {
+            // Verificar si ya tiene turno para cualquier fecha
+            $tieneTurno = Shift::where('person_shift', $cedula)
+                ->where('status_shift', Shift::STATUS_OCCUPIED)
+                ->exists();
+                
+            if ($tieneTurno) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya tienes un turno asignado. Debes cancelarlo primero.',
+                    'data' => []
+                ]);
+            }
+        }
         // Si no se encuentra, no mostrar turnos
         if (!$operatingAreaId) {
             return response()->json([

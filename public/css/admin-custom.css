@@ -14,6 +14,22 @@
     border-bottom: 1px solid #f0f0f0;
 }
 
+/* Asegura que los botones de acción no se amontonen */
+.acciones-column {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center; /* Centra los botones */
+    align-items: center;
+    gap: 5px; /* Espacio uniforme entre los botones */
+}
+
+/* Ajuste para que el formulario no ocupe espacio extra */
+.acciones-column form {
+    margin: 0;
+    display: flex;
+}
+
 /* ==========================================================================
    2. TABLAS Y DATATABLES - Limpieza visual y botones de exportación
    ========================================================================== */

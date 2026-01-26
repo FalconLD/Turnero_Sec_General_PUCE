@@ -59,21 +59,27 @@
                                             <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td>
 
                                             <td class="text-nowrap">
-                                                @can('cubiculos.editar')
-                                                    <a href="{{ route('cubiculos.edit', $cubiculo) }}" class="btn btn-xs btn-default text-primary mx-1 shadow-sm" title="Editar">
-                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                    </a>
-                                                @endcan
-                                                @can('cubiculos.eliminar')
-                                                    <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
-                                                            onclick="return confirm('¿Seguro de eliminar este cubículo?')">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
+                                                <div class="acciones-column">
+                                                    @can('cubiculos.editar')
+                                                        <a href="{{ route('cubiculos.edit', $cubiculo) }}"
+                                                        class="btn btn-xs btn-default text-primary shadow-sm"
+                                                        title="Editar">
+                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                        </a>
+                                                    @endcan
+
+                                                    @can('cubiculos.eliminar')
+                                                        <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-xs btn-default text-danger shadow-sm"
+                                                                    onclick="return confirm('¿Seguro de eliminar este cubículo?')">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

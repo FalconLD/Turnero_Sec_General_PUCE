@@ -85,20 +85,22 @@
                                             </td>
 
                                             <td class="text-center">
-                                                @can('usuarios.editar')
-                                                    <a href="{{ route('users.edit', $usuario) }}" class="btn btn-xs btn-default text-primary mx-1 shadow-sm" title="Editar">
-                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                    </a>
-                                                @endcan
+                                                <div class="acciones-column">
+                                                    @can('usuarios.editar')
+                                                        <a href="{{ route('users.edit', $usuario) }}" class="btn btn-xs btn-default text-primary mx-1 shadow-sm" title="Editar">
+                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                        </a>
+                                                    @endcan
 
-                                                @can('usuarios.eliminar')
-                                                    <form action="{{ route('users.destroy', $usuario) }}" method="POST" class="d-inline">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow-sm" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar este usuario?')">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
+                                                    @can('usuarios.eliminar')
+                                                        <form action="{{ route('users.destroy', $usuario) }}" method="POST" class="d-inline">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow-sm" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar este usuario?')">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

@@ -55,20 +55,22 @@
                                                 <span class="badge badge-info">{{ $faculty->nivel }}</span>
                                             </td>
                                             <td class="text-center">
-                                                @can('facultades.editar')
-                                                    <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Editar">
-                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                    </a>
-                                                @endcan
+                                                <div class="acciones-column">
+                                                    @can('facultades.editar')
+                                                        <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Editar">
+                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                        </a>
+                                                    @endcan
 
-                                                @can('facultades.eliminar')
-                                                    <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta facultad?')">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
+                                                    @can('facultades.eliminar')
+                                                        <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta facultad?')">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

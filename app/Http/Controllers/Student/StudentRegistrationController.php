@@ -199,11 +199,9 @@ class StudentRegistrationController extends Controller
             $student->motivo = $request->input('motivo', 'Matriculación');
             $student->acepta_terminos = $request->input('acepta_terminos') ? 1 : 0;
 
-
-
             // Datos de sesión
-            $student->banner_id = session('student_banner_id');
-            $student->plan_estudio = session('student_plan_estudio');
+            $student->banner_id = session('student_banner_id', $student->banner_id);
+            $student->plan_estudio = session('student_plan_estudio', $student->plan_estudio); // Solo actualiza si hay valor nuevo
 
             // ✅ IMPORTANTE: Marcar como que TIENE turno asignado
             $student->tomado = self::STUDENT_HAS_SHIFT; // 1 = Ya tiene turno
@@ -243,7 +241,8 @@ class StudentRegistrationController extends Controller
 
             // 4. Enviar correo de confirmación
             try {
-                Mail::to($student->correo_puce)->send(new StudentRegistered($student, $turno));
+                Mail::to($student->correo_puce)->queue(new StudentRegistered($student, $turno));
+                // ↑ Cambiar send() por queue()
             } catch (\Exception $e) {
                 Log::error("Error enviando correo a {$student->correo_puce}: " . $e->getMessage());
             }

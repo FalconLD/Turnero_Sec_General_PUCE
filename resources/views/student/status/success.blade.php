@@ -7,8 +7,8 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             {{-- Tarjeta de éxito --}}
-            <div class="card border-success shadow">
-                <div class="card-header bg-success text-white text-center py-4">
+            <div class="card border-primary shadow">
+                <div class="card-header bg-primary text-white text-center py-4">
                     <i class="bi bi-check-circle display-4 d-block mb-3"></i>
                     <h4 class="mb-0">Turno Confirmado</h4>
                 </div>
@@ -20,7 +20,7 @@
                     
                     {{-- Botón principal --}}
                     <a href="{{ route('student.agendamiento') }}" 
-                       class="btn btn-success btn-lg w-100 mb-3">
+                       class="btn btn-primary btn-lg w-100 mb-3">
                         <i class="bi bi-eye me-2"></i> Ver detalles de mi turno
                     </a>
                     

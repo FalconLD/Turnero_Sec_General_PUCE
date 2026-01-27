@@ -46,27 +46,28 @@
                                 <td>{{ $form->description }}</td>
                                 <td>{{ $form->term }}</td>
                                 <td>{{ $form->question }}</td>
-                                <td class="text-nowrap">
-                                    {{-- Contenedor estandarizado para botones alineados --}}
-                                    <div class="acciones-column">
-                                        <a href="{{ route('forms.edit', $form->id) }}"
-                                           class="btn btn-xs btn-default text-primary shadow-sm"
-                                           title="Editar">
-                                            <i class="fas fa-lg fa-edit"></i>
-                                        </a>
+                                @canany(['forms.editar', 'forms.eliminar'])
+                                    <td class="text-nowrap text-center">
+                                        <div class="acciones-column">
+                                            <a href="{{ route('forms.edit', $form->id) }}"
+                                            class="btn btn-xs btn-default text-primary shadow-sm"
+                                            title="Editar">
+                                                <i class="fas fa-lg fa-edit"></i>
+                                            </a>
 
-                                        <form action="{{ route('forms.destroy', $form->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="btn btn-xs btn-default text-danger shadow-sm"
-                                                    onclick="return confirm('¿Seguro que quieres eliminar este formulario?')"
-                                                    title="Eliminar">
-                                                <i class="fas fa-lg fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+                                            <form action="{{ route('forms.destroy', $form->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="btn btn-xs btn-default text-danger shadow-sm"
+                                                        onclick="return confirm('¿Seguro que quieres eliminar este formulario?')"
+                                                        title="Eliminar">
+                                                    <i class="fas fa-lg fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

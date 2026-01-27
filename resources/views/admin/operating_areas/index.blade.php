@@ -54,7 +54,7 @@
                                                     <i class="fas fa-university mr-1"></i> {{ $area->faculty->facultad }}
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-nowrap text-center">
                                                 <div class="acciones-column">
                                                     @can('areas.editar')
                                                         <a href="{{ route('operating-areas.edit', $area) }}"

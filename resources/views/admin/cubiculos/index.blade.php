@@ -39,7 +39,9 @@
                                         <th>Nombre del Cubículo</th>
                                         <th>Enlace de Reunión</th>
                                         <th>Usuario Asignado</th>
-                                        <th>Acciones</th>
+                                        @canany(['cubiculos.editar', 'cubiculos.eliminar'])
+                                            <th>Acciones</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -57,30 +59,31 @@
                                                 @endif
                                             </td>
                                             <td>{{ $cubiculo->users->name ?? 'No asignado' }}</td>
+                                            @canany(['cubiculos.editar', 'cubiculos.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    <div class="acciones-column">
+                                                        @can('cubiculos.editar')
+                                                            <a href="{{ route('cubiculos.edit', $cubiculo) }}"
+                                                            class="btn btn-xs btn-default text-primary shadow-sm"
+                                                            title="Editar">
+                                                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                            </a>
+                                                        @endcan
 
-                                            <td class="text-nowrap">
-                                                <div class="acciones-column">
-                                                    @can('cubiculos.editar')
-                                                        <a href="{{ route('cubiculos.edit', $cubiculo) }}"
-                                                        class="btn btn-xs btn-default text-primary shadow-sm"
-                                                        title="Editar">
-                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                        </a>
-                                                    @endcan
-
-                                                    @can('cubiculos.eliminar')
-                                                        <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="btn btn-xs btn-default text-danger shadow-sm"
-                                                                    onclick="return confirm('¿Seguro de eliminar este cubículo?')">
-                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endcan
-                                                </div>
-                                            </td>
+                                                        @can('cubiculos.eliminar')
+                                                            <form action="{{ route('cubiculos.destroy', $cubiculo) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-xs btn-default text-danger shadow-sm"
+                                                                        onclick="return confirm('¿Seguro de eliminar este cubículo?')">
+                                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endforeach
                                 </tbody>

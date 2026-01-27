@@ -42,7 +42,9 @@
                                         <th>Facultad</th>
                                         <th>Descripción Programa</th>
                                         <th>Nivel</th>
-                                        <th class="text-center">Acciones</th>
+                                        @canany(['facultades.editar', 'facultades.eliminar'])
+                                            <th class="text-center">Acciones</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,24 +56,26 @@
                                             <td>
                                                 <span class="badge badge-info">{{ $faculty->nivel }}</span>
                                             </td>
-                                            <td class="text-center">
-                                                <div class="acciones-column">
-                                                    @can('facultades.editar')
-                                                        <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Editar">
-                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                        </a>
-                                                    @endcan
+                                            @canany(['facultades.editar', 'facultades.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    <div class="acciones-column">
+                                                        @can('facultades.editar')
+                                                            <a href="{{ route('faculties.edit', $faculty) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Editar">
+                                                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                            </a>
+                                                        @endcan
 
-                                                    @can('facultades.eliminar')
-                                                        <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta facultad?')">
-                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endcan
-                                                </div>
-                                            </td>
+                                                        @can('facultades.eliminar')
+                                                            <form action="{{ route('faculties.destroy', $faculty) }}" method="POST" style="display:inline">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta facultad?')">
+                                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endforeach
                                 </tbody>

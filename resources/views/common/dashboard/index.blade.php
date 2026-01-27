@@ -79,26 +79,8 @@
     </div>
 
 
-    {{-- ======= FILA 1: Turnos + Pagos ======= --}}
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <canvas id="turnosDiaChart" style="height:260px;"></canvas>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <canvas id="pagosFormaChart" style="height:260px;"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- ======= FILA 2: Turnos Atendidos vs Libres + Cubículos ======= --}}
+    {{-- ======= FILA: Turnos Atendidos vs Libres + Cubículos ======= --}}
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
@@ -160,31 +142,6 @@ new Chart(document.getElementById('turnosDiaChart'), {
 });
 
 
-// --- Gráfico: Pagos por Forma ---
-const pagosLabels = @json($pagosPorForma->pluck('forma_pago'));
-const pagosData   = @json($pagosPorForma->pluck('total'));
-const blueShadesPagos = pagosData.map((_, i) => `rgba(54, 162, 235, ${0.3 + 0.7 * (i / pagosData.length)})`);
-
-new Chart(document.getElementById('pagosFormaChart'), {
-    type: 'bar',
-    data: {
-        labels: pagosLabels,
-        datasets: [{
-            label: 'Estudiantes por forma de pago',
-            data: pagosData,
-            backgroundColor: blueShadesPagos,
-            borderColor: blueShadesPagos.map(c => c.replace('0.', '1.')),
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true, precision: 0 } },
-        plugins: { legend: { display: false }, title: { display: true, text: 'Pagos por forma de pago' } }
-    }
-});
-
-
 // --- Gráfico: Turnos Atendidos vs Libres ---
 const blueShadesStatus = ['rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 0.3)'];
 new Chart(document.getElementById('turnosStatusChart'), {
@@ -242,7 +199,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async (e) => {
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const charts = ['turnosDiaChart', 'pagosFormaChart', 'turnosStatusChart', 'cubiculosChart'];
+    const charts = ['turnosDiaChart', 'turnosStatusChart', 'cubiculosChart'];
 
     let yOffset = 10; // margen superior
 

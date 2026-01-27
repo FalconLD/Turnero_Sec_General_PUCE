@@ -36,6 +36,8 @@ class TokenLoginController extends Controller
         }
 
         $info = $data['data'];
+        $facultad = $info['facultad'] ?? 'No especificada';
+        $carrera = $info['carrera'] ?? 'No especificada';
 
         // 2️⃣ Crear o actualizar el estudiante
         $student = StudentRegistration::updateOrCreate(
@@ -64,7 +66,9 @@ class TokenLoginController extends Controller
             'student_id' => $student->id,
             'student_name' => $student->names,
             'student_cedula' => $student->cedula,
-            'student_correo' => $info['usuario'] . '@puce.edu.ec', 
+            'student_correo' => $info['usuario'] . '@puce.edu.ec',
+            'student_facultad'  => $facultad, // <--- Agregado para mostrarse al estudiante
+            'student_carrera'   => $carrera,  // <--- Agregado para mostrarse al estudiante
         ]);
 
         // 4️⃣ Redirigir al formulario principal de estudiantes
@@ -112,28 +116,41 @@ public function loginWithToken($token)
             ->withErrors(['error' => 'El token no contiene una cédula válida.']);
     }
 
-    // 3. CREAR O ACTUALIZAR EL REGISTRO EN LA BASE DE DATOS
-    // Esto asegura que el banner_id se guarde físicamente en tu tabla
-    $student = StudentRegistration::updateOrCreate(
-        ['cedula' => $cedula], // Buscamos por cédula para evitar duplicados
-        [
-            'names'        => $nombre,
-            'banner_id'    => $idBanner,    // <--- Guardamos P00016545
-            'plan_estudio' => $planEstudio, // <--- Guardamos Q096
-            'correo_puce'  => $usuario ? "{$usuario}@puce.edu.ec" : null,
-            'facultad'     => $facultad,
-            'carrera'      => $carrera,
-            'acepta_terminos' => false, // Valor inicial por defecto
-            'edad'              => null,
-            'nivel'             => null,
-            'nivel_instruccion' => null,
-            'fecha_nacimiento'  => null,
-            'telefono'          => null,
-            'direccion'         => null,
-            'motivo'            => null,
-        ]
-    );
+        // 3. CREAR O ACTUALIZAR EL REGISTRO EN LA BASE DE DATOS
+        // Esto asegura que el banner_id se guarde físicamente en tu tabla
+        $student = StudentRegistration::where('cedula', $cedula)->first();
 
+        if ($student) {
+            // ✅ SOLO actualizar campos académicos, NO sobrescribir datos personales
+            $student->update([
+                'names'        => $nombre,
+                'banner_id'    => $idBanner,
+                'plan_estudio' => $planEstudio,
+                'correo_puce'  => $usuario ? "{$usuario}@puce.edu.ec" : $student->correo_puce,
+                'facultad'     => $facultad ?? $student->facultad,
+                'carrera'      => $carrera ?? $student->carrera,
+            ]);
+        } else {
+            // Crear nuevo estudiante
+            $student = StudentRegistration::create([
+                'cedula' => $cedula,
+                'names' => $nombre,
+                'banner_id' => $idBanner,
+                'plan_estudio' => $planEstudio,
+                'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+                'facultad' => $facultad,
+                'carrera' => $carrera,
+                'acepta_terminos' => false,
+                'edad' => null,
+                'nivel' => null,
+                'nivel_instruccion' => null,
+                'fecha_nacimiento' => null,
+                'telefono' => null,
+                'direccion' => null,
+                'motivo' => null,
+                // Dejar otros campos como null para que el estudiante los complete
+            ]);
+        }
     // 4. Guardar datos en la sesión para el flujo del frontend
     // Usamos el ID real de la base de datos ($student->id)
     session([
@@ -144,6 +161,8 @@ public function loginWithToken($token)
         'student_correo' => $usuario ? "{$usuario}@puce.edu.ec" : null, // Agregamos para que se pueda mostrar al estudiante 
         'student_banner_id' => $idBanner, // Capturamos el Banner ID del estudiante 
         'student_plan_estudio' => $planEstudio, // Capturamos el Plan de Estudio del estudiante
+        'student_facultad'  => $facultad, // Capturamos la Facultad del estudiante
+        'student_carrera'   => $carrera,  // Capturamos la Carrera del estudiante
     ]);
 
     // 5. Redirigir al primer paso del formulario de datos personales

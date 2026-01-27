@@ -134,6 +134,33 @@
         background-color: #e8f0fe;
         box-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
     }
+
+    /* Estilos para el mensaje temporal */
+    #mensaje-procesando {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    /* Estado de botón deshabilitado */
+    .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* Animación simple para el mensaje */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 {{-- === Script funcional CORREGIDO === --}}
@@ -237,11 +264,12 @@
         // ✅ Event listener para cambio de fecha
         fechaInput.addEventListener('change', cargarTurnos);
 
-        // ✅ Validación antes de enviar formulario
+        // ✅ Validación antes de enviar formulario - VERSIÓN SIMPLE
         document.getElementById('form-agendamiento').addEventListener('submit', function(e) {
             const turnoId = document.getElementById('turno_id').value;
+            const btnConfirmar = document.getElementById('btnConfirmar');
 
-            console.log('Submit - Turno ID:', turnoId); // Debug
+            console.log('Submit - Turno ID:', turnoId);
 
             if (!turnoId) {
                 e.preventDefault();
@@ -255,9 +283,34 @@
                 return false;
             }
 
+            // ✅ PASO 1: Deshabilitar el botón inmediatamente
+            btnConfirmar.disabled = true;
+            btnConfirmar.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+
+            // ✅ PASO 2: Deshabilitar temporalmente los turnos para evitar clics adicionales
+            document.querySelectorAll('.turno-card').forEach(card => {
+                card.style.pointerEvents = 'none';
+                card.style.opacity = '0.7';
+            });
+
+            // ✅ PASO 3: Mostrar un mensaje de éxito/espera temporal
+            // Crear un mensaje simple que aparezca cerca del botón
+            const mensajeDiv = document.createElement('div');
+            mensajeDiv.id = 'mensaje-procesando';
+            mensajeDiv.className = 'alert alert-success mt-3 text-center';
+            mensajeDiv.innerHTML = `
+                <i class="bi bi-check-circle"></i>
+                <strong> Turno en proceso de asignación...</strong>
+                <p class="mb-0 small">Por favor espere, esto puede tomar unos segundos.</p>
+            `;
+
+            // Insertar después del botón
+            btnConfirmar.parentNode.appendChild(mensajeDiv);
+
+            // El formulario se enviará normalmente
+            // El servidor procesará y redirigirá según corresponda
             return true;
         });
     });
 </script>
-
 @stop

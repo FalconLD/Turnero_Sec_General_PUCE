@@ -83,7 +83,7 @@ class CubiculoController extends Controller
             'operating_area_id' => $request->operating_area_id, // Area operativa agregadada
         ]);
 
-        return redirect()->route('cubiculos.index')->with('success', 'Cubículo creado exitosamente.');
+        return redirect()->route('cubiculos.index')->with('info', 'Cubículo creado exitosamente.');
     }
 
 
@@ -153,7 +153,7 @@ public function update(UpdateCubiculoRequest $request, $id) // Usamos $id aquí 
         'operating_area_id' => $request->operating_area_id, // <-- ¡No olvides actualizar el área operativa!
     ]);
 
-    return redirect()->route('cubiculos.index')->with('success', 'Cubículo actualizado exitosamente.');
+    return redirect()->route('cubiculos.index')->with('info', 'Cubículo actualizado exitosamente.');
 }
 
     /**
@@ -164,6 +164,6 @@ public function update(UpdateCubiculoRequest $request, $id) // Usamos $id aquí 
         $cubiculo = Cubiculo::findOrFail($id);
         $cubiculo->delete();
 
-        return redirect()->route('cubiculos.index')->with('success', 'Cubículo eliminado correctamente.');
+        return redirect()->route('cubiculos.index')->with('info', 'Cubículo eliminado correctamente.');
     }
 }

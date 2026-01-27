@@ -60,26 +60,28 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                @can('carreras.editar')
-                                                    <a href="{{ route('careers.edit', $career) }}"
-                                                       class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
-                                                       title="Editar">
-                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                    </a>
-                                                @endcan
+                                                <div class="acciones-column">
+                                                    @can('carreras.editar')
+                                                        <a href="{{ route('careers.edit', $career) }}"
+                                                        class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
+                                                        title="Editar">
+                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                        </a>
+                                                    @endcan
 
-                                                @can('carreras.eliminar')
-                                                    <form action="{{ route('careers.destroy', $career) }}"
-                                                          method="POST" class="d-inline">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit"
-                                                                class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
-                                                                title="Eliminar"
-                                                                onclick="return confirm('¿Está seguro de eliminar esta carrera?')">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
+                                                    @can('carreras.eliminar')
+                                                        <form action="{{ route('careers.destroy', $career) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
+                                                                    title="Eliminar"
+                                                                    onclick="return confirm('¿Está seguro de eliminar esta carrera?')">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -95,13 +97,9 @@
 @stop
 
 @section('css')
-    {{-- Hereda los estilos globales del archivo que creamos --}}
-    <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+        <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
 @stop
 
 @section('js')
-    {{-- Hereda la inicialización automática de DataTables y botones --}}
-    @include('partials.datatables-scripts')
+    <script src="{{ asset('js/admin-init.js') }}"></script>
 @stop

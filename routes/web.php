@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 // ==============================================================================
 //  IMPORTACIÓN DE CONTROLADORES (ESTRUCTURA POR DOMINIOS)
@@ -14,7 +12,7 @@ use App\Http\Controllers\Common\HomeController;
 use App\Http\Controllers\Common\ProfileController;
 use App\Http\Controllers\Common\DashboardController;
 
-// 2. Dominio: Admin (Gestión de Infraestructura y Configuración)
+// 2. Dominio: Admin (Gestión, Configuración y Operación)
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\CubiculoController;
@@ -26,13 +24,12 @@ use App\Http\Controllers\Admin\OperatingAreaController;
 use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\CareerController;
+// Controladores movidos de Operator a Admin:
+use App\Http\Controllers\Admin\AttentionController;
+use App\Http\Controllers\Admin\ShiftController;
+use App\Http\Controllers\Admin\ShiftUnlockController;
 
-// 3. Dominio: Operator (Atención y Flujo de Turnos)
-use App\Http\Controllers\Operator\AttentionController;
-use App\Http\Controllers\Operator\ShiftController;
-use App\Http\Controllers\Operator\ShiftUnlockController;
-
-// 4. Dominio: Student (Zona Pública y Registro)
+// 3. Dominio: Student (Zona Pública y Registro)
 use App\Http\Controllers\Student\TokenLoginController;
 use App\Http\Controllers\Student\StudentRegistrationController;
 
@@ -41,17 +38,14 @@ use App\Http\Controllers\Student\StudentRegistrationController;
 //  RUTAS DE INICIO Y AUTENTICACIÓN
 // ==============================================================================
 
-// Ruta Raíz: Redirige a Bienvenida o Login
 Route::get('/', function () {
     return Auth::check() ? redirect('/home') : redirect('/login');
 });
 
-// Ruta de Bienvenida (Ventana Neutra)
 Route::get('/home', [HomeController::class, 'index'])
     ->middleware('auth')
     ->name('home');
 
-// Rutas de Auth estándar (Registro desactivado)
 Auth::routes(['register' => false]);
 
 
@@ -59,9 +53,8 @@ Auth::routes(['register' => false]);
 //  ZONA PÚBLICA (ESTUDIANTES Y API)
 // ==============================================================================
 
-// APIs de Turnos
+// APIs de Turnos (Acceso público/estudiante)
 Route::get('/shifts/{fecha}', [ShiftController::class, 'getShifts'])->name('api.shifts');
-// Route::get('/shifts/{modalidad}/{fecha}', [ShiftController::class, 'getShiftsByModalidad'])->name('api.shifts.modalidad');
 
 // Acceso mediante Token
 Route::controller(TokenLoginController::class)->group(function () {
@@ -86,12 +79,12 @@ Route::controller(StudentRegistrationController::class)->prefix('student')->grou
 
 
 // ==============================================================================
-//  ZONA PROTEGIDA (ADMINISTRACIÓN / OPERACIÓN)
+//  ZONA PROTEGIDA (ADMINISTRACIÓN / GESTIÓN INTERNA)
 // ==============================================================================
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
 
-    // --- DASHBOARD Y PERFIL ---
+    // --- 0. DASHBOARD Y PERFIL ---
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::controller(ProfileController::class)->group(function () {
@@ -127,13 +120,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('careers', CareerController::class)->names('careers');
     });
 
-    // --- 4. MÓDULO DE ATENCIÓN (OPERADORES) ---
+    // --- 4. MÓDULO DE ATENCIÓN (OPERACIÓN) ---
     Route::middleware(['can:atencion.ver_calendario'])->group(function () {
         Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index');
         Route::get('/shifts/attention', [ShiftController::class, 'attention'])->name('shifts.attention');
     });
 
-    // --- 6. MÓDULO DE DESBLOQUEO ---
+    // --- 5. MÓDULO DE DESBLOQUEO DE USUARIOS ---
     Route::middleware(['can:desbloqueo.ver'])->group(function () {
         Route::controller(ShiftUnlockController::class)->group(function () {
             Route::get('/shift-unlock', 'index')->name('shift_unlock.search');
@@ -142,11 +135,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         });
     });
 
-    // --- 7. INFRAESTRUCTURA, HORARIOS Y DÍAS ---
+    // --- 6. INFRAESTRUCTURA (CUBÍCULOS) ---
     Route::middleware(['can:cubiculos.ver'])->group(function () {
         Route::resource('modulos', CubiculoController::class)->names('cubiculos');
     });
 
+    // --- 7. PLANIFICACIÓN (HORARIOS, DÍAS Y TURNOS) ---
     Route::middleware(['can:horarios.ver'])->group(function () {
         Route::resource('schedules', ScheduleController::class);
         Route::post('/schedules/{id}/generate', [ScheduleController::class, 'generateShifts'])->name('schedules.generate');
@@ -160,14 +154,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         });
     });
 
-    // --- 8. PARÁMETROS, FORMULARIOS Y REPORTES ---
+    // --- 8. PARÁMETROS Y FORMULARIOS ---
     Route::middleware(['can:usuarios.ver'])->group(function () {
         Route::resource('parameters', ParameterController::class);
         Route::resource('forms', FormController::class);
     });
 
+    // --- 9. REPORTES Y AUDITORÍA ---
     Route::middleware(['can:reportes.ver'])->group(function () {
         Route::get('/encuesta', fn() => view('common.encuesta.index'))->name('encuesta.index');
-        Route::get('/auditorias', fn() => view('auditoria.index'))->name('auditoria.index');
+        Route::get('/auditorias', fn() => view('admin.auditoria.index'))->name('auditoria.index');
     });
 });

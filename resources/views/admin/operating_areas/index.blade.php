@@ -55,25 +55,27 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                @can('areas.editar')
-                                                    <a href="{{ route('operating-areas.edit', $area) }}"
-                                                       class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
-                                                       title="Editar">
-                                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                    </a>
-                                                @endcan
+                                                <div class="acciones-column">
+                                                    @can('areas.editar')
+                                                        <a href="{{ route('operating-areas.edit', $area) }}"
+                                                        class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
+                                                        title="Editar">
+                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                        </a>
+                                                    @endcan
 
-                                                @can('areas.eliminar')
-                                                    <form action="{{ route('operating-areas.destroy', $area) }}" method="POST" class="d-inline">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit"
-                                                                class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
-                                                                title="Eliminar"
-                                                                onclick="return confirm('¿Está seguro de eliminar esta área?')">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
+                                                    @can('areas.eliminar')
+                                                        <form action="{{ route('operating-areas.destroy', $area) }}" method="POST" class="d-inline">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
+                                                                    title="Eliminar"
+                                                                    onclick="return confirm('¿Está seguro de eliminar esta área?')">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -89,13 +91,9 @@
 @stop
 
 @section('css')
-    {{-- Carga estilos globales --}}
-    <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+        <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
 @stop
 
 @section('js')
-    {{-- Carga la lógica de DataTables centralizada --}}
-    @include('partials.datatables-scripts')
+    <script src="{{ asset('js/admin-init.js') }}"></script>
 @stop

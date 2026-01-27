@@ -20,7 +20,7 @@
 @section('content')
 
     <form action="{{ route('roles.store') }}" method="POST">
-        @csrf 
+        @csrf
 
         {{-- NOMBRE DEL ROL --}}
         <div class="card shadow-none border mb-4" style="background: #f8f9fa;">
@@ -28,7 +28,7 @@
                 <div class="row align-items-center">
                     <label class="col-auto col-form-label font-weight-bold text-muted text-uppercase small ls-1">Nombre del Rol:</label>
                     <div class="col">
-                        <input type="text" name="name" class="form-control bg-white border-0 shadow-sm font-weight-bold text-dark" 
+                        <input type="text" name="name" class="form-control bg-white border-0 shadow-sm font-weight-bold text-dark"
                                placeholder="Ej: Auditor, Supervisor..." value="{{ old('name') }}" required style="font-size: 1.1rem;">
                         @error('name')
                             <span class="text-danger small mt-1">{{ $message }}</span>
@@ -47,7 +47,7 @@
                     $icon = 'fas fa-cogs';
                     switch(strtolower($groupName)) {
                         case 'atencion': $bgHeader = 'bg-info'; $icon = 'far fa-calendar-alt'; break;
-                        case 'usuarios': $bgHeader = 'bg-warning'; $icon = 'fas fa-users'; break; 
+                        case 'usuarios': $bgHeader = 'bg-warning'; $icon = 'fas fa-users'; break;
                         case 'roles':    $bgHeader = 'bg-danger'; $icon = 'fas fa-user-shield'; break;
                         case 'horarios': $bgHeader = 'bg-teal'; $icon = 'far fa-clock'; break;
                         case 'cubiculos': $bgHeader = 'bg-orange'; $icon = 'fas fa-door-open'; break;
@@ -58,14 +58,14 @@
                     $textClass = ($bgHeader == 'bg-warning' || $bgHeader == 'bg-orange') ? 'text-dark' : 'text-white';
                 @endphp
 
-                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4"> 
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden hover-shadow-lg">
                         <div class="card-header {{ $bgHeader }} {{ $textClass }} py-2 d-flex justify-content-between align-items-center">
                             <h6 class="card-title mb-0 font-weight-bold text-uppercase" style="font-size: 0.9rem; letter-spacing: 0.5px;">
                                 <i class="{{ $icon }} mr-2 opacity-75"></i> {{ ucfirst($groupName) }}
                             </h6>
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input select-all-group" 
+                                <input type="checkbox" class="custom-control-input select-all-group"
                                        id="all_{{ $groupName }}" data-group="{{ $groupName }}">
                                 <label class="custom-control-label font-weight-normal" for="all_{{ $groupName }}" style="font-size: 0.8rem">Todo</label>
                             </div>
@@ -75,22 +75,22 @@
                             <table class="table table-sm table-hover mb-0">
                                 <tbody>
                                     @foreach($permissions as $permission)
-                                        @php 
+                                        @php
                                             $cleanName = ucfirst(explode('.', $permission->name)[1] ?? $permission->name);
                                             $cleanName = str_replace('_', ' ', $cleanName);
                                         @endphp
                                         <tr>
                                             <td class="pl-3 align-middle border-top-0">
-                                                <label class="m-0 font-weight-normal text-secondary cursor-pointer" 
+                                                <label class="m-0 font-weight-normal text-secondary cursor-pointer"
                                                        for="perm_{{ $permission->id }}" style="cursor: pointer; font-size: 0.9rem;">
                                                     {{ $cleanName }}
                                                 </label>
                                             </td>
                                             <td class="text-right pr-3 align-middle border-top-0" style="width: 60px;">
                                                 <div class="custom-control custom-switch">
-                                                    <input type="checkbox" class="custom-control-input" 
+                                                    <input type="checkbox" class="custom-control-input"
                                                         id="perm_{{ $permission->id }}"
-                                                        name="permissions[]" 
+                                                        name="permissions[]"
                                                         value="{{ $permission->name }}">
                                                     <label class="custom-control-label" for="perm_{{ $permission->id }}"></label>
                                                 </div>
@@ -111,7 +111,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6 text-left">
                         <p class="text-muted small mb-0">
-                            <i class="fas fa-info-circle mr-1"></i> 
+                            <i class="fas fa-info-circle mr-1"></i>
                             <span class="d-none d-md-inline">Defina los permisos iniciales para este nuevo perfil.</span>
                         </p>
                     </div>
@@ -126,7 +126,7 @@
                 </div>
             </div>
         </div>
-        <div class="mb-4"></div> 
+        <div class="mb-4"></div>
 
     </form>
 @stop

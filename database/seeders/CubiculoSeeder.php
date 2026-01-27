@@ -39,7 +39,7 @@ class CubiculoSeeder extends Seeder
             $scheduleId = (DB::table('schedules')->max('id_hor') ?? 0) + 1 + $index;
 
             DB::table('schedules')->insert([
-                'id_hor' => $scheduleId, // ← AGREGAR ESTA LÍNEA
+                'id_hor' => $scheduleId, 
                 'start_time' => '08:00:00',
                 'end_time' => '17:00:00',
                 'valid_from' => Carbon::today()->format('Y-m-d'),

@@ -116,28 +116,41 @@ public function loginWithToken($token)
             ->withErrors(['error' => 'El token no contiene una cédula válida.']);
     }
 
-    // 3. CREAR O ACTUALIZAR EL REGISTRO EN LA BASE DE DATOS
-    // Esto asegura que el banner_id se guarde físicamente en tu tabla
-    $student = StudentRegistration::updateOrCreate(
-        ['cedula' => $cedula], // Buscamos por cédula para evitar duplicados
-        [
-            'names'        => $nombre,
-            'banner_id'    => $idBanner,    // <--- Guardamos P00016545
-            'plan_estudio' => $planEstudio, // <--- Guardamos Q096
-            'correo_puce'  => $usuario ? "{$usuario}@puce.edu.ec" : null,
-            'facultad'     => $facultad,
-            'carrera'      => $carrera,
-            'acepta_terminos' => false, // Valor inicial por defecto
-            'edad'              => null,
-            'nivel'             => null,
-            'nivel_instruccion' => null,
-            'fecha_nacimiento'  => null,
-            'telefono'          => null,
-            'direccion'         => null,
-            'motivo'            => null,
-        ]
-    );
+        // 3. CREAR O ACTUALIZAR EL REGISTRO EN LA BASE DE DATOS
+        // Esto asegura que el banner_id se guarde físicamente en tu tabla
+        $student = StudentRegistration::where('cedula', $cedula)->first();
 
+        if ($student) {
+            // ✅ SOLO actualizar campos académicos, NO sobrescribir datos personales
+            $student->update([
+                'names'        => $nombre,
+                'banner_id'    => $idBanner,
+                'plan_estudio' => $planEstudio,
+                'correo_puce'  => $usuario ? "{$usuario}@puce.edu.ec" : $student->correo_puce,
+                'facultad'     => $facultad ?? $student->facultad,
+                'carrera'      => $carrera ?? $student->carrera,
+            ]);
+        } else {
+            // Crear nuevo estudiante
+            $student = StudentRegistration::create([
+                'cedula' => $cedula,
+                'names' => $nombre,
+                'banner_id' => $idBanner,
+                'plan_estudio' => $planEstudio,
+                'correo_puce' => $usuario ? "{$usuario}@puce.edu.ec" : null,
+                'facultad' => $facultad,
+                'carrera' => $carrera,
+                'acepta_terminos' => false,
+                'edad' => null,
+                'nivel' => null,
+                'nivel_instruccion' => null,
+                'fecha_nacimiento' => null,
+                'telefono' => null,
+                'direccion' => null,
+                'motivo' => null,
+                // Dejar otros campos como null para que el estudiante los complete
+            ]);
+        }
     // 4. Guardar datos en la sesión para el flujo del frontend
     // Usamos el ID real de la base de datos ($student->id)
     session([

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Operator;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class ShiftUnlockController extends Controller
     // Mostrar formulario de búsqueda
     public function index()
     {
-        return view('operator.shift_unlock.search');
+        return view('admin.shift_unlock.search');
     }
 
     // Buscar cédula en shifts
@@ -38,7 +38,7 @@ class ShiftUnlockController extends Controller
     // Traer el estudiante (puede no existir)
     $student = StudentRegistration::where('cedula', $request->cedula)->first();
 
-    return view('operator.shift_unlock.result', [
+    return view('admin.shift_unlock.result', [
         'shift' => $shift,
         'student' => $student
     ]);

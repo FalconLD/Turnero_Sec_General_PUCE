@@ -453,7 +453,7 @@
                     inputTelefonoSuffix.focus();
                     return;
                 }
-                
+
                 currentStep++;
                 showStep(currentStep);
                 return;
@@ -468,21 +468,21 @@
                     alert('Por favor seleccione un turno antes de continuar.');
                     return;
                 }
-                
+
                 // Validar que no sea una fecha pasada
                 const hoy = new Date().toISOString().split('T')[0];
                 if (fechaSeleccionada < hoy) {
                     alert('No puede seleccionar fechas pasadas.');
                     return;
                 }
-                
+
                 // Validar que si es hoy, la hora no sea pasada
                 if (fechaSeleccionada === hoy) {
                     const ahora = new Date();
-                    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + 
+                    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' +
                                     ahora.getMinutes().toString().padStart(2, '0');
                     const horaTurno = shiftTimeInput.value.split(' - ')[0];
-                    
+
                     if (horaTurno <= horaActual) {
                         alert('No puede seleccionar un turno que ya ha pasado.');
                         return;
@@ -542,7 +542,6 @@
         const turnoIdInput = document.getElementById('turno_id');
         const dateShiftInput = document.getElementById('date_shift');
         const shiftTimeInput = document.getElementById('shift_time');
-        const modalidadShiftInput = document.getElementById('modalidad_shift');
 
     function cargarTurnos() {
         const fecha = fechaInput.value;
@@ -581,24 +580,24 @@
                 // ✅ FILTRO PARA HORAS PASADAS DEL DÍA ACTUAL
                 const hoy = new Date().toISOString().split('T')[0]; // Fecha actual YYYY-MM-DD
                 const ahora = new Date();
-                const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + 
+                const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' +
                                 ahora.getMinutes().toString().padStart(2, '0') + ':00';
-                
+
                 console.log('🕐 Hora actual:', horaActual);
                 console.log('📅 Fecha seleccionada:', fecha);
                 console.log('📅 Hoy:', hoy);
 
                 let turnosDisponibles = data.data;
-                
+
                 // Si es hoy, filtrar por horas futuras
                 if (fecha === hoy) {
                     turnosDisponibles = data.data.filter(turno => {
                         console.log(`⏰ Comparando: ${turno.start_shift} > ${horaActual} = ${turno.start_shift > horaActual}`);
                         return turno.start_shift > horaActual;
                     });
-                    
+
                     console.log('✅ Turnos después del filtro:', turnosDisponibles.length);
-                    
+
                     if (turnosDisponibles.length === 0) {
                         turnosContainer.innerHTML = `
                             <div class="alert alert-info text-center w-100">
@@ -615,11 +614,11 @@
                     const div = document.createElement('div');
                     div.className = 'turno-card text-center';
                     div.setAttribute('data-turno-id', turno.id_shift);
-                    
+
                     // Mostrar indicador si es turno de hoy
                     const esHoy = fecha === hoy;
                     const horaIndicador = esHoy ? `<small class="text-success">• Hoy</small>` : '';
-                    
+
                     div.innerHTML = `
                         <i class="bi bi-clock text-primary mb-2" style="font-size:1.5rem;"></i><br>
                         <strong class="d-block">${turno.start_shift}</strong>
@@ -640,7 +639,7 @@
 
                         document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
                         div.classList.add('selected');
-                        
+
                         // ✅ Habilitar botón siguiente si estamos en paso de agendamiento
                         if (currentStep === 2) {
                             nextBtn.disabled = false;
@@ -718,11 +717,11 @@
 
                 // Calcular fechas
                 const { primerDia, ultimoDia, anio } = calcularFechaPorEdad(edad);
-                
+
                 // Restringir rango de fechas
                 inputFecha.min = primerDia;
                 inputFecha.max = ultimoDia;
-                
+
                 // ✅ FORZAR la fecha al 1 de enero (evita problemas de diciembre)
                 if (!inputFecha.value || new Date(inputFecha.value).getFullYear() !== anio) {
                     inputFecha.value = primerDia;
@@ -733,22 +732,22 @@
                     infoFecha.textContent = `Solo fechas del año ${anio}`;
                     infoFecha.style.display = 'block';
                 }
-                
+
                 return true;
             }
 
             // Eventos
             inputEdad.addEventListener('input', validarYAjustarFecha);
             inputEdad.addEventListener('change', validarYAjustarFecha);
-            
+
             // ✅ También validar cuando el usuario cambia la fecha manualmente
             inputFecha.addEventListener('change', function() {
                 const edad = parseInt(inputEdad.value) || 0;
                 if (edad < 17 || edad > 80) return;
-                
+
                 const anioNacimiento = new Date().getFullYear() - edad;
                 const fechaSeleccionada = new Date(this.value).getFullYear();
-                
+
                 // Si el usuario selecciona una fecha de otro año, corregirla
                 if (fechaSeleccionada !== anioNacimiento) {
                     alert(`Debe seleccionar una fecha del año ${anioNacimiento}`);

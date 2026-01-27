@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Operator;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NewShift;
@@ -111,7 +111,7 @@ class ShiftController extends Controller
                        ->orderBy("shifts.start_shift", "asc")
                        ->get();
 
-        return view('operator.shifts.index', ['shifts' => $shifts]);
+        return view('admin.shifts.index', ['shifts' => $shifts]);
     }
 
     /**
@@ -194,7 +194,7 @@ class ShiftController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error en getShifts: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'error' => 'Error al procesar la solicitud',

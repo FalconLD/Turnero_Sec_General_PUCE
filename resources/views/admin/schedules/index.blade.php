@@ -59,7 +59,7 @@
                                                 <div class="acciones-column">
                                                     @can('horarios.editar')
                                                         <a href="{{ route('schedules.edit', $schedule->id_hor) }}"
-                                                           class="btn btn-xs btn-default text-primary shadow"
+                                                           class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
                                                            title="Editar">
                                                             <i class="fa fa-lg fa-fw fa-pen"></i>
                                                         </a>
@@ -70,7 +70,7 @@
                                                               method="POST">
                                                             @csrf @method('DELETE')
                                                             <button type="submit"
-                                                                    class="btn btn-xs btn-default text-danger shadow"
+                                                                    class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
                                                                     onclick="return confirm('¿Eliminar horario?')"
                                                                     title="Eliminar">
                                                                 <i class="fa fa-lg fa-fw fa-trash"></i>
@@ -80,7 +80,7 @@
 
                                                     @if($schedule->cubicles->count() > 0)
                                                         <div class="dropdown">
-                                                            <button class="btn btn-xs btn-default text-info shadow dropdown-toggle"
+                                                            <button class="btn btn-xs btn-default text-info mx-1 shadow-sm dropdown-toggle"
                                                                     data-toggle="dropdown">
                                                                 <i class="fas fa-wrench"></i>
                                                             </button>

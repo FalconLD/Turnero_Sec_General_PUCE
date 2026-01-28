@@ -36,7 +36,9 @@
                                         <th>Nombre</th>
                                         <th>DNI</th>
                                         <th>Áreas de Atención</th>
-                                        <th class="text-center">Acciones</th>
+                                        @canany(['asignaciones.editar', 'asignaciones.eliminar'])
+                                            <th class="text-center">Acciones</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,16 +56,18 @@
                                                     <span class="badge badge-light border text-muted">Sin áreas asignadas</span>
                                                 @endforelse
                                             </td>
-                                            <td class="text-center">
-                                                @can('asignaciones.editar')
-                                                    <a href="{{ route('assignments.edit', $usuario->id) }}"
-                                                       class="btn btn-primary rounded-pill px-3 btn-sm shadow-sm d-inline-flex align-items-center"
-                                                       title="Gestionar Áreas">
-                                                        <i class="fas fa-tasks mr-2"></i>
-                                                        <span>Gestionar</span>
-                                                    </a>
-                                                @endcan
-                                            </td>
+                                            @canany(['asignaciones.editar', 'asignaciones.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    @can('asignaciones.editar')
+                                                        <a href="{{ route('assignments.edit', $usuario->id) }}"
+                                                        class="btn btn-primary rounded-pill px-3 btn-sm shadow-sm d-inline-flex align-items-center"
+                                                        title="Gestionar Áreas">
+                                                            <i class="fas fa-tasks mr-2"></i>
+                                                            <span>Gestionar</span>
+                                                        </a>
+                                                    @endcan
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endforeach
                                 </tbody>

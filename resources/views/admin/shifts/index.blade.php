@@ -27,7 +27,9 @@
                             >
                                 <thead>
                                     <tr>
-                                        <th>Acciones</th>
+                                        @canany(['turnos.eliminar'])
+                                            <th>Acciones</th>
+                                        @endcanany
                                         <th>Cubículo</th>
                                         <th>Fecha</th>
                                         <th>Inicio</th>
@@ -41,20 +43,22 @@
                                 <tbody>
                                     @foreach($shifts as $shift)
                                         <tr>
-                                            <td>
-                                                <div class="acciones-column">
-                                                    <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                                class="btn btn-xs btn-default text-danger shadow"
-                                                                onclick="return confirm('¿Seguro de que deseas borrar este turno?')"
-                                                                title="Eliminar">
-                                                            <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
+                                            @canany(['turnos.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    <div class="acciones-column">
+                                                        <form action="{{ route('shifts.destroy', $shift->id) }}" method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-xs btn-default text-danger shadow"
+                                                                    onclick="return confirm('¿Seguro de que deseas borrar este turno?')"
+                                                                    title="Eliminar">
+                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            @endcanany
 
                                             <td>{{ $shift->cubicle_name ?? 'N/A' }}</td>
                                             <td>{{ \Carbon\Carbon::parse($shift->date_shift)->format('d/m/Y') }}</td>

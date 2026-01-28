@@ -41,7 +41,9 @@
                                         <th>ID</th>
                                         <th>Nombre del Área</th>
                                         <th>Facultad</th>
-                                        <th class="text-center">Acciones</th>
+                                        @canany(['areas.editar', 'areas.eliminar'])
+                                            <th class="text-center">Acciones</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,29 +56,31 @@
                                                     <i class="fas fa-university mr-1"></i> {{ $area->faculty->facultad }}
                                                 </span>
                                             </td>
-                                            <td class="text-nowrap text-center">
-                                                <div class="acciones-column">
-                                                    @can('areas.editar')
-                                                        <a href="{{ route('operating-areas.edit', $area) }}"
-                                                        class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
-                                                        title="Editar">
-                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                        </a>
-                                                    @endcan
+                                            @canany(['areas.editar', 'areas.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    <div class="acciones-column">
+                                                        @can('areas.editar')
+                                                            <a href="{{ route('operating-areas.edit', $area) }}"
+                                                            class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
+                                                            title="Editar">
+                                                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                            </a>
+                                                        @endcan
 
-                                                    @can('areas.eliminar')
-                                                        <form action="{{ route('operating-areas.destroy', $area) }}" method="POST" class="d-inline">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
-                                                                    title="Eliminar"
-                                                                    onclick="return confirm('¿Está seguro de eliminar esta área?')">
-                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endcan
-                                                </div>
-                                            </td>
+                                                        @can('areas.eliminar')
+                                                            <form action="{{ route('operating-areas.destroy', $area) }}" method="POST" class="d-inline">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
+                                                                        title="Eliminar"
+                                                                        onclick="return confirm('¿Está seguro de eliminar esta área?')">
+                                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endforeach
                                 </tbody>

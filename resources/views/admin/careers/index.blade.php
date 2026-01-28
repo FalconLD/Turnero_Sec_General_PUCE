@@ -41,7 +41,9 @@
                                         <th>Código</th>
                                         <th>Nombre de la Carrera</th>
                                         <th>Área de Atención</th>
-                                        <th class="text-center">Acciones</th>
+                                        @canany(['carreras.editar', 'carreras.eliminar'])
+                                            <th class="text-center">Acciones</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -59,30 +61,32 @@
                                                     {{ $career->operatingArea->name ?? 'Sin área' }}
                                                 </span>
                                             </td>
-                                            <td class="text-center">
-                                                <div class="acciones-column">
-                                                    @can('carreras.editar')
-                                                        <a href="{{ route('careers.edit', $career) }}"
-                                                        class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
-                                                        title="Editar">
-                                                            <i class="fa fa-lg fa-fw fa-pen"></i>
-                                                        </a>
-                                                    @endcan
+                                            @canany(['carreras.editar', 'carreras.eliminar'])
+                                                <td class="text-nowrap text-center">
+                                                    <div class="acciones-column">
+                                                        @can('carreras.editar')
+                                                            <a href="{{ route('careers.edit', $career) }}"
+                                                            class="btn btn-xs btn-default text-primary mx-1 shadow-sm"
+                                                            title="Editar">
+                                                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                                                            </a>
+                                                        @endcan
 
-                                                    @can('carreras.eliminar')
-                                                        <form action="{{ route('careers.destroy', $career) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
-                                                                    title="Eliminar"
-                                                                    onclick="return confirm('¿Está seguro de eliminar esta carrera?')">
-                                                                <i class="fa fa-lg fa-fw fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endcan
-                                                </div>
-                                            </td>
+                                                        @can('carreras.eliminar')
+                                                            <form action="{{ route('careers.destroy', $career) }}"
+                                                                method="POST" class="d-inline">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-xs btn-default text-danger mx-1 shadow-sm"
+                                                                        title="Eliminar"
+                                                                        onclick="return confirm('¿Está seguro de eliminar esta carrera?')">
+                                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                            @endcanany
                                         </tr>
                                     @endforeach
                                 </tbody>

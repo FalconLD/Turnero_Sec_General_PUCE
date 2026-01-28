@@ -39,7 +39,9 @@
                                     <th>Parámetro</th>
                                     <th>Creado</th>
                                     <th>Actualizado</th>
-                                    <th class="text-center">Acciones</th>
+                                    @canany(['parametros.editar', 'parametros.eliminar'])
+                                        <th class="text-center">Acciones</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
@@ -50,30 +52,32 @@
                                         <td><code class="text-dark">{{ $param->parametro }}</code></td>
                                         <td>{{ $param->created_at?->format('Y-m-d H:i') }}</td>
                                         <td>{{ $param->updated_at?->format('Y-m-d H:i') }}</td>
-                                        <td class="text-nowrap">
-                                            <div class="acciones-column">
-                                                @can('parametros.editar')
-                                                    <a href="{{ route('parameters.edit', $param) }}"
-                                                       class="btn btn-xs btn-default text-primary shadow-sm"
-                                                       title="Editar">
-                                                        <i class="fas fa-lg fa-pen"></i>
-                                                    </a>
-                                                @endcan
+                                        @canany(['parametros.editar', 'parametros.eliminar'])
+                                            <td class="text-nowrap">
+                                                <div class="acciones-column">
+                                                    @can('parametros.editar')
+                                                        <a href="{{ route('parameters.edit', $param) }}"
+                                                        class="btn btn-xs btn-default text-primary shadow-sm"
+                                                        title="Editar">
+                                                            <i class="fas fa-lg fa-pen"></i>
+                                                        </a>
+                                                    @endcan
 
-                                                @can('parametros.eliminar')
-                                                    <form action="{{ route('parameters.destroy', $param) }}" method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                                class="btn btn-xs btn-default text-danger shadow-sm"
-                                                                onclick="return confirm('¿Eliminar este parámetro?')"
-                                                                title="Eliminar">
-                                                            <i class="fas fa-lg fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endcan
-                                            </div>
-                                        </td>
+                                                    @can('parametros.eliminar')
+                                                        <form action="{{ route('parameters.destroy', $param) }}" method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-xs btn-default text-danger shadow-sm"
+                                                                    onclick="return confirm('¿Eliminar este parámetro?')"
+                                                                    title="Eliminar">
+                                                                <i class="fas fa-lg fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
+                                            </td>
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>

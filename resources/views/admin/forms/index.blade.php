@@ -35,7 +35,9 @@
                             <th>Descripción</th>
                             <th>Término</th>
                             <th>Pregunta</th>
-                            <th class="text-center">Acciones</th>
+                            @canany(['forms.editar', 'forms.eliminar'])
+                                <th class="text-center">Acciones</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>

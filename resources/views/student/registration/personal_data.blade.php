@@ -219,7 +219,10 @@
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" id="prevBtn" class="btn btn-outline-secondary">Anterior</button>
                     <button type="button" id="nextBtn" class="btn btn-primary" disabled>Siguiente</button>
-                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">Confirmar y Guardar</button>
+                    <button type="submit" id="submitBtn" class="btn btn-success" style="display:none;">
+                        <span id="submitText">Confirmar y Guardar</span>
+                        <span id="submitSpinner" class="spinner-border spinner-border-sm ms-2 spinner-custom" role="status" style="display: none;"></span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -390,8 +393,62 @@
             flex: 1 1 100%;
         }
     }
-</style>
+    /* === LOADER DURANTE EL ENVÍO === */
+    #submitBtn.processing {
+        opacity: 0.8;
+        pointer-events: none;
+    }
 
+    #submitSpinner {
+        vertical-align: middle;
+    }
+
+    /* Spinner personalizado con color #00a0dd */
+    .spinner-custom {
+        color: #00a0dd !important;
+        border-color: #00a0dd !important;
+    }
+
+    .spinner-custom.spinner-border {
+        border-right-color: transparent !important;
+    }
+
+    /* Overlay de carga completa */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(2px);
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    .loading-content {
+        text-align: center;
+        max-width: 400px;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    /* Barra de progreso con color #00a0dd */
+    .progress-bar-custom {
+        background-color: #00a0dd !important;
+    }
+
+    /* Color para el texto del loader */
+    .text-custom-blue {
+        color: #00a0dd;
+    }
+</style>
 
 {{-- === Script de funcionalidad === --}}
 <script>
@@ -453,7 +510,7 @@
                     inputTelefonoSuffix.focus();
                     return;
                 }
-                
+
                 currentStep++;
                 showStep(currentStep);
                 return;
@@ -468,21 +525,21 @@
                     alert('Por favor seleccione un turno antes de continuar.');
                     return;
                 }
-                
+
                 // Validar que no sea una fecha pasada
                 const hoy = new Date().toISOString().split('T')[0];
                 if (fechaSeleccionada < hoy) {
                     alert('No puede seleccionar fechas pasadas.');
                     return;
                 }
-                
+
                 // Validar que si es hoy, la hora no sea pasada
                 if (fechaSeleccionada === hoy) {
                     const ahora = new Date();
-                    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + 
-                                    ahora.getMinutes().toString().padStart(2, '0');
+                    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' +
+                        ahora.getMinutes().toString().padStart(2, '0');
                     const horaTurno = shiftTimeInput.value.split(' - ')[0];
-                    
+
                     if (horaTurno <= horaActual) {
                         alert('No puede seleccionar un turno que ya ha pasado.');
                         return;
@@ -544,83 +601,83 @@
         const shiftTimeInput = document.getElementById('shift_time');
         const modalidadShiftInput = document.getElementById('modalidad_shift');
 
-    function cargarTurnos() {
-        const fecha = fechaInput.value;
+        function cargarTurnos() {
+            const fecha = fechaInput.value;
 
-        if (!fecha) {
-            turnosContainer.innerHTML = '<div class="text-muted text-center"><em>Seleccione una fecha...</em></div>';
-            return;
-        }
+            if (!fecha) {
+                turnosContainer.innerHTML = '<div class="text-muted text-center"><em>Seleccione una fecha...</em></div>';
+                return;
+            }
 
-        turnoIdInput.value = '';
-        turnosContainer.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Cargando turnos...</p>';
+            turnoIdInput.value = '';
+            turnosContainer.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Cargando turnos...</p>';
 
-        console.log('🔍 Cargando turnos para fecha:', fecha);
+            console.log('🔍 Cargando turnos para fecha:', fecha);
 
-        fetch(`/shifts/${fecha}`)
-            .then(res => {
-                console.log('📡 Response status:', res.status);
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                console.log('📦 Turnos recibidos:', data);
+            fetch(`/shifts/${fecha}`)
+                .then(res => {
+                    console.log('📡 Response status:', res.status);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('📦 Turnos recibidos:', data);
 
-                turnosContainer.innerHTML = '';
+                    turnosContainer.innerHTML = '';
 
-                if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-                    turnosContainer.innerHTML = `
+                    if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                        turnosContainer.innerHTML = `
                         <div class="alert alert-warning text-center w-100">
                             <i class="bi bi-exclamation-triangle me-2"></i>
                             No hay turnos disponibles para esta fecha.
                         </div>
                     `;
-                    return;
-                }
+                        return;
+                    }
 
-                // ✅ FILTRO PARA HORAS PASADAS DEL DÍA ACTUAL
-                const hoy = new Date().toISOString().split('T')[0]; // Fecha actual YYYY-MM-DD
-                const ahora = new Date();
-                const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + 
-                                ahora.getMinutes().toString().padStart(2, '0') + ':00';
-                
-                console.log('🕐 Hora actual:', horaActual);
-                console.log('📅 Fecha seleccionada:', fecha);
-                console.log('📅 Hoy:', hoy);
+                    // ✅ FILTRO PARA HORAS PASADAS DEL DÍA ACTUAL
+                    const hoy = new Date().toISOString().split('T')[0]; // Fecha actual YYYY-MM-DD
+                    const ahora = new Date();
+                    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' +
+                        ahora.getMinutes().toString().padStart(2, '0') + ':00';
 
-                let turnosDisponibles = data.data;
-                
-                // Si es hoy, filtrar por horas futuras
-                if (fecha === hoy) {
-                    turnosDisponibles = data.data.filter(turno => {
-                        console.log(`⏰ Comparando: ${turno.start_shift} > ${horaActual} = ${turno.start_shift > horaActual}`);
-                        return turno.start_shift > horaActual;
-                    });
-                    
-                    console.log('✅ Turnos después del filtro:', turnosDisponibles.length);
-                    
-                    if (turnosDisponibles.length === 0) {
-                        turnosContainer.innerHTML = `
+                    console.log('🕐 Hora actual:', horaActual);
+                    console.log('📅 Fecha seleccionada:', fecha);
+                    console.log('📅 Hoy:', hoy);
+
+                    let turnosDisponibles = data.data;
+
+                    // Si es hoy, filtrar por horas futuras
+                    if (fecha === hoy) {
+                        turnosDisponibles = data.data.filter(turno => {
+                            console.log(`⏰ Comparando: ${turno.start_shift} > ${horaActual} = ${turno.start_shift > horaActual}`);
+                            return turno.start_shift > horaActual;
+                        });
+
+                        console.log('✅ Turnos después del filtro:', turnosDisponibles.length);
+
+                        if (turnosDisponibles.length === 0) {
+                            turnosContainer.innerHTML = `
                             <div class="alert alert-info text-center w-100">
                                 <i class="bi bi-info-circle me-2"></i>
                                 No hay turnos disponibles para el resto del día.<br>
                                 <small>Por favor, seleccione otra fecha.</small>
                             </div>
                         `;
-                        return;
+                            return;
+                        }
                     }
-                }
 
-                turnosDisponibles.forEach(turno => {
-                    const div = document.createElement('div');
-                    div.className = 'turno-card text-center';
-                    div.setAttribute('data-turno-id', turno.id_shift);
-                    
-                    // Mostrar indicador si es turno de hoy
-                    const esHoy = fecha === hoy;
-                    const horaIndicador = esHoy ? `<small class="text-success">• Hoy</small>` : '';
-                    
-                    div.innerHTML = `
+                    turnosDisponibles.forEach(turno => {
+                        const div = document.createElement('div');
+                        div.className = 'turno-card text-center';
+                        div.setAttribute('data-turno-id', turno.id_shift);
+
+                        // Mostrar indicador si es turno de hoy
+                        const esHoy = fecha === hoy;
+                        const horaIndicador = esHoy ? `<small class="text-success">• Hoy</small>` : '';
+
+                        div.innerHTML = `
                         <i class="bi bi-clock text-primary mb-2" style="font-size:1.5rem;"></i><br>
                         <strong class="d-block">${turno.start_shift}</strong>
                         <span class="text-muted small">a ${turno.end_shift}</span><br>
@@ -630,42 +687,42 @@
                         </div>
                     `;
 
-                    div.onclick = () => {
-                        console.log('✅ Turno seleccionado:', turno.id_shift);
+                        div.onclick = () => {
+                            console.log('✅ Turno seleccionado:', turno.id_shift);
 
-                        turnoIdInput.value = turno.id_shift;
-                        dateShiftInput.value = data.fecha_consulta || fecha;
-                        shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
-                        modalidadShiftInput.value = 'virtual';
+                            turnoIdInput.value = turno.id_shift;
+                            dateShiftInput.value = data.fecha_consulta || fecha;
+                            shiftTimeInput.value = turno.start_shift + ' - ' + turno.end_shift;
+                            modalidadShiftInput.value = 'virtual';
 
-                        document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
-                        div.classList.add('selected');
-                        
-                        // ✅ Habilitar botón siguiente si estamos en paso de agendamiento
-                        if (currentStep === 2) {
-                            nextBtn.disabled = false;
-                        }
-                    };
+                            document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+                            div.classList.add('selected');
 
-                    turnosContainer.appendChild(div);
-                });
+                            // ✅ Habilitar botón siguiente si estamos en paso de agendamiento
+                            if (currentStep === 2) {
+                                nextBtn.disabled = false;
+                            }
+                        };
 
-                const totalInfo = document.createElement('div');
-                totalInfo.className = 'w-100 text-center text-muted small mt-3';
-                totalInfo.innerHTML = `<i class="bi bi-info-circle me-1"></i> ${turnosDisponibles.length} turno(s) disponible(s)`;
-                turnosContainer.appendChild(totalInfo);
-            })
-            .catch(error => {
-                console.error("❌ Error al cargar los turnos:", error);
-                turnosContainer.innerHTML = `
+                        turnosContainer.appendChild(div);
+                    });
+
+                    const totalInfo = document.createElement('div');
+                    totalInfo.className = 'w-100 text-center text-muted small mt-3';
+                    totalInfo.innerHTML = `<i class="bi bi-info-circle me-1"></i> ${turnosDisponibles.length} turno(s) disponible(s)`;
+                    turnosContainer.appendChild(totalInfo);
+                })
+                .catch(error => {
+                    console.error("❌ Error al cargar los turnos:", error);
+                    turnosContainer.innerHTML = `
                     <div class="alert alert-danger text-center w-100">
                         <i class="bi bi-x-circle me-2"></i>
                         Error al cargar los turnos.<br>
                         <small>Por favor intente nuevamente.</small>
                     </div>
                 `;
-            });
-    }
+                });
+        }
 
         fechaInput.addEventListener('change', cargarTurnos);
 
@@ -717,12 +774,16 @@
                 }
 
                 // Calcular fechas
-                const { primerDia, ultimoDia, anio } = calcularFechaPorEdad(edad);
-                
+                const {
+                    primerDia,
+                    ultimoDia,
+                    anio
+                } = calcularFechaPorEdad(edad);
+
                 // Restringir rango de fechas
                 inputFecha.min = primerDia;
                 inputFecha.max = ultimoDia;
-                
+
                 // ✅ FORZAR la fecha al 1 de enero (evita problemas de diciembre)
                 if (!inputFecha.value || new Date(inputFecha.value).getFullYear() !== anio) {
                     inputFecha.value = primerDia;
@@ -733,22 +794,22 @@
                     infoFecha.textContent = `Solo fechas del año ${anio}`;
                     infoFecha.style.display = 'block';
                 }
-                
+
                 return true;
             }
 
             // Eventos
             inputEdad.addEventListener('input', validarYAjustarFecha);
             inputEdad.addEventListener('change', validarYAjustarFecha);
-            
+
             // ✅ También validar cuando el usuario cambia la fecha manualmente
             inputFecha.addEventListener('change', function() {
                 const edad = parseInt(inputEdad.value) || 0;
                 if (edad < 17 || edad > 80) return;
-                
+
                 const anioNacimiento = new Date().getFullYear() - edad;
                 const fechaSeleccionada = new Date(this.value).getFullYear();
-                
+
                 // Si el usuario selecciona una fecha de otro año, corregirla
                 if (fechaSeleccionada !== anioNacimiento) {
                     alert(`Debe seleccionar una fecha del año ${anioNacimiento}`);
@@ -761,6 +822,40 @@
                 validarYAjustarFecha();
             }
         }
+        // === MANEJAR EL ENVÍO DEL FORMULARIO CON LOADER ===
+        const form = document.getElementById('student-registration-form');
+        const submitText = document.getElementById('submitText');
+        const submitSpinner = document.getElementById('submitSpinner');
+
+        form.addEventListener('submit', function(e) {
+            // Solo mostrar loader si estamos en el paso de confirmación
+            if (currentStep === steps.length - 1) {
+                // Mostrar loader en el botón
+                submitBtn.classList.add('processing');
+                submitText.textContent = 'Procesando su registro...';
+                submitSpinner.style.display = 'inline-block';
+                submitBtn.disabled = true;
+
+                // Deshabilitar todos los botones de navegación
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+
+                // Mostrar overlay de carga completo
+                const overlay = document.createElement('div');
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+                        <h5 class="text-primary">Registrando su información</h5>
+                        <p class="text-muted">Por favor espere, esto puede tomar unos segundos...</p>
+                        <div class="progress mt-3" style="width: 300px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+        });
         showStep(currentStep);
     });
 </script>

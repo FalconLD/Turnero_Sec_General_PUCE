@@ -1,5 +1,5 @@
 @component('mail::message')
-# Estimado {{ $student->names }},
+# Estimado/a {{ $student->names }},
 
 **Los datos de su cita son:**
 

@@ -166,3 +166,126 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/auditorias', fn() => view('admin.auditoria.index'))->name('auditoria.index');
     });
 });
+
+
+
+// ========== RUTA DE DIAGNÓSTICO ==========
+Route::get('/email-diagnostic', function () {
+    return response()->json([
+        'status' => 'Diagnóstico de Email',
+        'current_config' => [
+            'MAIL_MAILER' => env('MAIL_MAILER'),
+            'MAIL_HOST' => env('MAIL_HOST'),
+            'MAIL_PORT' => env('MAIL_PORT'),
+            'MAIL_USERNAME' => env('MAIL_USERNAME') ? '✅ Configurado' : '❌ Vacío',
+            'MAIL_PASSWORD' => env('MAIL_PASSWORD') ? '✅ Configurado' : '❌ Vacío',
+            'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'),
+            'MAIL_FROM_NAME' => env('MAIL_FROM_NAME'),
+        ],
+        'app_env' => app()->environment(),
+        'app_debug' => config('app.debug'),
+        'has_mailables' => is_dir(app_path('Mail')),
+        'mailables_found' => glob(app_path('Mail/**/*.php')),
+        'notes' => 'Visita /test-email-simple para enviar un email de prueba'
+    ]);
+});
+
+// ==================== RUTAS DE PRUEBA DE EMAIL ====================
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TestEmail;
+
+// Ruta 1: Email simple de prueba
+Route::get('/test-email-simple', function () {
+    try {
+        // Datos de prueba
+        $testData = [
+            'fecha' => now()->format('d/m/Y H:i:s'),
+            'entorno' => app()->environment(),
+            'sistema' => 'Sistema de Turnos PUCE'
+        ];
+        
+        // Enviar email
+        Mail::to('favegaen@gmail.com')->send(new TestEmail($testData));
+        
+        return response()->json([
+            'success' => true,
+            'message' => '✅ Correo de prueba enviado exitosamente',
+            'to' => 'favegaen@gmail.com',
+            'fecha' => now()->format('Y-m-d H:i:s'),
+            'config' => [
+                'driver' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port')
+            ],
+            'next_step' => 'Revisa Mailtrap.io o Mailhog para ver el email'
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+})->name('test.email');
+
+// Ruta 2: Ver vista previa del email (sin enviar)
+Route::get('/email-preview', function () {
+    $testData = [
+        'fecha' => now()->format('d/m/Y H:i:s'),
+        'entorno' => app()->environment(),
+        'sistema' => 'Sistema de Turnos PUCE'
+    ];
+    
+    return (new TestEmail($testData))->render();
+});
+
+// Ruta 3: Probar StudentRegistered (si existe)
+Route::get('/test-student-email', function () {
+    try {
+        // Datos de prueba simulados
+        $student = (object)[
+            'names' => 'Estudiante de Prueba',
+            'cedula' => '1234567890',
+            'correo_puce' => 'prueba@gmail.com'
+        ];
+        
+        $shift = (object)[
+            'date_shift' => now()->format('d/m/Y'),
+            'start_shift' => '14:00',
+            'cubicle' => (object)[
+                'nombre' => 'Cubículo Virtual 01',
+                'tipo_atencion' => 'Virtual',
+                'enlace_o_ubicacion' => 'https://meet.google.com/abc-defg-hij',
+                'user_id' => 1
+            ]
+        ];
+        
+        // Usar el Mailable StudentRegistered si existe
+        if (class_exists('App\Mail\StudentRegistered')) {
+            Mail::to('favegaen@gmail.com')->send(new \App\Mail\StudentRegistered($student, $shift));
+            $mailable = 'StudentRegistered';
+        } else {
+            // Fallback a TestEmail
+            Mail::to('favegaen@gmail.com')->send(new TestEmail([
+                'type' => 'student_registration',
+                'student' => $student->names,
+                'shift' => $shift->date_shift . ' ' . $shift->start_shift
+            ]));
+            $mailable = 'TestEmail (fallback)';
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => '✅ Email de estudiante enviado',
+            'mailable' => $mailable,
+            'to' => 'prueba@gmail.com'
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
